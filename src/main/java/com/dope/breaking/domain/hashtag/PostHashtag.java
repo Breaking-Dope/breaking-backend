@@ -1,17 +1,22 @@
-package com.dope.breaking.domain.Hashtag;
-import com.dope.breaking.domain.Comment;
+package com.dope.breaking.domain.hashtag;
+
+
+import com.dope.breaking.domain.post.Post;
+import lombok.Getter;
 
 import javax.persistence.*;
 
-public class CommentHashtag {
-    @Id
-    @GeneratedValue
+@Entity
+@Getter
+public class PostHashtag {
+
+    @Id @GeneratedValue
     @Column(name =  "POST_HASHTAG_ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "COMMENT_ID")
-    private Comment comment;
+    @JoinColumn (name = "POST_ID")
+    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "HASHTAG_ID")

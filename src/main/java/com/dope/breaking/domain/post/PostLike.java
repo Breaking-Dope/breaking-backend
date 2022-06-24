@@ -1,12 +1,14 @@
-package com.dope.breaking.domain.Like;
+package com.dope.breaking.domain.post;
 
 
-import com.dope.breaking.domain.Post;
-import com.dope.breaking.domain.User;
+import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.user.User;
+import lombok.Getter;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class PostLike {
 
     @Id @GeneratedValue
@@ -20,4 +22,5 @@ public class PostLike {
     @ManyToOne
     @JoinColumn (name="POST_ID")
     private Post post;
+
 }

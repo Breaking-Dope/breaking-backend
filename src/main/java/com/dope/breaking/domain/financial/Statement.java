@@ -1,13 +1,15 @@
-package com.dope.breaking.domain.Financials;
+package com.dope.breaking.domain.financial;
 
-import com.dope.breaking.domain.User;
+import com.dope.breaking.domain.user.User;
+import lombok.Getter;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class Statement {
-    @Id
-    @GeneratedValue
+
+    @Id @GeneratedValue
     @Column(name="STATEMENT_ID")
     private Long id;
 
@@ -16,4 +18,5 @@ public class Statement {
     private User user;
 
     private int amount;
+
 }

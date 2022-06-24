@@ -1,11 +1,13 @@
-package com.dope.breaking.domain.Financials;
+package com.dope.breaking.domain.financial;
 
-import com.dope.breaking.domain.Post;
-import com.dope.breaking.domain.User;
+import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.user.User;
+import lombok.Getter;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class Purchase {
 
     @Id @GeneratedValue
@@ -19,4 +21,5 @@ public class Purchase {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "POST_ID")
     private Post post;
+
 }

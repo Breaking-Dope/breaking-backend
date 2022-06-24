@@ -1,9 +1,12 @@
-package com.dope.breaking.domain;
+package com.dope.breaking.domain.post;
 
 
 
-import com.dope.breaking.domain.Financials.Purchase;
-import com.dope.breaking.domain.Like.PostLike;
+import com.dope.breaking.domain.comment.Comment;
+import com.dope.breaking.domain.financial.Purchase;
+import com.dope.breaking.domain.media.Media;
+import com.dope.breaking.domain.user.User;
+import lombok.Getter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class Post {
 
     @Id @GeneratedValue
@@ -44,9 +48,11 @@ public class Post {
     private int price;
 
     private boolean isAnonymous;
+
     private boolean isSold;
+
     private boolean isHidden;
 
-    //나중에 테스트 후 conversion 주의
     private LocalDateTime eventTime;
+
 }

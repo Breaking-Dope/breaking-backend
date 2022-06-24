@@ -1,7 +1,7 @@
-package com.dope.breaking.domain.UserRelationship;
+package com.dope.breaking.domain.user;
 
 
-import com.dope.breaking.domain.User;
+import com.dope.breaking.domain.user.User;
 
 import javax.persistence.*;
 

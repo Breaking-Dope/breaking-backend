@@ -1,6 +1,7 @@
-package com.dope.breaking.domain;
+package com.dope.breaking.domain.comment;
 
-import com.dope.breaking.domain.Like.CommentLike;
+import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.user.User;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 public class Comment {
+
     @Id @GeneratedValue
     @Column (name="COMMENT_ID")
     private Long id;
@@ -25,8 +27,6 @@ public class Comment {
     @JoinColumn (name="POST_ID")
     private Post post;
 
-    ////////////////
-
     //댓글, 대댓글 self-referencing
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name="PARENT_ID")
@@ -35,7 +35,6 @@ public class Comment {
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<Comment>();
 
-    ///////////////////////
 
     @OneToMany(mappedBy="comment")
     private List<CommentLike> commentLikeList = new ArrayList<CommentLike>();

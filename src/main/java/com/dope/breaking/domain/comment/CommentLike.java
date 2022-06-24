@@ -1,16 +1,16 @@
-package com.dope.breaking.domain.Like;
+package com.dope.breaking.domain.comment;
 
 
-import com.dope.breaking.domain.Comment;
-import com.dope.breaking.domain.User;
+import com.dope.breaking.domain.user.User;
+import lombok.Getter;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class CommentLike {
 
-    @Id
-    @GeneratedValue
+    @Id @GeneratedValue
     @Column(name="COMMENT_LIKE_ID")
     private Long id;
 
@@ -21,4 +21,5 @@ public class CommentLike {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name="COMMENT_ID")
     private Comment comment;
+
 }

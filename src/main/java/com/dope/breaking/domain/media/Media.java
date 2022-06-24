@@ -1,11 +1,15 @@
-package com.dope.breaking.domain;
+package com.dope.breaking.domain.media;
+
+import com.dope.breaking.domain.post.Post;
+import lombok.Getter;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class Media {
-    @Id
-    @GeneratedValue
+
+    @Id @GeneratedValue
     @Column(name="MEDIA_ID")
     private Long id;
 
@@ -13,8 +17,8 @@ public class Media {
     @JoinColumn (name = "POST_ID")
     private Post post;
 
-    private String mediaURL;
-
     @Enumerated(EnumType.STRING)
     private MediaType mediaType;   // PHOTO 혹은 VIDEO
+
+    private String mediaURL;
 }

@@ -63,4 +63,18 @@ public class User {
 
     private String profileImgURL;
 
+    public void SignUp
+            (String profileImgURL, String nickname, String phoneNumber, String email,
+             String firstname, String lastname, String statusMsg){
+
+        this.profileImgURL = profileImgURL;
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.statusMsg = statusMsg;
+
+    }
+
 }

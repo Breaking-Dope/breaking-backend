@@ -1,8 +1,8 @@
 package com.dope.breaking.dto.user;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class EmailValidateRequestDto {
 
     private String email;

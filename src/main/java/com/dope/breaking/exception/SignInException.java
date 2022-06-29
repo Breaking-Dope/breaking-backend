@@ -14,7 +14,9 @@ public class SignInException {
         Matcher m = p.matcher(email);
 
         if(m.matches()) {
+
             err = true;
+
         }
         return err;
     }

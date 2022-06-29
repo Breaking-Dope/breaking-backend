@@ -8,6 +8,7 @@ class SignInExceptionTest {
 
     @Test
     void isValidEmail() {
+
         String email1 = "hello@naver.com";
         String email2 = "hello@naver";
         String email3 = "hello";
@@ -16,7 +17,6 @@ class SignInExceptionTest {
         assertFalse(SignInException.isValidEmail(email2));
         assertFalse(SignInException.isValidEmail(email3));
 
-
-
     }
+
 }

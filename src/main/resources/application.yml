@@ -12,9 +12,10 @@ spring:
       hibernate:
         #        show_sql: true
         format_sql: true
+  profiles:
+    include: jwt
 
 logging.level:
   org.hibernate.SQL: debug
 
-  profiles:
-    include: jwt
+

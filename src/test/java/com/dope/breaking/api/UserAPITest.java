@@ -1,7 +1,7 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.user.SignUpRequest;
+import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,10 +16,10 @@ class UserAPITest {
     @Autowired UserRepository userRepository;
 
     @Test
-    void signInConfirm() {
+    void signUpConfirm() {
 
         // Given
-        SignUpRequest signUpRequest =  new SignUpRequest
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
                 ("URL","nickname","phoneNumber",
                         "mwk300@nyu.edu","Minwu","Kim","msg");
 

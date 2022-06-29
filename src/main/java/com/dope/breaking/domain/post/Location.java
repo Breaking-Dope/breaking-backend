@@ -1,7 +1,5 @@
 package com.dope.breaking.domain.post;
 
-import lombok.Data;
-
 import javax.persistence.Embeddable;
 
 @Embeddable

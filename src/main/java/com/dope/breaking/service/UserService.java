@@ -1,9 +1,9 @@
-package com.dope.breaking.exception;
+package com.dope.breaking.service;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SignInException {
+public class UserService {
 
     public static boolean isValidEmail(String email) {
 
@@ -20,5 +20,4 @@ public class SignInException {
         }
         return err;
     }
-
 }

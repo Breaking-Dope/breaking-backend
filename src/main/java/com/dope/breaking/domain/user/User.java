@@ -4,7 +4,6 @@ import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.post.Post;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;

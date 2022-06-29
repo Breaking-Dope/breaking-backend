@@ -1,10 +1,10 @@
-package com.dope.breaking.exception;
+package com.dope.breaking.service;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SignInExceptionTest {
+class UserServiceTest {
 
     @Test
     void isValidEmail() {
@@ -13,9 +13,9 @@ class SignInExceptionTest {
         String email2 = "hello@naver";
         String email3 = "hello";
 
-        assertTrue(SignInException.isValidEmail(email1));
-        assertFalse(SignInException.isValidEmail(email2));
-        assertFalse(SignInException.isValidEmail(email3));
+        assertTrue(UserService.isValidEmail(email1));
+        assertFalse(UserService.isValidEmail(email2));
+        assertFalse(UserService.isValidEmail(email3));
 
     }
 

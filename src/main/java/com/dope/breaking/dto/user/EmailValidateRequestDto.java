@@ -1,11 +1,9 @@
 package com.dope.breaking.dto.user;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
-public class EmailValidateRequest {
+public class EmailValidateRequestDto {
 
     private String email;
 

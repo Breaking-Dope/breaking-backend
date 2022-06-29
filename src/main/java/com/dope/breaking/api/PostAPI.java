@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,7 +29,6 @@ public class PostAPI {
             @RequestBody PostWriteRequest postWriteRequest){
 
         return postWriteRequest;
-
 
     }
 

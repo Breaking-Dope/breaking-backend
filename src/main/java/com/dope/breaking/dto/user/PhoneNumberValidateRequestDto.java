@@ -1,11 +1,9 @@
 package com.dope.breaking.dto.user;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-public class PhoneNumberValidateRequest {
+public class PhoneNumberValidateRequestDto {
 
     private String phoneNumber;
 

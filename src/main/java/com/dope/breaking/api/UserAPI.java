@@ -2,8 +2,8 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
-import com.dope.breaking.exception.SignInException;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.service.UserService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class UserAPI {
     public UserRepository userRepository;
 
     @PostMapping("/oauth2/sign-up/validate-phone-number")
-    public ResponseEntity<Void> validatePhoneNumber(@RequestBody PhoneNumberValidateRequest phoneNumberValidateRequest){
+    public ResponseEntity<Void> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
 
         Optional<User> user =  userRepository.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
 
@@ -38,10 +38,10 @@ public class UserAPI {
     }
 
     @PostMapping("/oauth2/sign-up/validate-email")
-    public ResponseEntity<MessageResponse> validateEmail(@RequestBody EmailValidateRequest emailValidateRequest){
+    public ResponseEntity<MessageResponseDto> validateEmail(@RequestBody EmailValidateRequestDto emailValidateRequest){
 
-        if(!SignInException.isValidEmail(emailValidateRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponse("invalid email"));
+        if(!UserService.isValidEmail(emailValidateRequest.getEmail())){
+            return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
         }
 
         Optional<User> user = userRepository.findByEmail(emailValidateRequest.getEmail());
@@ -57,7 +57,7 @@ public class UserAPI {
     }
 
     @PostMapping("/oauth2/sign-up/validate-nickname")
-    public ResponseEntity<Void> validateNickname(@RequestBody NicknameValidateRequest nicknameValidateRequest){
+    public ResponseEntity<Void> validateNickname(@RequestBody NicknameValidateRequestDto nicknameValidateRequest){
 
         Optional<User> user = userRepository.findByNickname(nicknameValidateRequest.getNickname());
 
@@ -72,25 +72,25 @@ public class UserAPI {
     }
 
     @PostMapping("/oauth2/sign-up")
-    public ResponseEntity<MessageResponse> signInConfirm(@RequestBody @Valid SignUpRequest signUpRequest){
+    public ResponseEntity<MessageResponseDto> signInConfirm(@RequestBody @Valid SignUpRequestDto signUpRequest){
 
-        if(!SignInException.isValidEmail(signUpRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponse("invalid email"));
+        if(!UserService.isValidEmail(signUpRequest.getEmail())){
+            return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
         }
 
         if (userRepository.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponse(SignUpDuplicateType.PHONE_NUMBER_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(SignUpDuplicateType.PHONE_NUMBER_DUPLICATE.getMessage()));
         }
 
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponse(SignUpDuplicateType.EMAIL_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(SignUpDuplicateType.EMAIL_DUPLICATE.getMessage()));
         }
 
         if (userRepository.findByNickname(signUpRequest.getNickname()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponse(SignUpDuplicateType.NICKNAME_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(SignUpDuplicateType.NICKNAME_DUPLICATE.getMessage()));
         }
 
         User user = new User();

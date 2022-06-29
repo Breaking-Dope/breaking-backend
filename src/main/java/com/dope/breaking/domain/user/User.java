@@ -3,7 +3,9 @@ package com.dope.breaking.domain.user;
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.post.Post;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class User {
 
     @Id @GeneratedValue
@@ -47,6 +50,14 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Bookmark> bookmarkList = new ArrayList<Bookmark>();
 
+    @Builder
+    public User(String username, String password, Role role){
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+
     private String firstname;
 
     private String lastname;
@@ -69,7 +80,7 @@ public class User {
 
     public void signUp
             (String profileImgURL, String nickname, String phoneNumber, String email,
-             String firstname, String lastname, String statusMsg, String username){
+             String firstname, String lastname, String statusMsg, String username) {
 
         this.profileImgURL = profileImgURL;
         this.nickname = nickname;
@@ -80,6 +91,13 @@ public class User {
         this.statusMsg = statusMsg;
         this.username = username;
         this.balance = 0;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private Role role; //권한 종류
+
+    public String getRoleKey(){
+        return this.role.getKey();
     }
 
 }

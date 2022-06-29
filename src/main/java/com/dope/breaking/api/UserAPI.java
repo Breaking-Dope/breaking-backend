@@ -2,6 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
+import com.dope.breaking.exception.SignInException;
 import com.dope.breaking.repository.UserRepository;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,7 +38,11 @@ public class UserAPI {
     }
 
     @PostMapping("/oauth2/sign-up/validate-email")
-    public ResponseEntity<Void> validateNickname(@RequestBody EmailValidateRequest emailValidateRequest){
+    public ResponseEntity<MessageResponse> validateEmail(@RequestBody EmailValidateRequest emailValidateRequest){
+
+        if(!SignInException.isValidEmail(emailValidateRequest.getEmail())){
+            return ResponseEntity.badRequest().body(new MessageResponse("invalid email"));
+        }
 
         Optional<User> user = userRepository.findByEmail(emailValidateRequest.getEmail());
 
@@ -67,21 +72,25 @@ public class UserAPI {
     }
 
     @PostMapping("/oauth2/sign-up")
-    public ResponseEntity<SignUpDuplicateResponse> signInConfirm(@RequestBody @Valid SignUpRequest signUpRequest){
+    public ResponseEntity<MessageResponse> signInConfirm(@RequestBody @Valid SignUpRequest signUpRequest){
+
+        if(!SignInException.isValidEmail(signUpRequest.getEmail())){
+            return ResponseEntity.badRequest().body(new MessageResponse("invalid email"));
+        }
 
         if (userRepository.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new SignUpDuplicateResponse(SignUpDuplicateType.PHONE_NUMBER_DUPLICATE.getMessage()));
+                    .body(new MessageResponse(SignUpDuplicateType.PHONE_NUMBER_DUPLICATE.getMessage()));
         }
 
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new SignUpDuplicateResponse(SignUpDuplicateType.EMAIL_DUPLICATE.getMessage()));
+                    .body(new MessageResponse(SignUpDuplicateType.EMAIL_DUPLICATE.getMessage()));
         }
 
         if (userRepository.findByNickname(signUpRequest.getNickname()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new SignUpDuplicateResponse(SignUpDuplicateType.NICKNAME_DUPLICATE.getMessage()));
+                    .body(new MessageResponse(SignUpDuplicateType.NICKNAME_DUPLICATE.getMessage()));
         }
 
         User user = new User();

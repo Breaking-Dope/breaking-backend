@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignUpDuplicateResponse {
+public class MessageResponse {
 
     private String message;
 

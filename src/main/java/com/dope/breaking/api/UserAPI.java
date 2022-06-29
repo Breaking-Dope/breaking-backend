@@ -102,7 +102,8 @@ public class UserAPI {
                 signUpRequest.getEmail(),
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
-                signUpRequest.getStatusMsg()
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername()
         );
 
         userRepository.save(user);

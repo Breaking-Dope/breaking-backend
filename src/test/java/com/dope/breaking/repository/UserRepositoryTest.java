@@ -19,7 +19,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg");
+        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username");
 
         //When
         User savedUser = userRepository.save(user);
@@ -35,7 +35,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg");
+        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username");
 
         //When
         User savedUser = userRepository.save(user);
@@ -51,7 +51,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg");
+        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username");
 
         //When
         User savedUser = userRepository.save(user);

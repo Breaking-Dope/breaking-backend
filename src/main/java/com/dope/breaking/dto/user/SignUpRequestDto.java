@@ -23,6 +23,8 @@ public class SignUpRequestDto {
     private String firstName;
     @NotNull
     private String lastName;
+    @NotNull
+    private String username;
 
 }
 

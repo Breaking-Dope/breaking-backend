@@ -20,8 +20,7 @@ class UserAPITest {
 
         // Given
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
-                ("URL","nickname","phoneNumber",
-                        "mwk300@nyu.edu","Minwu","Kim","msg");
+                ("URL","nickname","phoneNumber", "mwk300@nyu.edu","Minwu","Kim","msg","username");
 
         // When
         User user = new User();
@@ -33,7 +32,8 @@ class UserAPITest {
                 signUpRequest.getEmail(),
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
-                signUpRequest.getStatusMsg()
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername()
         );
 
         User savedUser = userRepository.save(user);

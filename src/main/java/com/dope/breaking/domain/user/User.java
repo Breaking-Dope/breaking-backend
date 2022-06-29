@@ -51,6 +51,10 @@ public class User {
 
     private String lastname;
 
+    private String username;
+
+    private String password;
+
     private String nickname;
 
     private String statusMsg;
@@ -65,7 +69,7 @@ public class User {
 
     public void signUp
             (String profileImgURL, String nickname, String phoneNumber, String email,
-             String firstname, String lastname, String statusMsg){
+             String firstname, String lastname, String statusMsg, String username){
 
         this.profileImgURL = profileImgURL;
         this.nickname = nickname;
@@ -74,6 +78,7 @@ public class User {
         this.firstname = firstname;
         this.lastname = lastname;
         this.statusMsg = statusMsg;
+        this.username = username;
         this.balance = 0;
     }
 

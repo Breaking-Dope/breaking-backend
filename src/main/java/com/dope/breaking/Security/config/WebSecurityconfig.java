@@ -5,7 +5,6 @@ import com.dope.breaking.Security.Jwt.JwtAuthenticationFilter;
 import com.dope.breaking.Security.Jwt.JwtEntryPoint;
 import com.dope.breaking.Security.Jwt.JwtTokenProvider;
 import com.dope.breaking.Security.UserDetails.PrincipalDetailsService;
-import com.dope.breaking.Security.UserInfoDto.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

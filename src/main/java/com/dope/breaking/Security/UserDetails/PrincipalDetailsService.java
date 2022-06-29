@@ -1,7 +1,7 @@
 package com.dope.breaking.Security.UserDetails;
 
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.Security.UserInfoDto.UserRepository;
+import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

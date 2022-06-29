@@ -37,6 +37,8 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Purchase> buyerList = new ArrayList<Purchase>();
 
+    private String title;
+
     private String content;
 
     @Enumerated(EnumType.STRING)

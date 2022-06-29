@@ -63,7 +63,7 @@ public class User {
 
     private String profileImgURL;
 
-    public void SignUp
+    public void signUp
             (String profileImgURL, String nickname, String phoneNumber, String email,
              String firstname, String lastname, String statusMsg){
 
@@ -74,7 +74,7 @@ public class User {
         this.firstname = firstname;
         this.lastname = lastname;
         this.statusMsg = statusMsg;
-
+        this.balance = 0;
     }
 
 }

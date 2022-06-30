@@ -38,5 +38,28 @@ public class UserService {
         return userRepository.findByUsername(username);
 
     }
-    
+
+    public Optional<User> findByNickname(String nickname) {
+
+        return userRepository.findByNickname(nickname);
+
+    }
+
+    public Optional<User> findByPhoneNumber(String phoneNumber) {
+
+        return userRepository.findByPhoneNumber(phoneNumber);
+
+    }
+
+    public Optional<User> findByEmail(String email) {
+
+        return userRepository.findByEmail(email);
+
+    }
+
+    public User save(User user){
+
+        return userRepository.save(user);
+
+    }
 }

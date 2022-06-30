@@ -5,6 +5,7 @@ import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -68,4 +69,11 @@ public class UserService {
         return userRepository.save(user);
 
     }
+
+
+    public Boolean existByUsername(String username){
+        return userRepository.existsByUsername(username);
+    }
+
+
 }

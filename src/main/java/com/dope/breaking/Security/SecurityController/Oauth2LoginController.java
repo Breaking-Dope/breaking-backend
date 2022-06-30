@@ -57,7 +57,7 @@ public class Oauth2LoginController {
         dto.setUsername(jsonObject1.get("id").toString());
         dto.setEmail(jsonObject1.get("email").toString());
         log.info(dto.toString());
-        User user = userService.findbyUsername(dto.getUsername()).orElse(null);
+        User user = userService.findByUsername(dto.getUsername()).orElse(null);
         if(user == null){
             log.info("유저 정보가 없음");
             return ResponseEntity.status(200).body(dto);
@@ -104,7 +104,7 @@ public class Oauth2LoginController {
         jsonObject1 = (JSONObject) jsonParser.parse(profile);
         dto.setFullname(jsonObject1.get("nickname").toString());
         log.info(dto.toString());
-        User user = userService.findbyUsername(dto.getUsername()).orElse(null);
+        User user = userService.findByUsername(dto.getUsername()).orElse(null);
         if(user == null){
             log.info("유저 정보가 없음");
             return ResponseEntity.status(200).body(dto);
@@ -144,7 +144,7 @@ public class Oauth2LoginController {
         dto.setUsername(jsonObject.get("sub").toString());
         dto.setEmail(jsonObject.get("email").toString());
         dto.setFullname(jsonObject.get("given_name").toString());
-        User user = userService.findbyUsername(dto.getUsername()).orElse(null);
+        User user = userService.findByUsername(dto.getUsername()).orElse(null);
         if(user == null){
             log.info("유저 정보가 없음");
             return ResponseEntity.status(200).body(dto);

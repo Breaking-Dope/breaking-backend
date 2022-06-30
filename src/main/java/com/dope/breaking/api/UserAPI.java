@@ -2,11 +2,10 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
-import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.UserService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,15 +17,15 @@ import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 public class UserAPI {
 
-    @Autowired
-    public UserRepository userRepository;
+    private final UserService userService;
 
     @PostMapping("/oauth2/sign-up/validate-phone-number")
     public ResponseEntity<Void> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
 
-        Optional<User> user =  userRepository.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
+        Optional<User> user =  userService.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
 
         if (user.isPresent()){
             return ResponseEntity.badRequest().build();
@@ -44,7 +43,7 @@ public class UserAPI {
             return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
         }
 
-        Optional<User> user = userRepository.findByEmail(emailValidateRequest.getEmail());
+        Optional<User> user = userService.findByEmail(emailValidateRequest.getEmail());
 
         if (user.isPresent()){
             return ResponseEntity.badRequest().build();
@@ -59,7 +58,7 @@ public class UserAPI {
     @PostMapping("/oauth2/sign-up/validate-nickname")
     public ResponseEntity<Void> validateNickname(@RequestBody NicknameValidateRequestDto nicknameValidateRequest){
 
-        Optional<User> user = userRepository.findByNickname(nicknameValidateRequest.getNickname());
+        Optional<User> user = userService.findByNickname(nicknameValidateRequest.getNickname());
 
         if (user.isPresent()){
             return ResponseEntity.badRequest().build();
@@ -78,17 +77,17 @@ public class UserAPI {
             return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
         }
 
-        if (userRepository.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
+        if (userService.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpDuplicateType.PHONE_NUMBER_DUPLICATE.getMessage()));
         }
 
-        if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()){
+        if (userService.findByEmail(signUpRequest.getEmail()).isPresent()){
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpDuplicateType.EMAIL_DUPLICATE.getMessage()));
         }
 
-        if (userRepository.findByNickname(signUpRequest.getNickname()).isPresent()){
+        if (userService.findByNickname(signUpRequest.getNickname()).isPresent()){
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpDuplicateType.NICKNAME_DUPLICATE.getMessage()));
         }
@@ -106,7 +105,7 @@ public class UserAPI {
                 signUpRequest.getUsername()
         );
 
-        userRepository.save(user);
+        userService.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
 

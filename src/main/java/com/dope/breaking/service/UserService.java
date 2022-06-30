@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,7 +33,10 @@ public class UserService {
         return err;
     }
 
-    public Optional<User> findbyUsername(String username) {
+    public Optional<User> findByUsername(String username) {
+
         return userRepository.findByUsername(username);
+
     }
+    
 }

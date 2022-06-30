@@ -1,11 +1,13 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.media.MediaType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +50,25 @@ public class MediaService {
         }finally{
 
             return fileNameList;
+
+        }
+
+    }
+
+    public MediaType findMediaType(String fileName){
+
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+        List<String> videoExtension = Arrays.asList("mp4","mov","mpg","mpeg","gif","rm","vob");
+
+        if(videoExtension.contains(extension)){
+
+            return MediaType.VIDEO;
+
+        }
+        else{
+
+            return MediaType.PHOTO;
 
         }
 

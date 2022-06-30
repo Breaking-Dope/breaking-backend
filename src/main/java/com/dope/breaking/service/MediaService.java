@@ -1,6 +1,10 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.MediaType;
+import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.repository.MediaRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +17,10 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MediaService {
+
+    private final MediaRepository mediaRepository;
 
     //디렉토리는 추후 AWS내의 디렉토리로 변경
     private String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
@@ -55,10 +62,9 @@ public class MediaService {
 
     }
 
-    public MediaType findMediaType(String fileName){
+    public MediaType findMediaType (String fileName){
 
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
         List<String> videoExtension = Arrays.asList("mp4","mov","mpg","mpeg","gif","rm","vob");
 
         if(videoExtension.contains(extension)){
@@ -70,6 +76,19 @@ public class MediaService {
 
             return MediaType.PHOTO;
 
+        }
+
+    }
+
+    public void createMediaEntities(List<String> fileNameList, Post post){
+        
+        for (String fileName : fileNameList) {
+
+            MediaType mediaType = findMediaType(fileName);
+
+            Media media = new Media(post,mediaType,fileName);
+
+            mediaRepository.save(media);
         }
 
     }

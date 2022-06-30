@@ -26,8 +26,8 @@ public class Media {
     @Builder
     public Media(Post post, MediaType mediaType, String fileName){
         this.post = post;
-        this.mediaType=mediaType;
-        this.mediaURL=fileName;
+        this.mediaType = mediaType;
+        this.mediaURL = fileName;
     }
 
     protected Media(){}

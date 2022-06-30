@@ -5,6 +5,7 @@ import com.dope.breaking.Security.Jwt.JwtAuthenticationFilter;
 import com.dope.breaking.Security.Jwt.JwtEntryPoint;
 import com.dope.breaking.Security.Jwt.JwtTokenProvider;
 import com.dope.breaking.Security.UserDetails.PrincipalDetailsService;
+import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -32,10 +33,6 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final PrincipalDetailsService principalDetailsService;
-
-    private final UserRepository userRepository;
-
-
 
     private final PasswordEncoder passwordEncoder;
 
@@ -66,7 +63,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/**").hasRole("USER") //USER를 가진 권한만이 접근이 허용됨
                 .antMatchers("/**").permitAll() //그외 접근은 모두 허용됨.
                 .and()
-                .exceptionHandling().authenticationEntryPoint(jwtEnrtyPoint()); //에러코드 반환할 except
+                .exceptionHandling().authenticationEntryPoint(jwtEntryPoint()); //에러코드 반환할 except
 
 
         http.addFilterBefore(jwtAuthenticationFilter(),
@@ -82,9 +79,9 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    JwtEntryPoint jwtEnrtyPoint() {
-        JwtEntryPoint jwtEnrtyPoint = new JwtEntryPoint();
-        return jwtEnrtyPoint;
+    JwtEntryPoint jwtEntryPoint() {
+        JwtEntryPoint jwtEntryPoint = new JwtEntryPoint();
+        return jwtEntryPoint;
     }
 
 

@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum Role {
 
 
-    PPRESS("ROLE_PRESS", "언론사"),
+    PRESS("ROLE_PRESS", "언론사"),
     USER("ROLE_USER", "사용자");
 
     private final String key;

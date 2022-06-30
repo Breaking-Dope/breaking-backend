@@ -29,8 +29,6 @@ public class JwtTokenProvider {
 
     private static final String BEARER = "Bearer ";
 
-    private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
-
     private final long accesstokenValidityInMilliseconds = 30 * 60 * 1000L; //엑세스 토큰 유효기간  엑세스 토큰 30분
 
     // JWT 토큰 생성
@@ -42,8 +40,6 @@ public class JwtTokenProvider {
     public String createAccessToken(String username) {
         Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
-        log.info("{}", secret);
-        log.info("{}", accesstokenValidityInMilliseconds);
         return Jwts.builder()
                 .setSubject("AccessToken")// 제목 지정
                 .setClaims(claims) //유저이름 지정.
@@ -57,7 +53,7 @@ public class JwtTokenProvider {
         return Optional.ofNullable(request.getHeader(accessheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
-    // 토큰에서 Username추출
+    // 토큰에서 Username추출하는 과정.
     public String getUsername(String token) { //Username을 얻자.
         String username = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
         log.info("JwtProvider's getUsername method : {}", username);

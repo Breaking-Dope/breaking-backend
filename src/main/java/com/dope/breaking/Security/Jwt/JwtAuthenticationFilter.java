@@ -26,9 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
 
     private final PrincipalDetailsService principalDetailsService;
 
-
     //인증작업을 실시함.
-
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
@@ -39,9 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
         if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == true) {
 
             String username = jwtTokenProvider.getUsername(accesstoken);
-            if (username != null) {
-                log.info("username은 {}", username);
-            }
+
             UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
             //스프링 시큐리티가 수행해주는 권한 처리를 위해 아래와 같이 토큰을 만들어서 Authentication 객체를 강제로 만들고 컨텍스트에 저장한다.
             log.info("Userdetail : {}", userDetails.getUsername());

@@ -2,12 +2,10 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
-import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.UserService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

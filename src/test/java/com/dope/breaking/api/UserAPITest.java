@@ -2,7 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.SignUpRequestDto;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.service.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class UserAPITest {
 
-    @Autowired UserRepository userRepository;
+    @Autowired
+    UserService userService;
 
     @Test
     void signUpConfirm() {
@@ -36,10 +37,10 @@ class UserAPITest {
                 signUpRequest.getUsername()
         );
 
-        User savedUser = userRepository.save(user);
+        User savedUser = userService.save(user);
 
         // Then
-        User foundUser = userRepository.findById(savedUser.getId()).get();
+        User foundUser = userService.findById(savedUser.getId()).get();
         Assertions.assertThat(foundUser).isEqualTo(user);
 
     }

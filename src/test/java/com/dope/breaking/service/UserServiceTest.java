@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -24,9 +26,22 @@ class UserServiceTest {
         String email2 = "hello@naver";
         String email3 = "hello";
 
-        assertTrue(UserService.isValidEmail(email1));
-        assertFalse(UserService.isValidEmail(email2));
-        assertFalse(UserService.isValidEmail(email3));
+        assertTrue(userService.isValidEmail(email1));
+        assertFalse(userService.isValidEmail(email2));
+        assertFalse(userService.isValidEmail(email3));
+
+    }
+
+    @Test
+    void isValidRole() {
+
+        String role1 = "PRESS";
+        String role2 = "PreSs";
+        String role3 = "Pre";
+
+        assertTrue(userService.isValidRole(role1));
+        assertTrue(userService.isValidRole(role2));
+        assertFalse(userService.isValidRole(role3));
 
     }
 
@@ -35,7 +50,7 @@ class UserServiceTest {
 
         // Given
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
-                ("nickname","phoneNumber", "mwk300@nyu.edu","Minwu","Kim","msg","username", Role.PRESS);
+                ("nickname","phoneNumber", "mwk300@nyu.edu","Minwu","Kim","msg","username", "PRess");
 
         // When
         User user = new User();
@@ -49,7 +64,8 @@ class UserServiceTest {
                 signUpRequest.getLastName(),
                 signUpRequest.getStatusMsg(),
                 signUpRequest.getUsername(),
-                signUpRequest.getRole()
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+
         );
 
         User savedUser = userService.save(user);

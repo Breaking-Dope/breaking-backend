@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -79,10 +80,10 @@ public class User {
     private String profileImgURL;
 
     public void signUp
-            (String profileImgURL, String nickname, String phoneNumber, String email,
-             String firstname, String lastname, String statusMsg, String username) {
+            (String generatedImgURL, String nickname, String phoneNumber, String email,
+             String firstname, String lastname, String statusMsg, String username, Role role) {
 
-        this.profileImgURL = profileImgURL;
+        this.profileImgURL = generatedImgURL;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.email = email;
@@ -91,6 +92,8 @@ public class User {
         this.statusMsg = statusMsg;
         this.username = username;
         this.balance = 0;
+        this.role = role;
+        this.password = UUID.randomUUID().toString();
     }
 
     @Enumerated(EnumType.STRING)

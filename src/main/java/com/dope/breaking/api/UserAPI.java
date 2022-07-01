@@ -2,16 +2,21 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
+import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -19,6 +24,7 @@ import java.util.Optional;
 public class UserAPI {
 
     private final UserService userService;
+    private final MediaService mediaService;
 
     @PostMapping("/oauth2/sign-up/validate-phone-number")
     public ResponseEntity<Void> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
@@ -56,8 +62,10 @@ public class UserAPI {
 
     }
 
-    @PostMapping("/oauth2/sign-up")
-    public ResponseEntity<MessageResponseDto> signInConfirm(@RequestBody @Valid SignUpRequestDto signUpRequest){
+    @PostMapping(value = "/oauth2/sign-up",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<MessageResponseDto> signInConfirm(
+            @RequestPart @Valid SignUpRequestDto signUpRequest,
+            @RequestPart List<MultipartFile> profileImg) throws Exception {
 
         if(!UserService.isValidEmail(signUpRequest.getEmail())){
             return ResponseEntity.badRequest()
@@ -79,10 +87,13 @@ public class UserAPI {
                     .body(new MessageResponseDto(SignUpErrorType.NICKNAME_DUPLICATE.getMessage()));
         }
 
+        List<String> generatedFileNameList = mediaService.uploadMedias(profileImg);
+
         User user = new User();
 
         user.signUp(
-                signUpRequest.getProfileImgURL(),
+//                signUpRequest.getProfileImgURL(),
+                generatedFileNameList.get(0),
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),

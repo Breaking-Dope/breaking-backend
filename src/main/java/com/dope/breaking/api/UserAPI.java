@@ -1,5 +1,6 @@
 package com.dope.breaking.api;
 
+import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.service.MediaService;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @RestController
@@ -67,7 +69,11 @@ public class UserAPI {
             @RequestPart @Valid SignUpRequestDto signUpRequest,
             @RequestPart List<MultipartFile> profileImg) throws Exception {
 
-        if(!UserService.isValidEmail(signUpRequest.getEmail())){
+        if(!userService.isValidRole(signUpRequest.getRole())){
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponseDto(SignUpErrorType.INVALID_ROLE.getMessage()));
+        }
+        if(!userService.isValidEmail(signUpRequest.getEmail())){
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
         }
@@ -92,7 +98,6 @@ public class UserAPI {
         User user = new User();
 
         user.signUp(
-//                signUpRequest.getProfileImgURL(),
                 generatedFileNameList.get(0),
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
@@ -100,7 +105,8 @@ public class UserAPI {
                 signUpRequest.getFirstName(),
                 signUpRequest.getLastName(),
                 signUpRequest.getStatusMsg(),
-                signUpRequest.getUsername()
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
         );
 
         userService.save(user);

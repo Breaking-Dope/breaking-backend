@@ -3,8 +3,6 @@ package com.dope.breaking.api;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.service.UserService;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,13 +25,8 @@ public class UserAPI {
 
         Optional<User> user =  userService.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
 
-        if (user.isPresent()){
-            return ResponseEntity.badRequest().build();
-        }
+        return userService.checkOptionalUser(user);
 
-        else{
-            return ResponseEntity.ok().build();
-        }
     }
 
     @PostMapping("/oauth2/sign-up/validate-email")
@@ -48,7 +41,6 @@ public class UserAPI {
         if (user.isPresent()){
             return ResponseEntity.badRequest().build();
         }
-
         else{
             return ResponseEntity.ok().build();
         }
@@ -60,13 +52,7 @@ public class UserAPI {
 
         Optional<User> user = userService.findByNickname(nicknameValidateRequest.getNickname());
 
-        if (user.isPresent()){
-            return ResponseEntity.badRequest().build();
-        }
-
-        else{
-            return ResponseEntity.ok().build();
-        }
+        return userService.checkOptionalUser(user);
 
     }
 
@@ -110,16 +96,5 @@ public class UserAPI {
         return ResponseEntity.status(HttpStatus.CREATED).build();
 
     }
-
-
-    @Data
-    @NoArgsConstructor
-    public static class PhoneNumberRequest{
-
-        private String phoneNumber;
-
-    }
-
-
 
 }

@@ -6,10 +6,18 @@ import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.repository.MediaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -90,6 +98,20 @@ public class MediaService {
 
             mediaRepository.save(media);
         }
+
+    }
+
+    public ResponseEntity<FileSystemResource> responseMediaFile(String fileName) throws IOException {
+
+        String directory = dirName + "/" + fileName;
+
+        FileSystemResource fsr =  new FileSystemResource(directory);
+
+        HttpHeaders header = new HttpHeaders();
+        Path filePath = Paths.get(fileName);
+        header.add("Content-Type", Files.probeContentType(filePath));
+
+        return new ResponseEntity<FileSystemResource>(fsr, header, HttpStatus.OK);
 
     }
 

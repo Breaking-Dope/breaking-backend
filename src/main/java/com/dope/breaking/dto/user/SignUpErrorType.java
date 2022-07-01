@@ -1,14 +1,16 @@
 package com.dope.breaking.dto.user;
 
-public enum SignUpDuplicateType {
+public enum SignUpErrorType {
 
+    INVALID_EMAIL("invalid email"),
     EMAIL_DUPLICATE("used email"),
     PHONE_NUMBER_DUPLICATE("used phone number"),
     NICKNAME_DUPLICATE("used nickname");
 
+
     private String message;
 
-    SignUpDuplicateType(String message) {
+    SignUpErrorType(String message) {
 
         this.message = message;
 

@@ -60,22 +60,23 @@ public class UserAPI {
     public ResponseEntity<MessageResponseDto> signInConfirm(@RequestBody @Valid SignUpRequestDto signUpRequest){
 
         if(!UserService.isValidEmail(signUpRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
         }
 
         if (userService.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpDuplicateType.PHONE_NUMBER_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage()));
         }
 
         if (userService.findByEmail(signUpRequest.getEmail()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpDuplicateType.EMAIL_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(SignUpErrorType.EMAIL_DUPLICATE.getMessage()));
         }
 
         if (userService.findByNickname(signUpRequest.getNickname()).isPresent()){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpDuplicateType.NICKNAME_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(SignUpErrorType.NICKNAME_DUPLICATE.getMessage()));
         }
 
         User user = new User();

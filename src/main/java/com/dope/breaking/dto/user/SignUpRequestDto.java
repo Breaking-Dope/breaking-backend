@@ -1,6 +1,5 @@
 package com.dope.breaking.dto.user;
 
-import com.dope.breaking.domain.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

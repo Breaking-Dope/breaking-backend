@@ -1,5 +1,6 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +35,17 @@ public class UserService {
 
         }
         return err;
+    }
+
+    public static boolean isValidRole(String role) {
+
+        String upperCasedRole = role.toUpperCase();
+
+        if (upperCasedRole.equals("PRESS") ||  upperCasedRole.equals("USER")){
+            return true;
+        }
+        return false;
+
     }
 
     public Optional<User> findByUsername(String username) {

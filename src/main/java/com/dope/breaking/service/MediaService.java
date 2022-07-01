@@ -23,7 +23,7 @@ public class MediaService {
     private final MediaRepository mediaRepository;
 
     //디렉토리는 추후 AWS내의 디렉토리로 변경
-    private String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
+    private final String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
 
     public List<String> uploadMedias(List<MultipartFile> medias) throws Exception{
 
@@ -81,7 +81,7 @@ public class MediaService {
     }
 
     public void createMediaEntities(List<String> fileNameList, Post post){
-        
+
         for (String fileName : fileNameList) {
 
             MediaType mediaType = findMediaType(fileName);

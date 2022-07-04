@@ -52,13 +52,8 @@ public class PostService {
                     .isAnonymous(postCreateRequestDto.getIsAnonymous())
                     .price(postCreateRequestDto.getPrice())
                     .build();
-            log.info("content info : {} ", post.toString());
-            if (post.isAnonymous()) {//익명성이라면, 유저 정보는 존재하지 않는다.
-                post.setUser(null);
-            } else {
-                User user = userService.findByUsername(username).get();
-                post.setUser(user);
-            }
+            User user = userService.findByUsername(username).get();
+            post.setUser(user);
             postid = postRepository.save(post).getId();
         } catch (Exception e) {
             log.info("게시글 entity화 실패.");

@@ -2,8 +2,10 @@ package com.dope.breaking.api;
 
 
 import com.dope.breaking.dto.post.PostCreateRequestDto;
+import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.post.PostResponse;
 import com.dope.breaking.dto.post.SearchFeedResponseDto;
+import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.SearchFeedService;
 import com.dope.breaking.service.SortFilter;
@@ -23,10 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -71,31 +70,25 @@ public class PostAPI {
     public ResponseEntity<?> PostCreate(Principal principal,
                                         @RequestPart(value = "mediaList") List<MultipartFile> files, @RequestPart(value = "data") @Valid PostCreateRequestDto postCreateRequestDto) {
 
-        log.info("여기까지 진입");
-        log.info("content : {}", postCreateRequestDto.toString());
 
         Optional<String> cntusername = Optional.ofNullable(principal.getName());
         Long postid;
         if (cntusername.isEmpty()) {
-            PostResponse errorMsg = new PostResponse("현재 유저 정보가 없음");
-            return ResponseEntity.status(401).body(errorMsg);
+            return ResponseEntity.status(401).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
         }//유저 정보 없으면 일치하지 않다고 반환하기.
         if (!userService.existByUsername(cntusername.get())) {
-            log.info("게시글 등록에 실패함");
-            PostResponse errorMsg = new PostResponse("등록되지 않은 유저");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }
         try {
             postid = postService.create(cntusername.get(), postCreateRequestDto, files);
-            log.info("file info: {}", files.toString());
 
         } catch (Exception e) {
             log.info("게시글 등록에 실패함");
-            PostResponse errorMsg = new PostResponse("게시글 등록에 실패함");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.POST_FAILED.getMessage()));
         }
-        PostResponse postResponse = new PostResponse("등록된 게시글 번호: " + postid.toString());
-        return ResponseEntity.status(HttpStatus.OK).body(postResponse);
+        Map<String, Long> result = new LinkedHashMap<>();
+        result.put("postId", postid);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
 

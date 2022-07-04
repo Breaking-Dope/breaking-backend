@@ -20,7 +20,7 @@ class UserServiceTest {
     @Autowired UserService userService;
 
     @Test
-    void isValidEmail() {
+    void isValidEmailFormat() {
 
         String email1 = "hello@naver.com";
         String email2 = "hello@naver";
@@ -29,6 +29,19 @@ class UserServiceTest {
         assertTrue(userService.isValidEmailFormat(email1));
         assertFalse(userService.isValidEmailFormat(email2));
         assertFalse(userService.isValidEmailFormat(email3));
+
+    }
+
+    @Test
+    void isValidPhoneNumberFormat() {
+
+        String number1 = "01012345678";
+        String number2 = "0212345678";
+        String number3 = "010102312";
+
+        assertTrue(userService.isValidPhoneNumberFormat(number1));
+        assertTrue(userService.isValidPhoneNumberFormat(number2));
+        assertFalse(userService.isValidPhoneNumberFormat(number3));
 
     }
 

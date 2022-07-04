@@ -29,11 +29,20 @@ public class UserAPI {
     private final MediaService mediaService;
 
     @PostMapping("/oauth2/sign-up/validate-phone-number")
-    public ResponseEntity<Void> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
+    public ResponseEntity<MessageResponseDto> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
+
+        if(!UserService.isValidPhoneNumberFormat(phoneNumberValidateRequest.getPhoneNumber())){
+            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.INVALID_PHONE_NUMBER.getMessage()));
+        }
 
         Optional<User> user =  userService.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
 
-        return userService.checkOptionalUser(user);
+        if (user.isPresent()){
+            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage()));
+        }
+        else{
+            return ResponseEntity.ok().build();
+        }
 
     }
 
@@ -41,13 +50,13 @@ public class UserAPI {
     public ResponseEntity<MessageResponseDto> validateEmail(@RequestBody EmailValidateRequestDto emailValidateRequest){
 
         if(!UserService.isValidEmailFormat(emailValidateRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
+            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
         }
 
         Optional<User> user = userService.findByEmail(emailValidateRequest.getEmail());
 
         if (user.isPresent()){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.EMAIL_DUPLICATE.getMessage()));
         }
         else{
             return ResponseEntity.ok().build();
@@ -56,11 +65,16 @@ public class UserAPI {
     }
 
     @PostMapping("/oauth2/sign-up/validate-nickname")
-    public ResponseEntity<Void> validateNickname(@RequestBody NicknameValidateRequestDto nicknameValidateRequest){
+    public ResponseEntity<MessageResponseDto> validateNickname(@RequestBody NicknameValidateRequestDto nicknameValidateRequest){
 
         Optional<User> user = userService.findByNickname(nicknameValidateRequest.getNickname());
 
-        return userService.checkOptionalUser(user);
+        if (user.isPresent()){
+            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.NICKNAME_DUPLICATE.getMessage()));
+        }
+        else{
+            return ResponseEntity.ok().build();
+        }
 
     }
 
@@ -73,9 +87,15 @@ public class UserAPI {
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpErrorType.INVALID_ROLE.getMessage()));
         }
+
         if(!userService.isValidEmailFormat(signUpRequest.getEmail())){
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
+        }
+
+        if(!userService.isValidPhoneNumberFormat(signUpRequest.getPhoneNumber())){
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponseDto(SignUpErrorType.INVALID_PHONE_NUMBER.getMessage()));
         }
 
         if (userService.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
@@ -83,7 +103,7 @@ public class UserAPI {
                     .body(new MessageResponseDto(SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage()));
         }
 
-        if (userService.findByEmail(signUpRequest.getEmail()).isPresent()){
+        if (userService.findByEmail(signUpRequest.getEmail()).isPresent()) {
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpErrorType.EMAIL_DUPLICATE.getMessage()));
         }

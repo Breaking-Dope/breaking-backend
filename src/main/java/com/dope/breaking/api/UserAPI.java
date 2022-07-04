@@ -40,7 +40,7 @@ public class UserAPI {
     @PostMapping("/oauth2/sign-up/validate-email")
     public ResponseEntity<MessageResponseDto> validateEmail(@RequestBody EmailValidateRequestDto emailValidateRequest){
 
-        if(!UserService.isValidEmail(emailValidateRequest.getEmail())){
+        if(!UserService.isValidEmailFormat(emailValidateRequest.getEmail())){
             return ResponseEntity.badRequest().body(new MessageResponseDto("invalid email"));
         }
 
@@ -73,7 +73,7 @@ public class UserAPI {
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpErrorType.INVALID_ROLE.getMessage()));
         }
-        if(!userService.isValidEmail(signUpRequest.getEmail())){
+        if(!userService.isValidEmailFormat(signUpRequest.getEmail())){
             return ResponseEntity.badRequest()
                     .body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
         }

@@ -26,9 +26,9 @@ class UserServiceTest {
         String email2 = "hello@naver";
         String email3 = "hello";
 
-        assertTrue(userService.isValidEmail(email1));
-        assertFalse(userService.isValidEmail(email2));
-        assertFalse(userService.isValidEmail(email3));
+        assertTrue(userService.isValidEmailFormat(email1));
+        assertFalse(userService.isValidEmailFormat(email2));
+        assertFalse(userService.isValidEmailFormat(email3));
 
     }
 

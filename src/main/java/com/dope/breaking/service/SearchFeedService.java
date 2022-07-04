@@ -19,4 +19,10 @@ public class SearchFeedService {
         return postRepository.findAll(pageRequest);
     }
 
+    public Page<Post> searchFeed(int size, int page, SortFilter sortFilter) {
+        // 미구현
+        // QueryDSL 적용하여 리팩토링합니다.
+        return null;
+    }
+
 }

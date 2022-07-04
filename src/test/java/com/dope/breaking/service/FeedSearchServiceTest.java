@@ -29,13 +29,13 @@ class FeedSearchServiceTest {
             postRepository.save(post);
         }
 
-        Page<Post> paginationResult1 = searchFeedService.searchFeedByDefault(10,0);
+        Page<Post> paginationResult1 = searchFeedService.searchFeed(10,0);
         List<Post> content1 = paginationResult1.getContent();
 
-        Page<Post> paginationResult2 = searchFeedService.searchFeedByDefault(10, 1);
+        Page<Post> paginationResult2 = searchFeedService.searchFeed(10, 1);
         List<Post> content2 = paginationResult2.getContent();
 
-        Page<Post> paginationResult3 = searchFeedService.searchFeedByDefault(10, 2);
+        Page<Post> paginationResult3 = searchFeedService.searchFeed(10, 2);
         List<Post> content3 = paginationResult3.getContent();
 
         assertEquals(10, content1.size());
@@ -45,7 +45,7 @@ class FeedSearchServiceTest {
 
     @Test
     void when_there_are_no_posts() {
-        Page<Post> paginationResult = searchFeedService.searchFeedByDefault(10, 0);
+        Page<Post> paginationResult = searchFeedService.searchFeed(10, 0);
         List<Post> content = paginationResult.getContent();
 
         assertEquals(0, content.size());

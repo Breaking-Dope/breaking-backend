@@ -1,6 +1,6 @@
 package com.dope.breaking.security.config;
 
-import com.dope.breaking.security.handler.JwtExceptHandler;
+
 import com.dope.breaking.security.jwt.JwtAuthenticationFilter;
 import com.dope.breaking.security.jwt.JwtEntryPoint;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
@@ -10,9 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,16 +31,6 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
     private final PrincipalDetailsService principalDetailsService;
 
     private final PasswordEncoder passwordEncoder;
-
-
-//    @Bean
-//    public AuthenticationManager authenticationManager() {//AuthenticationManager 등록
-//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();//Form 형식의 DaoAuthenticationProvider 사용 -> 여기서 아이디와 password를 대조하여 비교함.
-//        provider.setPasswordEncoder(passwordEncoder);//PasswordEncoder로는 BCry를 사용할 것임.
-//        provider.setUserDetailsService(principalDetailsService); //UserDtailsService는 예전에 작성한 것으로. 유저 인증절차는 이친구에게 넘김.
-//        return new ProviderManager(provider);
-//    }
-
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -67,14 +54,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
 
         http.addFilterBefore(jwtAuthenticationFilter(),
                 UsernamePasswordAuthenticationFilter.class); //JwtAuthenticationFilter를 JsonUsernamePasswordAuthenticationFilter 전에 넣음
-        http.addFilterBefore(jwtExceptHandler(), JwtAuthenticationFilter.class); //예외 처리를 위해 두자.
 
-    }
-
-    @Bean
-    JwtExceptHandler jwtExceptHandler() {
-        JwtExceptHandler jwtExcept = new JwtExceptHandler();
-        return jwtExcept;
     }
 
     @Bean

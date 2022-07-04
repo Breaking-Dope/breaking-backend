@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -76,26 +77,18 @@ public class UserAPI {
 
     }
 
-//    @PutMapping("/profile/{userId}",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-//    public void updateProfile(
-//            @PathVariable(value = "userId") String userId,
-//            @RequestPart @Valid SignUpRequestDto signUpRequestDto,
-//            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception{
-//
-//
-//
-//    }
+  
 
-    @PostMapping(value = "/oauth2/sign-up",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<MessageResponseDto> signInConfirm(
             @RequestPart @Valid SignUpRequestDto signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
-        
-        String invalidateMessage = userService.invalidMessage(signUpRequest);
 
-        if (invalidateMessage != ""){
+        String invalidMessage = userService.invalidMessage(signUpRequest);
+
+        if (invalidMessage != ""){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(invalidateMessage));
+                    .body(new MessageResponseDto(invalidMessage));
         }
 
         String profileImgFileName = mediaService.getBasicProfileDir();
@@ -104,15 +97,12 @@ public class UserAPI {
             profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
         }
 
-        User user = new User();
-
-        user.signUp(
+        User user = new User(
                 profileImgFileName,
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
-                signUpRequest.getFirstName(),
-                signUpRequest.getLastName(),
+                signUpRequest.getRealName(),
                 signUpRequest.getStatusMsg(),
                 signUpRequest.getUsername(),
                 Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))

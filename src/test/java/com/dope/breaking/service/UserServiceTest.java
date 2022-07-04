@@ -63,18 +63,15 @@ class UserServiceTest {
 
         // Given
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
-                ("nickname","phoneNumber", "mwk300@nyu.edu","Minwu","Kim","msg","username", "PRess");
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","username", "PRess");
 
         // When
-        User user = new User();
-
-        user.signUp(
+        User user = new User(
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
-                signUpRequest.getFirstName(),
-                signUpRequest.getLastName(),
+                signUpRequest.getRealName(),
                 signUpRequest.getStatusMsg(),
                 signUpRequest.getUsername(),
                 Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))

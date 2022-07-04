@@ -21,8 +21,7 @@ class UserRepositoryTest {
     void findByNickname() {
 
         //Given
-        User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username", Role.USER);
+        User user = new User("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
 
         //When
         User savedUser = userService.save(user);
@@ -37,8 +36,7 @@ class UserRepositoryTest {
     void findByPhoneNumber() {
 
         //Given
-        User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username",Role.USER);
+        User user = new User("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
 
         //When
         User savedUser = userService.save(user);
@@ -53,8 +51,7 @@ class UserRepositoryTest {
     void findByEmail() {
 
         //Given
-        User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username",Role.USER);
+        User user = new User("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
 
         //When
         User savedUser = userService.save(user);

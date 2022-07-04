@@ -19,9 +19,7 @@ public class SignUpRequestDto {
     @NotNull
     private String email;
     @NotNull
-    private String firstName;
-    @NotNull
-    private String lastName;
+    private String realName;
     @NotNull
     private String username;
     @NotNull

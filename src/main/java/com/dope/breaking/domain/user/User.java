@@ -58,10 +58,7 @@ public class User {
         this.role = role;
     }
 
-
-    private String firstname;
-
-    private String lastname;
+    private String realName;
 
     private String username;
 
@@ -79,16 +76,15 @@ public class User {
 
     private String profileImgURL;
 
-    public void signUp
-            (String generatedImgURL, String nickname, String phoneNumber, String email,
-             String firstname, String lastname, String statusMsg, String username, Role role) {
+    @Builder
+    public User (String generatedImgURL, String nickname, String phoneNumber, String email,
+             String realName, String statusMsg, String username, Role role) {
 
         this.profileImgURL = generatedImgURL;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.email = email;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.realName = realName;
         this.statusMsg = statusMsg;
         this.username = username;
         this.balance = 0;

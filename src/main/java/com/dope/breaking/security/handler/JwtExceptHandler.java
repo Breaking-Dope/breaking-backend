@@ -1,9 +1,7 @@
-package com.dope.breaking.Security.Handler;
+package com.dope.breaking.security.handler;
 
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;

@@ -1,4 +1,4 @@
-package com.dope.breaking.Security.UserDetails;
+package com.dope.breaking.security.userDetails;
 
 import com.dope.breaking.domain.user.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 public class PrincipalDetails implements UserDetails {
 

@@ -1,6 +1,13 @@
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0"
+	}
+}
+
 plugins {
 	id 'org.springframework.boot' version '2.5.2'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 	id 'java'
 }
 
@@ -30,12 +37,30 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
-
-
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+    implementation 'commons-fileupload:commons-fileupload:1.4'
 	implementation 'commons-io:commons-io:2.11.0'
-	implementation 'commons-fileupload:commons-fileupload:1.4'
+}
 
 
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+	jpa = true
+	querydslSourcesDir = querydslDir
+}
+sourceSets {
+	main.java.srcDir querydslDir
+}
+compileQuerydsl{
+	options.annotationProcessorPath = configurations.querydsl
+}
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	querydsl.extendsFrom compileClasspath
 }
 
 tasks.named('test') {

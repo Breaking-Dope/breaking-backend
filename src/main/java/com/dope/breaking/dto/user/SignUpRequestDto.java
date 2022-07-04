@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class SignUpRequestDto {
 
-    private String profileImgURL;
     private String statusMsg;
     @NotNull
     private String nickname;
@@ -25,6 +24,8 @@ public class SignUpRequestDto {
     private String lastName;
     @NotNull
     private String username;
+    @NotNull
+    private String role;
 
 }
 

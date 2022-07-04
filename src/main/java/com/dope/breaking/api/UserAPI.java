@@ -6,6 +6,7 @@ import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -77,18 +78,18 @@ public class UserAPI {
 
     }
 
-  
-
-    @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<MessageResponseDto> signInConfirm(
-            @RequestPart @Valid SignUpRequestDto signUpRequest,
+            @RequestPart String signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
 
-        String invalidMessage = userService.invalidMessage(signUpRequest);
+        ObjectMapper mapper = new ObjectMapper();
+        SignUpRequestDto signUpRequestDto = mapper.readValue(signUpRequest,SignUpRequestDto.class);
+
+        String invalidMessage = userService.invalidMessage(signUpRequestDto);
 
         if (invalidMessage != ""){
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(invalidMessage));
+            return ResponseEntity.badRequest().body(new MessageResponseDto(invalidMessage));
         }
 
         String profileImgFileName = mediaService.getBasicProfileDir();
@@ -99,13 +100,13 @@ public class UserAPI {
 
         User user = new User(
                 profileImgFileName,
-                signUpRequest.getNickname(),
-                signUpRequest.getPhoneNumber(),
-                signUpRequest.getEmail(),
-                signUpRequest.getRealName(),
-                signUpRequest.getStatusMsg(),
-                signUpRequest.getUsername(),
-                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+                signUpRequestDto.getNickname(),
+                signUpRequestDto.getPhoneNumber(),
+                signUpRequestDto.getEmail(),
+                signUpRequestDto.getRealName(),
+                signUpRequestDto.getStatusMsg(),
+                signUpRequestDto.getUsername(),
+                Role.valueOf(signUpRequestDto.getRole().toUpperCase(Locale.ROOT))
         );
 
         userService.save(user);

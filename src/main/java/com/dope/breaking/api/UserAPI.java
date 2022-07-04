@@ -2,6 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.UserService;

@@ -36,6 +36,12 @@ public class MediaService {
 
     //Martin0o0 dir
     private final  String dirName = System.getProperty("user.dir") + "/files";
+    private final String basicProfileDir = "profile.png";
+
+    public String getBasicProfileDir() {
+        return basicProfileDir;
+    }
+
     public List<String> uploadMedias(List<MultipartFile> medias) throws Exception{
 
         List<String> fileNameList = new ArrayList<String>();

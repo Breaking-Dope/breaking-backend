@@ -82,7 +82,7 @@ public class UserAPI {
     @PostMapping(value = "/oauth2/sign-up",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<MessageResponseDto> signInConfirm(
             @RequestPart @Valid SignUpRequestDto signUpRequest,
-            @RequestPart List<MultipartFile> profileImg) throws Exception {
+            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
 
         if(!userService.isValidRole(signUpRequest.getRole())){
             return ResponseEntity.badRequest()
@@ -114,12 +114,16 @@ public class UserAPI {
                     .body(new MessageResponseDto(SignUpErrorType.NICKNAME_DUPLICATE.getMessage()));
         }
 
-        List<String> generatedFileNameList = mediaService.uploadMedias(profileImg);
+        String profileImgFileName = mediaService.getBasicProfileDir();
+
+        if (profileImg != null){
+            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
+        }
 
         User user = new User();
 
         user.signUp(
-                generatedFileNameList.get(0),
+                profileImgFileName,
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),

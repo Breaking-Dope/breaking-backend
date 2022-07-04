@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -31,8 +32,10 @@ public class MediaService {
     private final MediaRepository mediaRepository;
 
     //디렉토리는 추후 AWS내의 디렉토리로 변경
-    private final String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
+    //private final String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
 
+    //Martin0o0 dir
+    private final  String dirName = System.getProperty("user.dir") + "/files";
     public List<String> uploadMedias(List<MultipartFile> medias) throws Exception{
 
         List<String> fileNameList = new ArrayList<String>();
@@ -88,6 +91,7 @@ public class MediaService {
 
     }
 
+    @Transactional //혹여나, 실패 시 자동 롤백 하기 위해.
     public void createMediaEntities(List<String> fileNameList, Post post){
 
         for (String fileName : fileNameList) {

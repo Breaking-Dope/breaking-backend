@@ -102,7 +102,7 @@ public class Oauth2LoginController {
         JSONObject jsonObject = (JSONObject) jsonParser.parse(kakaoUserinfo.getBody());
         log.info(jsonObject.toJSONString());
         UserDto dto = new UserDto();
-        dto.setUsername(jsonObject.get("id").toString());
+        dto.setUsername(jsonObject.get("id").toString()+"k");
         String kakao_account = jsonObject.get("kakao_account").toString();
         JSONObject jsonObject1 = (JSONObject) jsonParser.parse(kakao_account);
         log.info(jsonObject1.toJSONString());
@@ -170,7 +170,7 @@ public class Oauth2LoginController {
         JSONObject jsonObject = (JSONObject) jsonParser.parse(GoogleUserinfo.getBody());
         log.info(jsonObject.toJSONString());
         UserDto dto = new UserDto();
-        dto.setUsername(jsonObject.get("sub").toString());
+        dto.setUsername(jsonObject.get("sub").toString()+"g");
         try {
             dto.setEmail(jsonObject.get("email").toString());
         } catch (Exception e) {

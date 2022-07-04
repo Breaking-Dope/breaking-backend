@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SearchFeedResponseDTO {
+public class SearchFeedResponseDto {
     private List<Post> postList;
     private int currentPage;
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class SearchFeedRequestDTO {
+public class SearchFeedRequestDto {
 
     private String sort;
 

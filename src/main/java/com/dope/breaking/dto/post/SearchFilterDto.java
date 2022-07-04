@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
-public class SearchFilterDTO {
+public class SearchFilterDto {
 
     private final SortFilter sort;
 

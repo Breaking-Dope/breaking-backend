@@ -1,6 +1,8 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.user.SignUpErrorType;
+import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,10 +53,37 @@ public class UserService {
 
         String upperCasedRole = role.toUpperCase();
 
-        if (upperCasedRole.equals("PRESS") ||  upperCasedRole.equals("USER")){
-            return true;
+        return upperCasedRole.equals("PRESS") || upperCasedRole.equals("USER");
+
+    }
+
+    public String invalidMessage (SignUpRequestDto signUpRequest){
+
+        if(!isValidRole(signUpRequest.getRole())){
+            return SignUpErrorType.INVALID_ROLE.getMessage();
         }
-        return false;
+
+        if(!isValidEmailFormat(signUpRequest.getEmail())){
+            return SignUpErrorType.INVALID_EMAIL.getMessage();
+        }
+
+        if(!isValidPhoneNumberFormat(signUpRequest.getPhoneNumber())){
+            return SignUpErrorType.INVALID_PHONE_NUMBER.getMessage();
+        }
+
+        if (findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
+            return SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage();
+        }
+
+        if (findByEmail(signUpRequest.getEmail()).isPresent()) {
+            SignUpErrorType.EMAIL_DUPLICATE.getMessage();
+        }
+
+        if (findByNickname(signUpRequest.getNickname()).isPresent()){
+            return SignUpErrorType.NICKNAME_DUPLICATE.getMessage();
+        }
+
+        return "";
 
     }
 

@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -79,39 +76,26 @@ public class UserAPI {
 
     }
 
+//    @PutMapping("/profile/{userId}",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+//    public void updateProfile(
+//            @PathVariable(value = "userId") String userId,
+//            @RequestPart @Valid SignUpRequestDto signUpRequestDto,
+//            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception{
+//
+//
+//
+//    }
+
     @PostMapping(value = "/oauth2/sign-up",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<MessageResponseDto> signInConfirm(
             @RequestPart @Valid SignUpRequestDto signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
+        
+        String invalidateMessage = userService.invalidMessage(signUpRequest);
 
-        if(!userService.isValidRole(signUpRequest.getRole())){
+        if (invalidateMessage != ""){
             return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpErrorType.INVALID_ROLE.getMessage()));
-        }
-
-        if(!userService.isValidEmailFormat(signUpRequest.getEmail())){
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
-        }
-
-        if(!userService.isValidPhoneNumberFormat(signUpRequest.getPhoneNumber())){
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpErrorType.INVALID_PHONE_NUMBER.getMessage()));
-        }
-
-        if (userService.findByPhoneNumber(signUpRequest.getPhoneNumber()).isPresent()){
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage()));
-        }
-
-        if (userService.findByEmail(signUpRequest.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpErrorType.EMAIL_DUPLICATE.getMessage()));
-        }
-
-        if (userService.findByNickname(signUpRequest.getNickname()).isPresent()){
-            return ResponseEntity.badRequest()
-                    .body(new MessageResponseDto(SignUpErrorType.NICKNAME_DUPLICATE.getMessage()));
+                    .body(new MessageResponseDto(invalidateMessage));
         }
 
         String profileImgFileName = mediaService.getBasicProfileDir();

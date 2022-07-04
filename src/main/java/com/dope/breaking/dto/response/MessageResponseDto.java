@@ -1,4 +1,4 @@
-package com.dope.breaking.dto.user;
+package com.dope.breaking.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

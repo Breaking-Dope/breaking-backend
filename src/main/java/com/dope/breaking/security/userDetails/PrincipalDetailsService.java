@@ -1,4 +1,4 @@
-package com.dope.breaking.Security.UserDetails;
+package com.dope.breaking.security.userDetails;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.UserRepository;

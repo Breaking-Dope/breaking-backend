@@ -1,6 +1,6 @@
-package com.dope.breaking.Security.Jwt;
+package com.dope.breaking.security.jwt;
 
-import com.dope.breaking.Security.UserDetails.PrincipalDetailsService;
+import com.dope.breaking.security.userDetails.PrincipalDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;

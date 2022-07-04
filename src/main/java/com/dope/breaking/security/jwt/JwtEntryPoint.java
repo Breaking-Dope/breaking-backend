@@ -1,4 +1,4 @@
-package com.dope.breaking.Security.Jwt;
+package com.dope.breaking.security.jwt;
 
 import org.json.simple.JSONObject;
 import org.springframework.security.core.AuthenticationException;

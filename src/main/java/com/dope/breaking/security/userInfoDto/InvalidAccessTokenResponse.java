@@ -1,9 +1,8 @@
-package com.dope.breaking.Security.UserInfoDto;
+package com.dope.breaking.security.userInfoDto;
 
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter

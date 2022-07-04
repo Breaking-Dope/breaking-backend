@@ -1,4 +1,4 @@
-package com.dope.breaking.Security.UserInfoDto;
+package com.dope.breaking.security.userInfoDto;
 
 
 import lombok.*;

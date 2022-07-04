@@ -1,10 +1,9 @@
-package com.dope.breaking.Security.SecurityController;
+package com.dope.breaking.security.controller;
 
 
-import ch.qos.logback.core.encoder.EchoEncoder;
-import com.dope.breaking.Security.Jwt.JwtTokenProvider;
-import com.dope.breaking.Security.UserInfoDto.InvalidAccessTokenResponse;
-import com.dope.breaking.Security.UserInfoDto.UserDto;
+import com.dope.breaking.security.jwt.JwtTokenProvider;
+import com.dope.breaking.security.userInfoDto.InvalidAccessTokenResponse;
+import com.dope.breaking.security.userInfoDto.UserDto;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,7 +14,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;

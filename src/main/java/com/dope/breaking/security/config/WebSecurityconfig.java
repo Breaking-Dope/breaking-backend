@@ -1,11 +1,10 @@
-package com.dope.breaking.Security.config;
+package com.dope.breaking.security.config;
 
-import com.dope.breaking.Security.Handler.JwtExceptHandler;
-import com.dope.breaking.Security.Jwt.JwtAuthenticationFilter;
-import com.dope.breaking.Security.Jwt.JwtEntryPoint;
-import com.dope.breaking.Security.Jwt.JwtTokenProvider;
-import com.dope.breaking.Security.UserDetails.PrincipalDetailsService;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.security.handler.JwtExceptHandler;
+import com.dope.breaking.security.jwt.JwtAuthenticationFilter;
+import com.dope.breaking.security.jwt.JwtEntryPoint;
+import com.dope.breaking.security.jwt.JwtTokenProvider;
+import com.dope.breaking.security.userDetails.PrincipalDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -37,13 +36,13 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
     private final PasswordEncoder passwordEncoder;
 
 
-    @Bean
-    public AuthenticationManager authenticationManager() {//AuthenticationManager 등록
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();//Form 형식의 DaoAuthenticationProvider 사용 -> 여기서 아이디와 password를 대조하여 비교함.
-        provider.setPasswordEncoder(passwordEncoder);//PasswordEncoder로는 BCry를 사용할 것임.
-        provider.setUserDetailsService(principalDetailsService); //UserDtailsService는 예전에 작성한 것으로. 유저 인증절차는 이친구에게 넘김.
-        return new ProviderManager(provider);
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManager() {//AuthenticationManager 등록
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();//Form 형식의 DaoAuthenticationProvider 사용 -> 여기서 아이디와 password를 대조하여 비교함.
+//        provider.setPasswordEncoder(passwordEncoder);//PasswordEncoder로는 BCry를 사용할 것임.
+//        provider.setUserDetailsService(principalDetailsService); //UserDtailsService는 예전에 작성한 것으로. 유저 인증절차는 이친구에게 넘김.
+//        return new ProviderManager(provider);
+//    }
 
 
     @Override

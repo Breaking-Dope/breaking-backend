@@ -2,22 +2,28 @@ package com.dope.breaking.domain.post;
 
 
 
+import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.user.User;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@ToString
 @Entity
 @Getter
-public class Post {
+@NoArgsConstructor
+public class Post extends BaseTimeEntity {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column (name="POST_ID")
     private Long id;
 
@@ -56,5 +62,23 @@ public class Post {
     private boolean isHidden;
 
     private LocalDateTime eventTime;
+
+    @Builder
+    public Post(String title, String content, PostType postType, Location location, int price, boolean isAnonymous, LocalDateTime eventTime){
+        this.title = title;
+        this.content = content;
+        this.postType = postType;
+        this.location = location;
+        this.price = price;
+        this.isAnonymous = isAnonymous;
+        this.eventTime = eventTime;
+        this.isSold = false;
+        this.isHidden = false;
+    }
+
+    public void setUser(User user){
+        this.user = user;
+    }
+
 
 }

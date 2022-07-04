@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 public class Media {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="MEDIA_ID")
     private Long id;
 

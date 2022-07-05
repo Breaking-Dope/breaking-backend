@@ -57,21 +57,20 @@ public class PostAPI {
     }
 
 
-    @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Forbidden 반환.
-    @PostMapping(value = "/post", consumes = {"multipart/form-data"})
+    @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Fobbiden 반환.
+    @PostMapping(value = "/post")
     public ResponseEntity<?> PostCreate(Principal principal,
-                                        @RequestPart(value = "mediaList") List<MultipartFile> files, @RequestPart(value = "data") @Valid PostCreateRequestDto postCreateRequestDto) {
-
-        Optional<String> cntusername = Optional.ofNullable(principal.getName());
+                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") @Valid PostCreateRequestDto postCreateRequestDto) {
         Long postid;
-        if (cntusername.isEmpty()) {
+        if (principal ==  null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
         }//유저 정보 없으면 일치하지 않다고 반환하기.
-        if (!userService.existByUsername(cntusername.get())) {
+        String cntusername = principal.getName();
+        if (!userService.existByUsername(cntusername)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }
         try {
-            postid = postService.create(cntusername.get(), postCreateRequestDto, files);
+            postid = postService.create(cntusername, postCreateRequestDto, files);
 
         } catch (Exception e) {
             log.info("게시글 등록에 실패함");
@@ -81,6 +80,7 @@ public class PostAPI {
         result.put("postId", postid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class) //단일 컨트롤러에만 적용함.

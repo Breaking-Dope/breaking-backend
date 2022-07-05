@@ -38,4 +38,6 @@ public class PostCreateRequestDto {
 
 
     private List<String> hashtagList;
+
+    private int thumbnailIndex;
 }

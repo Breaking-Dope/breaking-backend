@@ -15,8 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
-import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -35,7 +34,7 @@ public class UserAPI {
             return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.INVALID_PHONE_NUMBER.getMessage()));
         }
 
-        Optional<User> user =  userService.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
+        Optional<User> user = userService.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
 
         if (user.isPresent()){
             return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage()));
@@ -98,7 +97,66 @@ public class UserAPI {
             profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
         }
 
-        User user = new User(
+        User user = new User();
+        user.setRequestFields(
+                profileImgFileName,
+                signUpRequestDto.getNickname(),
+                signUpRequestDto.getPhoneNumber(),
+                signUpRequestDto.getEmail(),
+                signUpRequestDto.getRealName(),
+                signUpRequestDto.getStatusMsg(),
+                signUpRequestDto.getUsername(),
+                Role.valueOf(signUpRequestDto.getRole().toUpperCase(Locale.ROOT))
+        );
+
+        userService.save(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping(value = "/profile", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<MessageResponseDto> profileUpdateConfirm(
+            Principal principal,
+            @RequestPart String signUpRequest,
+            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
+
+        Optional<String> cntUsername = Optional.ofNullable(principal.getName());
+
+        if (cntUsername.isEmpty()) {
+            return ResponseEntity.status(401).body(new MessageResponseDto(SignUpErrorType.NOT_FOUND_USER.getMessage()));
+        }
+
+        if (!userService.existByUsername(cntUsername.get())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(SignUpErrorType.NOT_REGISTERED_USER.getMessage()));
+        }
+
+        User user = userService.findByUsername(cntUsername.get()).get();
+
+        ObjectMapper mapper = new ObjectMapper();
+        SignUpRequestDto signUpRequestDto = mapper.readValue(signUpRequest,SignUpRequestDto.class);
+
+        String invalidMessage = userService.invalidMessage(signUpRequestDto);
+
+        if (invalidMessage != ""){
+            if(user.getPhoneNumber() != signUpRequestDto.getPhoneNumber()
+                && user.getNickname() != signUpRequestDto.getNickname()
+                && user.getEmail() != signUpRequestDto.getEmail()){
+
+                return ResponseEntity.badRequest().body(new MessageResponseDto(invalidMessage));
+
+            }
+
+        }
+
+        String profileImgFileName = mediaService.getBasicProfileDir();
+
+        if (profileImg != null){
+            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
+        }
+
+        user.setRequestFields(
                 profileImgFileName,
                 signUpRequestDto.getNickname(),
                 signUpRequestDto.getPhoneNumber(),

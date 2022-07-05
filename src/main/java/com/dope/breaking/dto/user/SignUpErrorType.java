@@ -7,8 +7,9 @@ public enum SignUpErrorType {
     INVALID_PHONE_NUMBER("invalid phone number"),
     EMAIL_DUPLICATE("used email"),
     PHONE_NUMBER_DUPLICATE("used phone number"),
-    NICKNAME_DUPLICATE("used nickname");
-
+    NICKNAME_DUPLICATE("used nickname"),
+    NOT_FOUND_USER("not found user"),
+    NOT_REGISTERED_USER("not registered user");
 
     private String message;
 

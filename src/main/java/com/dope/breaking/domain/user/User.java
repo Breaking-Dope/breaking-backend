@@ -76,8 +76,7 @@ public class User {
 
     private String profileImgURL;
 
-    @Builder
-    public User (String generatedImgURL, String nickname, String phoneNumber, String email,
+    public void setRequestFields (String generatedImgURL, String nickname, String phoneNumber, String email,
              String realName, String statusMsg, String username, Role role) {
 
         this.profileImgURL = generatedImgURL;

@@ -74,10 +74,10 @@ public class PostAPI {
         Optional<String> cntusername = Optional.ofNullable(principal.getName());
         Long postid;
         if (cntusername.isEmpty()) {
-            return ResponseEntity.status(401).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
         }//유저 정보 없으면 일치하지 않다고 반환하기.
         if (!userService.existByUsername(cntusername.get())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }
         try {
             postid = postService.create(cntusername.get(), postCreateRequestDto, files);

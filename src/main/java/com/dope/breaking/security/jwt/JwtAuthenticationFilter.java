@@ -52,16 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
         else if(accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == false){
             try {
                 String username = jwtTokenProvider.getUsername(accesstoken); //해독 과정 중 에러가 발생함.
-            } catch (SecurityException | MalformedJwtException e) {
-                request.setAttribute("exception", "인증이 유효하지 않음");
+            } catch (SecurityException | MalformedJwtException | IllegalArgumentException e) {
+                request.setAttribute("exception", "Invalid Signature");
             } catch (ExpiredJwtException e) {
-                request.setAttribute("exception", "만료됨");
-            } catch (UnsupportedJwtException e) {
-                request.setAttribute("exception", "jwt에서 지원하지 않음");
-            } catch (IllegalArgumentException e) {
-                request.setAttribute("exception", "유효하지 않는 토큰");
+                request.setAttribute("exception", "Expiration date");
             } catch (Exception e) {
-                request.setAttribute("exception", "기타 오류");
+                request.setAttribute("exception", "Other errors related to jwt");
             }
         }
         filterChain.doFilter(request, response);

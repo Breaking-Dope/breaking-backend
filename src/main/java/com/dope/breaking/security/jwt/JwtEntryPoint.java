@@ -18,6 +18,13 @@ public class JwtEntryPoint implements AuthenticationEntryPoint {
 
         if (exception != null) {
             setResponse(response, exception);
+        }else{
+            JSONObject responseJson = new JSONObject();
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            responseJson.put("message", "jwt token is required");
+
+            response.getWriter().print(responseJson);
         }
     }
 

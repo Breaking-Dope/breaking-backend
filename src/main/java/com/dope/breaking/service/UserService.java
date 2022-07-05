@@ -3,11 +3,13 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.SignUpErrorType;
 import com.dope.breaking.dto.user.SignUpRequestDto;
+import com.dope.breaking.dto.user.UpdateRequestDto;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,10 +78,43 @@ public class UserService {
         }
 
         if (findByEmail(signUpRequest.getEmail()).isPresent()) {
-            SignUpErrorType.EMAIL_DUPLICATE.getMessage();
+            return SignUpErrorType.EMAIL_DUPLICATE.getMessage();
         }
 
         if (findByNickname(signUpRequest.getNickname()).isPresent()){
+            return SignUpErrorType.NICKNAME_DUPLICATE.getMessage();
+        }
+
+        return "";
+
+    }
+
+    public String invalidMessage (UpdateRequestDto updateRequest, User user){
+
+        if(!isValidRole(updateRequest.getRole())){
+            return SignUpErrorType.INVALID_ROLE.getMessage();
+        }
+
+        if(!isValidEmailFormat(updateRequest.getEmail())){
+            return SignUpErrorType.INVALID_EMAIL.getMessage();
+        }
+
+        if(!isValidPhoneNumberFormat(updateRequest.getPhoneNumber()) ){
+            return SignUpErrorType.INVALID_PHONE_NUMBER.getMessage();
+        }
+
+        if (findByPhoneNumber(updateRequest.getPhoneNumber()).isPresent()
+                && !Objects.equals(user.getPhoneNumber(), updateRequest.getPhoneNumber())) {
+            return SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage();
+        }
+
+        if (findByEmail(updateRequest.getEmail()).isPresent()
+                && !Objects.equals(user.getEmail(), updateRequest.getEmail())) {
+            return SignUpErrorType.EMAIL_DUPLICATE.getMessage();
+        }
+
+        if (findByNickname(updateRequest.getNickname()).isPresent()
+                && !Objects.equals(user.getNickname(), updateRequest.getNickname())){
             return SignUpErrorType.NICKNAME_DUPLICATE.getMessage();
         }
 
@@ -110,5 +145,7 @@ public class UserService {
     public Boolean existByUsername(String username){
         return userRepository.existsByUsername(username);
     }
+
+    public void deleteUser(User user){userRepository.delete(user);}
 
 }

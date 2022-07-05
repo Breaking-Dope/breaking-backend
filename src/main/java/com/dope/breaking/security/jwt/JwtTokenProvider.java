@@ -58,7 +58,7 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
             return true;
-        } catch (SignatureException e) {
+        }  catch (SignatureException  | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
@@ -66,6 +66,8 @@ public class JwtTokenProvider {
             log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
+        }catch(Exception e){
+            log.info("JWT에 알 수 없는 문제가 발생하였습니다");
         }
         return false;
     }

@@ -32,15 +32,17 @@ public class MediaService {
     private final MediaRepository mediaRepository;
 
     //디렉토리는 추후 AWS내의 디렉토리로 변경
-    //private final String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
+    private final String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
 
     //Martin0o0 dir
-    private final  String dirName = System.getProperty("user.dir") + "/files";
+    //private final String dirName = System.getProperty("user.dir") + "/files";
     private final String basicProfileDir = "profile.png";
 
     public String getBasicProfileDir() {
         return basicProfileDir;
     }
+
+    public String getDirName(){return dirName;}
 
     public List<String> uploadMedias(List<MultipartFile> medias) throws Exception{
 

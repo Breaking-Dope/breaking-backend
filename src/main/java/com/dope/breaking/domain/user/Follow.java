@@ -8,6 +8,7 @@ import javax.persistence.*;
 
 @Entity
 public class Follow {
+    
     @Id
     @GeneratedValue
     @Column(name="FOLLOW_ID")
@@ -20,5 +21,13 @@ public class Follow {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "FOLLOWING_USER_ID")
     private User following;
+
+    public void updateUser(User user){
+        this.user = user;
+    }
+
+    public void updateFollowing(User following){
+        this.following = following;
+    }
 
 }

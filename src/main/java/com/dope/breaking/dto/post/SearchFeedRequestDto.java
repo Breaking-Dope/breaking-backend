@@ -1,19 +1,24 @@
 package com.dope.breaking.dto.post;
 
+import com.dope.breaking.service.SortStrategy;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
 public class SearchFeedRequestDto {
 
-    private String sort;
+    String searchKeyword;
+
+    SortStrategy sortStrategy;
 
     private Boolean soldPost;
 
-    private LocalDateTime dateFrom;
+    private LocalDate dateFrom;
 
-    private LocalDateTime dateTo;
+    private LocalDate dateTo;
 
-    private int forLastMin;
+    private Integer forLastMin;
+
 }

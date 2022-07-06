@@ -25,7 +25,7 @@ public class User {
     private List<Post> postList = new ArrayList<Post>();
 
     //유저가 팔로잉하는 유저리스트
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL)
     private List<Follow> followingList = new ArrayList<Follow>();
 
     public void addFollowing(Follow follow, User followed){
@@ -35,7 +35,7 @@ public class User {
     }
 
     //유저를 팔로우하는 유저리스트
-    @OneToMany(mappedBy = "following")
+    @OneToMany(mappedBy = "followed")
     private List<Follow> followerList = new ArrayList<Follow>();
 
     //유저가 차단한 리스트

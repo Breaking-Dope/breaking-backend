@@ -2,32 +2,34 @@ package com.dope.breaking.domain.user;
 
 
 
-import com.dope.breaking.domain.user.User;
+
+import lombok.Getter;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
 public class Follow {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="FOLLOW_ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "USER_ID")
-    private User user;
+    private User following;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "FOLLOWING_USER_ID")
-    private User following;
+    private User followed;
 
     public void updateFollowing(User user){
-        this.user = user;
+        this.following = user;
     }
 
     public void updateFollowed(User following){
-        this.following = following;
+        this.followed = following;
     }
 
 }

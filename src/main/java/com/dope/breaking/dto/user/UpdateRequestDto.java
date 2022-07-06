@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignUpRequestDto {
+public class UpdateRequestDto {
 
     private String statusMsg;
     @NotNull
@@ -20,8 +20,6 @@ public class SignUpRequestDto {
     private String email;
     @NotNull
     private String realName;
-    @NotNull
-    private String username;
     @NotNull
     private String role;
 

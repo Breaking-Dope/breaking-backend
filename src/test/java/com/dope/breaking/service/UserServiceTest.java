@@ -63,18 +63,16 @@ class UserServiceTest {
 
         // Given
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
-                ("nickname","phoneNumber", "mwk300@nyu.edu","Minwu","Kim","msg","username", "PRess");
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","username", "PRess");
 
         // When
         User user = new User();
-
-        user.signUp(
+        user.setRequestFields(
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
-                signUpRequest.getFirstName(),
-                signUpRequest.getLastName(),
+                signUpRequest.getRealName(),
                 signUpRequest.getStatusMsg(),
                 signUpRequest.getUsername(),
                 Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
@@ -86,6 +84,49 @@ class UserServiceTest {
         // Then
         User foundUser = userService.findById(savedUser.getId()).get();
         Assertions.assertThat(foundUser).isEqualTo(user);
+
+    }
+
+    @Test
+    void updateUser(){
+        // Given
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","username", "PRess");
+
+        User user = new User();
+        user.setRequestFields(
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+
+        userService.save(user);
+
+        //When
+        User updatedUser = userService.findById(1L).get();
+        updatedUser.setRequestFields(
+                "anyURL",
+                "newNickname",
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+
+        userService.save(updatedUser);
+
+        //Then
+        User foundUser = userService.findById(1L).get();
+
+        Assertions.assertThat(foundUser.getId()).isEqualTo(1L);
+        Assertions.assertThat(foundUser.getNickname()).isEqualTo("newNickname");
 
     }
 

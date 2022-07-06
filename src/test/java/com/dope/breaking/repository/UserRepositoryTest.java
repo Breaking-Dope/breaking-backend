@@ -22,7 +22,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username", Role.USER);
+        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
 
         //When
         User savedUser = userService.save(user);
@@ -38,7 +38,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username",Role.USER);
+        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
 
         //When
         User savedUser = userService.save(user);
@@ -54,7 +54,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.signUp("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu", "Kim","msg","username",Role.USER);
+        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
 
         //When
         User savedUser = userService.save(user);

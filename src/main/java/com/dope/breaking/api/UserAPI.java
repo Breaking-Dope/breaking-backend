@@ -106,8 +106,6 @@ public class UserAPI {
             return ResponseEntity.badRequest().body(nullFieldMap);
         }
 
-        System.out.println("=========");
-
         String invalidMessage = userService.invalidMessage(signUpRequestDto);
 
         if (invalidMessage != ""){

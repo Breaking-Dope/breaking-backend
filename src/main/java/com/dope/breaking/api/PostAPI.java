@@ -1,17 +1,16 @@
 package com.dope.breaking.api;
 
-
-import com.dope.breaking.dto.post.PostCreateRequestDto;
-import com.dope.breaking.dto.post.PostResType;
-import com.dope.breaking.dto.post.PostResponse;
-import com.dope.breaking.dto.post.SearchFeedResponseDto;
+import com.dope.breaking.dto.post.*;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.SearchFeedService;
-import com.dope.breaking.service.SortFilter;
+import com.dope.breaking.service.SortStrategy;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,29 +37,22 @@ public class PostAPI {
 
     private final PostService postService;
 
-
     @GetMapping("/post/feed")
-    public ResponseEntity<SearchFeedResponseDto> searchFeed(
-            @RequestParam(value="page-size", required = false) int pageSize,
-            @RequestParam(value="page-number", required = false) int pageNumber,
+    public ResponseEntity<Page<FeedResultPostDto>> searchFeed(
+            @RequestParam(value="page") int page,
+            @RequestParam(value="size") int size,
             @RequestParam(value="search", required = false) String searchKeyword,
-            @RequestParam(value="sort", required = false) String sort,
+            @RequestParam(value="sort-strategy", required = false) String sortStrategy,
             @RequestParam(value="sold-post", required = false) Boolean soldPost,
             @RequestParam(value="date-from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
-            @RequestParam(value="date-to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo){
+            @RequestParam(value="date-to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo,
+            @RequestParam(value="for-last-min", required = false) Integer forLastMin) {
 
-        SortFilter sortFilter = SortFilter.findMatchedEnum(sort);
+        SearchFeedRequestDto searchFeedRequestDto = new SearchFeedRequestDto(searchKeyword, SortStrategy.findMatchedEnum(sortStrategy),
+                soldPost, dateFrom, dateTo, forLastMin);
 
-        searchFeedService.searchFeed(pageSize, pageNumber);
-        if(sortFilter == null && searchKeyword == null && soldPost == null && dateFrom == null && dateTo == null) {
-            // 기본 조회
-            searchFeedService.searchFeed(pageSize, pageNumber);
-        } else if(sortFilter != null && searchKeyword == null && soldPost == null && dateFrom == null && dateTo == null) {
-            // 정렬 필터 조회
-            searchFeedService.searchFeed(pageSize, pageNumber, sortFilter);
-        }
-
-        return ResponseEntity.ok().body(new SearchFeedResponseDto());
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable));
 
     }
 
@@ -69,7 +61,6 @@ public class PostAPI {
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> PostCreate(Principal principal,
                                         @RequestPart(value = "mediaList") List<MultipartFile> files, @RequestPart(value = "data") @Valid PostCreateRequestDto postCreateRequestDto) {
-
 
         Optional<String> cntusername = Optional.ofNullable(principal.getName());
         Long postid;

@@ -2,6 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.service.MediaService;
@@ -144,15 +145,13 @@ public class UserAPI {
             @RequestPart String updateRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
 
+
         // 1. check the username (not_found / not registered)
-        Optional<String> cntUsername = Optional.ofNullable(principal.getName());
-
-        if (cntUsername.isEmpty()) {
-            return ResponseEntity.status(401).body(new MessageResponseDto(SignUpErrorType.NOT_FOUND_USER.getMessage()));
-        }
-
-        if (!userService.existByUsername(cntUsername.get())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(SignUpErrorType.NOT_REGISTERED_USER.getMessage()));
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
+        }//유저 정보 없으면 일치하지 않다고 반환하기.
+        if (!userService.existByUsername(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }
 
         // 2. create UpdateRequestDto with ObjectMapper (AND validation check)
@@ -174,7 +173,7 @@ public class UserAPI {
         }
 
         // 3. find the user by username.
-        User user = userService.findByUsername(cntUsername.get()).get();
+        User user = userService.findByUsername(principal.getName()).get();
 
         // 4. validation (email, nickname, and phone number)
         String invalidMessage = userService.invalidMessage(updateRequestDto,user);
@@ -218,7 +217,7 @@ public class UserAPI {
                 updateRequestDto.getEmail(),
                 updateRequestDto.getRealName(),
                 updateRequestDto.getStatusMsg(),
-                cntUsername.get(),
+                principal.getName(),
                 Role.valueOf(updateRequestDto.getRole().toUpperCase(Locale.ROOT))
         );
 

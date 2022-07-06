@@ -28,6 +28,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Follow> followingList = new ArrayList<Follow>();
 
+    public void addFollowing(Follow follow){
+        followingList.add(follow);
+        follow.updateUser(this);
+    }
+
     //유저를 팔로우하는 유저리스트
     @OneToMany(mappedBy = "following")
     private List<Follow> followerList = new ArrayList<Follow>();

@@ -1,5 +1,6 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.user.Follow;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.SignUpRequestDto;
@@ -128,6 +129,24 @@ class UserServiceTest {
         Assertions.assertThat(foundUser.getId()).isEqualTo(1L);
         Assertions.assertThat(foundUser.getNickname()).isEqualTo("newNickname");
 
+    }
+
+    @Test
+    public void createFollow(){
+
+        //Given
+        User followingUser = new User();
+        User followedUser = new User();
+
+        //When
+        Follow follow = new Follow();
+        followingUser.addFollowing(follow, followedUser);
+
+        userService.save(followingUser);
+
+        //Then
+        Assertions.assertThat(follow.getFollowing()).isEqualTo(followingUser);
+        Assertions.assertThat(follow.getFollowed()).isEqualTo(followedUser);
     }
 
 }

@@ -30,7 +30,7 @@ public class User {
 
     public void addFollowing(Follow follow){
         followingList.add(follow);
-        follow.updateUser(this);
+        follow.updateFollowing(this);
     }
 
     //유저를 팔로우하는 유저리스트

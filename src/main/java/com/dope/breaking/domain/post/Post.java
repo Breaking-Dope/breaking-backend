@@ -88,4 +88,8 @@ public class Post extends BaseTimeEntity {
         this.user = user;
     }
 
+    public void setThumbnailImgURL(String thumbnailURL){
+        this.thumbnailImgURL = thumbnailURL;
+    }
+
 }

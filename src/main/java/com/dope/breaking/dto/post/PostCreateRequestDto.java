@@ -28,7 +28,7 @@ public class PostCreateRequestDto {
 
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.SCALAR, pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventTime;
 
 
@@ -38,4 +38,6 @@ public class PostCreateRequestDto {
 
 
     private List<String> hashtagList;
+
+    private int thumbnailIndex;
 }

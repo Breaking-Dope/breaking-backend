@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,8 +26,8 @@ public class PostService {
 
 
     @Transactional
-    public Long create(String username, PostCreateRequestDto postCreateRequestDto, List<MultipartFile> files) {
-        Long postid = null; // null로 초기
+    public Long create(String username, PostCreateRequestDto postCreateRequestDto, List<MultipartFile> files) throws Exception {
+        Long postid = null; // null로 초기화
 
         PostType postType = null;
         if (PostType.EXCLUSIVE.getTitle().equals(postCreateRequestDto.getPostType())) {
@@ -60,16 +59,20 @@ public class PostService {
             throw e;
         }
 
-        List<String> filename = new LinkedList<>();
+        Map<String, List<String>> map = new LinkedHashMap<>();
         if (!files.isEmpty() && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
             try {
-                filename = mediaService.uploadMedias(files);
+                map = mediaService.uploadMediaAndThumbnail(files, postCreateRequestDto.getThumbnailIndex());
+                log.info(files.get(postCreateRequestDto.getThumbnailIndex()).getOriginalFilename());
 
             } catch (Exception e) {
                 log.info("파일이 정상적으로 처리되지 않음");
                 log.info(e.toString());
+                throw e;
             }
-            mediaService.createMediaEntities(filename, post);
+            log.info(map.get("mediaList").toString());
+            mediaService.createMediaEntities(map.get("mediaList"), post);
+            post.setThumbnailImgURL(map.get("thumbnail").get(0).toString());
         }
 
 

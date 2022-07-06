@@ -71,7 +71,7 @@ public class PostAPI {
     }
 
 
-    @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Fobbiden 반환.
+    @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Forbidden 반환.
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> PostCreate(Principal principal,
                                         @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentdata) throws JsonProcessingException {

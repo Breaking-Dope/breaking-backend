@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Entity
 public class Follow {
-    
+
     @Id
     @GeneratedValue
     @Column(name="FOLLOW_ID")

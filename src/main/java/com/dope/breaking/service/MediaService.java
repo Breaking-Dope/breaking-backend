@@ -8,21 +8,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnailator;
 import org.jcodec.api.FrameGrab;
+
 import org.jcodec.common.model.Picture;
+
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.jcodec.scale.AWTUtil;
+
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,9 +100,7 @@ public class MediaService {
         Map<String, List<String>> mediaList = new LinkedHashMap<>();
 
         try {
-
             File folder = new File(dirName);
-
             if (!folder.exists()) {
                 folder.mkdirs();
             }
@@ -108,12 +109,17 @@ public class MediaService {
 
                 String fileName = thumbnail.get(i).getOriginalFilename();
                 String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                String generatedFileName = UUID.randomUUID().toString() + "." + extension;
-
+                List<String> videoExtension = Arrays.asList("mp4", "mov", "mpg", "mpeg", "gif", "rm", "vob");
+                String generatedFileName = new String();
+                if (!videoExtension.contains(extension)) {
+                    generatedFileName = UUID.randomUUID().toString() + "." + extension;
+                } else {
+                    generatedFileName = UUID.randomUUID().toString() + ".mp4";
+                }
                 list.add(generatedFileName);
-
                 File destination = new File(dirName + File.separator + generatedFileName);
                 thumbnail.get(i).transferTo(destination);
+
                 log.info(Long.toString(index));
                 if (index == i) {
                     File thumfolder = new File(thumName);
@@ -122,7 +128,6 @@ public class MediaService {
                         thumfolder.mkdirs();
                     }
                     String generatedThumFileName = "s_" + UUID.randomUUID().toString() + "." + extension;
-                    List<String> videoExtension = Arrays.asList("mp4", "mov", "mpg", "mpeg", "gif", "rm", "vob");
                     if (!videoExtension.contains(extension)) {
                         File thumdestination = new File(thumName + File.separator + generatedThumFileName);
                         mediaList.put("thumbnail", List.of(generatedThumFileName));
@@ -130,7 +135,6 @@ public class MediaService {
                     } else {
                         Picture frame = FrameGrab.getFrameFromFile(destination, 0);
                         BufferedImage img = AWTUtil.toBufferedImage(frame);
-                        img = AWTUtil.rotate90ToLeft(img);
                         generatedThumFileName = "s_" + UUID.randomUUID().toString() + ".png";
                         mediaList.put("thumbnail", Arrays.asList(generatedThumFileName));
                         File thumdestination = new File(thumName + File.separator + generatedThumFileName);
@@ -138,8 +142,6 @@ public class MediaService {
                         Thumbnailator.createThumbnail(thumdestination, thumdestination, 500, 500);
                     }
                 }
-
-
             }
             mediaList.put("mediaList", list);
 
@@ -148,7 +150,6 @@ public class MediaService {
             log.error("error: " + e.getMessage());
 
         } finally {
-
 
             return mediaList;
 
@@ -174,6 +175,7 @@ public class MediaService {
         }
 
     }
+
 
     @Transactional //혹여나, 실패 시 자동 롤백 하기 위해.
     public void createMediaEntities(List<String> fileNameList, Post post) {

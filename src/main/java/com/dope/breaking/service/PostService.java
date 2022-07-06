@@ -8,8 +8,6 @@ import com.dope.breaking.dto.post.PostCreateRequestDto;
 import com.dope.breaking.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,7 +60,6 @@ public class PostService {
         }
 
         Map<String, List<String>> map = new LinkedHashMap<>();
-        String thumbnailname = new String();
         if (!files.isEmpty() && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
             try {
                 map = mediaService.uploadMediaAndThumbnail(files, postCreateRequestDto.getThumbnailIndex());

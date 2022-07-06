@@ -1,11 +1,18 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.post.*;
+
+import com.dope.breaking.dto.post.PostCreateRequestDto;
+import com.dope.breaking.dto.post.PostResType;
+import com.dope.breaking.dto.post.SearchFeedResponseDto;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.SearchFeedService;
 import com.dope.breaking.service.SortStrategy;
 import com.dope.breaking.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,7 +28,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.*;
@@ -54,23 +64,40 @@ public class PostAPI {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable));
 
+
     }
 
 
     @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Fobbiden 반환.
-    @PostMapping(value = "/post")
+    @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<?> PostCreate(Principal principal,
-                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") @Valid PostCreateRequestDto postCreateRequestDto) {
+                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentdata) throws JsonProcessingException {
+
+
+        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        PostCreateRequestDto postCreateRequestDto = mapper.readerFor(PostCreateRequestDto.class).readValue(contentdata);
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<PostCreateRequestDto>> violations = validator.validate(postCreateRequestDto);
+
+        Map<String,String> nullFieldMap = new LinkedHashMap<>();
+        for (ConstraintViolation<PostCreateRequestDto> violation : violations) {
+            nullFieldMap.put(String.valueOf(violation.getPropertyPath()),violation.getMessage());
+        }
+
+        if(!nullFieldMap.isEmpty()){
+            return ResponseEntity.badRequest().body(nullFieldMap);
+        }
+
         Long postid;
-        if (principal ==  null) {
+        if (principal == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
         }//유저 정보 없으면 일치하지 않다고 반환하기.
-        String cntusername = principal.getName();
-        if (!userService.existByUsername(cntusername)) {
+        if (!userService.existByUsername(principal.getName())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }
         try {
-            postid = postService.create(cntusername, postCreateRequestDto, files);
+            postid = postService.create(principal.getName(), postCreateRequestDto, files);
 
         } catch (Exception e) {
             log.info("게시글 등록에 실패함");
@@ -80,18 +107,4 @@ public class PostAPI {
         result.put("postId", postid);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
-
-
-
-    @ExceptionHandler(MethodArgumentNotValidException.class) //단일 컨트롤러에만 적용함.
-    public ResponseEntity<Map<String, String>> ValidationExceptions(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new LinkedHashMap<>();
-        List<ObjectError> errlist = e.getBindingResult().getAllErrors();
-        for (ObjectError err : errlist) {
-            FieldError fe = (FieldError) err;
-            errors.put(fe.getField(), fe.getDefaultMessage());
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-    }
-
 }

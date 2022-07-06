@@ -6,6 +6,7 @@ import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.media.Media;
+import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,6 +44,9 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post")
     private List<Purchase> buyerList = new ArrayList<Purchase>();
 
+    @OneToMany(mappedBy = "post")
+    private List<Bookmark> bookmarkList = new ArrayList<Bookmark>();
+
     private String title;
 
     private String content;
@@ -63,8 +67,12 @@ public class Post extends BaseTimeEntity {
 
     private LocalDateTime eventTime;
 
+    private String thumbnailImgURL;
+
+    private int viewCount;
+
     @Builder
-    public Post(String title, String content, PostType postType, Location location, int price, boolean isAnonymous, LocalDateTime eventTime){
+    public Post(String title, String content, PostType postType, Location location, int price, boolean isAnonymous, boolean isSold, LocalDateTime eventTime){
         this.title = title;
         this.content = content;
         this.postType = postType;
@@ -79,6 +87,5 @@ public class Post extends BaseTimeEntity {
     public void setUser(User user){
         this.user = user;
     }
-
 
 }

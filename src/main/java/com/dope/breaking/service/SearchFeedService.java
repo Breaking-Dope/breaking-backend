@@ -1,7 +1,7 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.dto.post.FeedResultPostDto;
-import com.dope.breaking.dto.post.SearchFeedRequestDto;
+import com.dope.breaking.dto.post.FeedSearchConditionDto;
 import com.dope.breaking.repository.FeedRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,12 +14,12 @@ public class SearchFeedService {
 
     private final FeedRepository feedRepository;
 
-    public Page<FeedResultPostDto> searchFeedPagination(SearchFeedRequestDto searchFeedRequestDto, Pageable pageable) {
+    public Page<FeedResultPostDto> searchFeedPagination(FeedSearchConditionDto feedSearchConditionDto, Pageable pageable) {
 
-        if( searchFeedRequestDto.getSoldPost() != null || searchFeedRequestDto.getDateFrom() != null || searchFeedRequestDto.getForLastMin() != null ) {
-            return feedRepository.searchFilteredFeedBy(searchFeedRequestDto, pageable);
+        if( feedSearchConditionDto.getVisibleSold() != null || feedSearchConditionDto.getDateFrom() != null || feedSearchConditionDto.getForLastMin() != null ) {
+            return feedRepository.searchFilteredFeedBy(feedSearchConditionDto, pageable);
         } else {
-            return feedRepository.searchDefaultFeedBy(searchFeedRequestDto, pageable);
+            return feedRepository.searchDefaultFeedBy(feedSearchConditionDto, pageable);
         }
     }
 

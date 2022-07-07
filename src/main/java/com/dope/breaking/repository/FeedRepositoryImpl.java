@@ -2,7 +2,7 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.QFeedResultPostDto;
-import com.dope.breaking.dto.post.SearchFeedRequestDto;
+import com.dope.breaking.dto.post.FeedSearchConditionDto;
 import com.dope.breaking.service.SortStrategy;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
@@ -31,7 +31,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
     }
 
     @Override
-    public Page<FeedResultPostDto> searchDefaultFeedBy(SearchFeedRequestDto searchFeedRequestDto, Pageable pageable) {
+    public Page<FeedResultPostDto> searchDefaultFeedBy(FeedSearchConditionDto feedSearchConditionDto, Pageable pageable) {
 
         List<Tuple> filteredPaginatedResult = queryFactory
                 .select(post.id, postLike.post.id.count())
@@ -41,7 +41,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         post.isHidden.eq(false)
                 )
                 .groupBy(post.id)
-                .orderBy(boardSort(searchFeedRequestDto.getSortStrategy()))
+                .orderBy(boardSort(feedSearchConditionDto.getSortStrategy()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -74,7 +74,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
     }
 
     @Override
-    public Page<FeedResultPostDto> searchFilteredFeedBy(SearchFeedRequestDto searchFeedRequestDto, Pageable pageable) {
+    public Page<FeedResultPostDto> searchFilteredFeedBy(FeedSearchConditionDto feedSearchConditionDto, Pageable pageable) {
         return null;
     }
 

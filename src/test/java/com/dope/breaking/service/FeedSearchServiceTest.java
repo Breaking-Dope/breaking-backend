@@ -4,7 +4,7 @@ import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.dto.post.FeedResultPostDto;
-import com.dope.breaking.dto.post.SearchFeedRequestDto;
+import com.dope.breaking.dto.post.FeedSearchConditionDto;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,19 +53,18 @@ class FeedSearchServiceTest {
     @Test
     void get10postsWithoutFilter() {
 
-        SearchFeedRequestDto searchFeedRequestDto = new SearchFeedRequestDto(null, null, null, null,
-                null, null);
+        FeedSearchConditionDto feedSearchConditionDto = FeedSearchConditionDto.builder().build();
         Pageable pageable1 = PageRequest.of(0, 10);
         Pageable pageable2 = PageRequest.of(1, 10);
         Pageable pageable3 = PageRequest.of(2, 10);
 
-        Page<FeedResultPostDto> paginationResult1 = searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable1);
+        Page<FeedResultPostDto> paginationResult1 = searchFeedService.searchFeedPagination(feedSearchConditionDto, pageable1);
         List<FeedResultPostDto> content1 = paginationResult1.getContent();
 
-        Page<FeedResultPostDto> paginationResult2 = searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable2);
+        Page<FeedResultPostDto> paginationResult2 = searchFeedService.searchFeedPagination(feedSearchConditionDto, pageable2);
         List<FeedResultPostDto> content2 = paginationResult2.getContent();
 
-        Page<FeedResultPostDto> paginationResult3 = searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable3);
+        Page<FeedResultPostDto> paginationResult3 = searchFeedService.searchFeedPagination(feedSearchConditionDto, pageable3);
         List<FeedResultPostDto> content3 = paginationResult3.getContent();
 
         assertEquals(10, content1.size());
@@ -75,11 +74,10 @@ class FeedSearchServiceTest {
 
     @Test
     void whenThereAreNoPosts() {
-        SearchFeedRequestDto searchFeedRequestDto = new SearchFeedRequestDto(null, null, null, null,
-                null, null);
+        FeedSearchConditionDto feedSearchConditionDto = FeedSearchConditionDto.builder().build();
         Pageable pageable = PageRequest.of(0, 10);;
 
-        Page<FeedResultPostDto> paginationResult = searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable);
+        Page<FeedResultPostDto> paginationResult = searchFeedService.searchFeedPagination(feedSearchConditionDto, pageable);
         List<FeedResultPostDto> content = paginationResult.getContent();
 
         assertEquals(0, content.size());

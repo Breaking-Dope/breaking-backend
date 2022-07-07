@@ -167,8 +167,4 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
-    public void deleteUser(User user){
-        userRepository.delete(user);
-    }
-
 }

@@ -28,12 +28,6 @@ public class User {
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followingList = new ArrayList<Follow>();
 
-    public void addFollowing(Follow follow, User followed){
-        followingList.add(follow);
-        follow.updateFollowing(this);
-        follow.updateFollowed(followed);
-    }
-
     //유저를 팔로우하는 유저리스트
     @OneToMany(mappedBy = "followed", orphanRemoval = true)
     private List<Follow> followerList = new ArrayList<Follow>();

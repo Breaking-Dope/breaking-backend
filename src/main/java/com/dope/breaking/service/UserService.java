@@ -2,15 +2,12 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.PostResType;
-import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.dto.user.SignUpErrorType;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UpdateRequestDto;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -146,7 +143,9 @@ public class UserService {
         return userRepository.findByNickname(nickname);
     }
 
-    public Optional<User> findByPhoneNumber(String phoneNumber) { return userRepository.findByPhoneNumber(phoneNumber); }
+    public Optional<User> findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -156,7 +155,9 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public User save(User user) { return userRepository.save(user); }
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 
     public Boolean existByUsername(String username){
         return userRepository.existsByUsername(username);
@@ -166,6 +167,8 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
-    public void deleteUser(User user){userRepository.delete(user);}
+    public void deleteUser(User user){
+        userRepository.delete(user);
+    }
 
 }

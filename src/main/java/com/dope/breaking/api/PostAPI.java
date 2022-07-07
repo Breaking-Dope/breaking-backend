@@ -4,7 +4,6 @@ import com.dope.breaking.dto.post.*;
 
 import com.dope.breaking.dto.post.PostCreateRequestDto;
 import com.dope.breaking.dto.post.PostResType;
-import com.dope.breaking.dto.post.SearchFeedResponseDto;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.SearchFeedService;
@@ -22,9 +21,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,16 +49,23 @@ public class PostAPI {
             @RequestParam(value="size") int size,
             @RequestParam(value="search", required = false) String searchKeyword,
             @RequestParam(value="sort-strategy", required = false) String sortStrategy,
-            @RequestParam(value="sold-post", required = false) Boolean soldPost,
+            @RequestParam(value="visible-sold", required = false) Boolean visibleSold,
             @RequestParam(value="date-from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
             @RequestParam(value="date-to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo,
             @RequestParam(value="for-last-min", required = false) Integer forLastMin) {
 
-        SearchFeedRequestDto searchFeedRequestDto = new SearchFeedRequestDto(searchKeyword, SortStrategy.findMatchedEnum(sortStrategy),
-                soldPost, dateFrom, dateTo, forLastMin);
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .searchKeyword(searchKeyword)
+                .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
+                .visibleSold(visibleSold)
+                .dateFrom(dateFrom)
+                .dateFrom(dateFrom)
+                .dateTo(dateTo)
+                .forLastMin(forLastMin)
+                .build();
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(searchFeedRequestDto, pageable));
+        return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(searchFeedConditionDto, pageable));
 
 
     }

@@ -1,6 +1,7 @@
 package com.dope.breaking.service;
 
 public enum SortStrategy {
+
     LIKE,
     VIEW,
     CHRONOLOGICAL;

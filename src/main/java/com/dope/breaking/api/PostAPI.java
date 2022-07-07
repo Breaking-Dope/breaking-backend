@@ -54,7 +54,7 @@ public class PostAPI {
             @RequestParam(value="date-to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo,
             @RequestParam(value="for-last-min", required = false) Integer forLastMin) {
 
-        FeedSearchConditionDto feedSearchConditionDto = FeedSearchConditionDto.builder()
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .searchKeyword(searchKeyword)
                 .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
                 .visibleSold(visibleSold)
@@ -65,7 +65,7 @@ public class PostAPI {
                 .build();
 
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(feedSearchConditionDto, pageable));
+        return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(searchFeedConditionDto, pageable));
 
 
     }

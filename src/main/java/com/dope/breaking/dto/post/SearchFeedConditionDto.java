@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class FeedSearchConditionDto {
+public class SearchFeedConditionDto {
 
     String searchKeyword;
 
@@ -27,7 +27,7 @@ public class FeedSearchConditionDto {
     private MyPageSoldOption myPageSoldOption;
 
     @Builder
-    public FeedSearchConditionDto(String searchKeyword, SortStrategy sortStrategy, Boolean visibleSold, LocalDate dateFrom, LocalDate dateTo, Integer forLastMin, MyPagePostOption myPagePostOption, MyPageSoldOption myPageSoldOption) {
+    public SearchFeedConditionDto(String searchKeyword, SortStrategy sortStrategy, Boolean visibleSold, LocalDate dateFrom, LocalDate dateTo, Integer forLastMin, MyPagePostOption myPagePostOption, MyPageSoldOption myPageSoldOption) {
         this.searchKeyword = searchKeyword;
         this.sortStrategy = sortStrategy;
         this.visibleSold = visibleSold;

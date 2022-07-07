@@ -37,14 +37,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
 
             String username = jwtTokenProvider.getUsername(accesstoken);
 
-            UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
-            //스프링 시큐리티가 수행해주는 권한 처리를 위해 아래와 같이 토큰을 만들어서 Authentication 객체를 강제로 만들고 컨텍스트에 저장한다.
-            log.info("Userdetail : {}", userDetails.getUsername());
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());//비밀번호는 인증단계에서는 필요없으므로,
+            try {
+                UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
+                log.info("Userdetail : {}", userDetails.getUsername());
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());//비밀번호는 인증단계에서는 필요없으므로,
 
-            SecurityContext context = SecurityContextHolder.createEmptyContext(); //컨텍스트 텅 비어있는 컨텍스트 객체 생성
-            context.setAuthentication(authentication);//SecurityContext에 Authentication 객체를 저장
-            SecurityContextHolder.setContext(context); //contextholder에 authentication 객체를 저장한 컨텍스트를 담게함.
+                SecurityContext context = SecurityContextHolder.createEmptyContext(); //컨텍스트 텅 비어있는 컨텍스트 객체 생성
+                context.setAuthentication(authentication);//SecurityContext에 Authentication 객체를 저장
+                SecurityContextHolder.setContext(context); //contextholder에 authentication 객체를 저장한 컨텍스트를 담게함.
+            }
+            catch(Exception e){
+                request.setAttribute("exception", "User Not Found");
+            }
+            //스프링 시큐리티가 수행해주는 권한 처리를 위해 아래와 같이 토큰을 만들어서 Authentication 객체를 강제로 만들고 컨텍스트에 저장한다.
 
             //다음 체인필터로 이동
         }

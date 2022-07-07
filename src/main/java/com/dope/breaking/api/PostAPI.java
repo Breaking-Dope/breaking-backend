@@ -2,7 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.dto.post.*;
 
-import com.dope.breaking.dto.post.PostCreateRequestDto;
+import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.service.PostService;
@@ -73,18 +73,24 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Fobbiden 반환.
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> PostCreate(Principal principal,
-                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentdata) throws JsonProcessingException {
+    public ResponseEntity<?> postCreate(Principal principal,
+                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws JsonProcessingException {
 
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
+        }//유저 정보 없으면 일치하지 않다고 반환하기.
+        if (!userService.existByUsername(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
+        }
 
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        PostCreateRequestDto postCreateRequestDto = mapper.readerFor(PostCreateRequestDto.class).readValue(contentdata);
+        PostRequestDto postRequestDto = mapper.readerFor(PostRequestDto.class).readValue(contentData);
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
-        Set<ConstraintViolation<PostCreateRequestDto>> violations = validator.validate(postCreateRequestDto);
+        Set<ConstraintViolation<PostRequestDto>> violations = validator.validate(postRequestDto);
 
         Map<String,String> nullFieldMap = new LinkedHashMap<>();
-        for (ConstraintViolation<PostCreateRequestDto> violation : violations) {
+        for (ConstraintViolation<PostRequestDto> violation : violations) {
             nullFieldMap.put(String.valueOf(violation.getPropertyPath()),violation.getMessage());
         }
 
@@ -92,22 +98,54 @@ public class PostAPI {
             return ResponseEntity.badRequest().body(nullFieldMap);
         }
 
-        Long postid;
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
-        }//유저 정보 없으면 일치하지 않다고 반환하기.
-        if (!userService.existByUsername(principal.getName())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
-        }
+        Long postId;
         try {
-            postid = postService.create(principal.getName(), postCreateRequestDto, files);
+            postId = postService.create(principal.getName(), postRequestDto, files);
 
         } catch (Exception e) {
             log.info("게시글 등록에 실패함");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.POST_FAILED.getMessage()));
         }
         Map<String, Long> result = new LinkedHashMap<>();
-        result.put("postId", postid);
+        result.put("postId", postId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
+
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping(value = "/post/{postId}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> postModify(@PathVariable("postId") long postid, Principal principal,
+                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws JsonProcessingException {
+        if (principal == null) { //인증된 사용자가 없다면 403반환.
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
+        }//유저 정보 없으면 일치하지 않는다면 401반환
+        if (!userService.existByUsername(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
+        }//작성자와 수정을 시도하려는 자가 일치하지 않는다면 400 반환
+        if(!postService.existByPostIdAndUserId(postid ,userService.findByUsername(principal.getName()).get().getId())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.NO_PERMISSION.getMessage()));
+        }
+
+        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        PostRequestDto postRequestDto = mapper.readerFor(PostRequestDto.class).readValue(contentData);
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<PostRequestDto>> violations = validator.validate(postRequestDto);
+
+        Map<String,String> nullFieldMap = new LinkedHashMap<>();
+        for (ConstraintViolation<PostRequestDto> violation : violations) {
+            nullFieldMap.put(String.valueOf(violation.getPropertyPath()),violation.getMessage());
+        }
+        if(!nullFieldMap.isEmpty()){
+            return ResponseEntity.badRequest().body(nullFieldMap);
+        }
+        try {
+            postService.modify(postid, postRequestDto, files);
+        } catch (Exception e) {
+            log.info("게시글 수정에 실패함");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.POST_FAILED.getMessage()));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Post is Modified");
+    }
+
 }

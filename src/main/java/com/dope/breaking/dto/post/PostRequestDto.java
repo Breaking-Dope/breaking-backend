@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostCreateRequestDto {
+public class PostRequestDto {
     @NotNull
     private String title;
     @NotNull

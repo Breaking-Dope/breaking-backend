@@ -85,12 +85,10 @@ public class MediaService {
         } catch (Exception e) {
 
             log.error("error: " + e.getMessage());
-
-        } finally {
-
-            return fileNameList;
+            throw e;
 
         }
+        return fileNameList;
 
     }
 
@@ -146,10 +144,9 @@ public class MediaService {
             log.error("error: " + e.getMessage());
             throw e;
 
-        } finally {
-            return mediaNameList;
-
         }
+        return mediaNameList;
+
     }
 
 

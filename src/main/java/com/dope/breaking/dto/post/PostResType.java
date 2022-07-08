@@ -7,7 +7,11 @@ public enum PostResType {
 
     NOT_FOUND_USER("not found user"),
     NOT_REGISTERED_USER("not registered user"),
-    POST_FAILED("posting failed");
+    POST_FAILED("posting failed"),
+
+    MODIFY_FAILED("modification failed"),
+
+    NO_PERMISSION("no permission to modify");
 
     private final String message;
 

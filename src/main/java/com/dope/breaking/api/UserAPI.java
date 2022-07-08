@@ -5,10 +5,12 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.dto.user.*;
+import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ public class UserAPI {
 
     private final UserService userService;
     private final MediaService mediaService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/oauth2/sign-up/validate-phone-number")
     public ResponseEntity<MessageResponseDto> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
@@ -132,8 +135,10 @@ public class UserAPI {
         );
 
         userService.save(user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        String accessjwt = jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Authorization", accessjwt);
+        return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
 
     }
 

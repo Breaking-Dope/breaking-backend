@@ -15,10 +15,6 @@ public class CustomExceptionHandler {
     protected ResponseEntity<ErrorResponseDto> handleCustomException(BreakingException e) {
 
         log.info(e.getMessage());
-        System.out.println("===========================");
-        System.out.println("e.getStatus() = " + e.getStatus());
-        System.out.println("e.getMessage() = " + e.getMessage());
-        System.out.println("===========================");
         return ResponseEntity
                 .status(e.getStatus())
                 .body(new ErrorResponseDto(e.getMessage()));

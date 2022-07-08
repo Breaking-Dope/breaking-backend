@@ -1,6 +1,7 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.user.SignUpErrorType;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UpdateRequestDto;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -122,6 +124,17 @@ public class UserService {
 
     }
 
+    public String validateUsername(Principal principal){
+
+        if (principal == null){
+            return PostResType.NOT_FOUND_USER.getMessage();
+        }
+        if (!existByUsername(principal.getName())){
+            return PostResType.NOT_REGISTERED_USER.getMessage();
+        }
+        return "";
+    }
+
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -130,7 +143,9 @@ public class UserService {
         return userRepository.findByNickname(nickname);
     }
 
-    public Optional<User> findByPhoneNumber(String phoneNumber) { return userRepository.findByPhoneNumber(phoneNumber); }
+    public Optional<User> findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
+    }
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -140,12 +155,16 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public User save(User user) { return userRepository.save(user); }
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 
     public Boolean existByUsername(String username){
         return userRepository.existsByUsername(username);
     }
 
-    public void deleteUser(User user){userRepository.delete(user);}
+    public Boolean existById(Long userId){
+        return userRepository.existsById(userId);
+    }
 
 }

@@ -142,6 +142,12 @@ public class UserAPI {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/oauth2/validate-jwt")
+    public ResponseEntity<UserBriefInformationResponseDto> validateJwt(Principal principal) {
+        return ResponseEntity.ok().body(userService.userBriefInformation(principal.getName()));
+    }
+
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/profile", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})

@@ -49,15 +49,11 @@ class PostAPITest {
     @Autowired
     UserRepository userRepository;
 
-
     @Autowired
     PasswordEncoder passwordEncoder;
 
-
-    private String jwt;
-
-    @BeforeEach
-    public void createToken() {
+    @BeforeEach //DB에 유저정보를 먼저 저장.
+    public void createUserInfo() {
       User  user = User.builder()
                 .username("12345g")
                 .password(passwordEncoder.encode(UUID.randomUUID().toString()))
@@ -68,7 +64,7 @@ class PostAPITest {
     }
 
 
-    @AfterEach
+    @AfterEach //테스트 후 DB 정보 모두 삭제.
     public void aftercleanup() {
         userRepository.deleteAll();
     }

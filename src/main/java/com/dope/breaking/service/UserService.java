@@ -5,6 +5,8 @@ import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.user.SignUpErrorType;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UpdateRequestDto;
+import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
+import com.dope.breaking.exception.oauth.InvalidAccessTokenException;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -165,6 +167,12 @@ public class UserService {
 
     public Boolean existById(Long userId){
         return userRepository.existsById(userId);
+    }
+
+    public UserBriefInformationResponseDto userBriefInformation(String username) {
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        return new UserBriefInformationResponseDto(user.getProfileImgURL(), user.getNickname(), user.getId());
     }
 
 }

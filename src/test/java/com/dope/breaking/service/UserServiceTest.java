@@ -3,14 +3,17 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.SignUpRequestDto;
-import org.assertj.core.api.Assertions;
+import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
+import com.dope.breaking.exception.oauth.InvalidAccessTokenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -18,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     @Autowired UserService userService;
+    @Autowired EntityManager em;
 
     @Test
     void isValidEmailFormat() {
@@ -83,7 +87,7 @@ class UserServiceTest {
 
         // Then
         User foundUser = userService.findById(savedUser.getId()).get();
-        Assertions.assertThat(foundUser).isEqualTo(user);
+        assertThat(foundUser).isEqualTo(user);
 
     }
 
@@ -125,9 +129,104 @@ class UserServiceTest {
         //Then
         User foundUser = userService.findById(1L).get();
 
-        Assertions.assertThat(foundUser.getId()).isEqualTo(1L);
-        Assertions.assertThat(foundUser.getNickname()).isEqualTo("newNickname");
+        assertThat(foundUser.getId()).isEqualTo(1L);
+        assertThat(foundUser.getNickname()).isEqualTo("newNickname");
 
+    }
+
+    @Test
+    void validateJwtTokenSuccess() {
+
+        //Given
+        User user = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","testUsername", "press");
+        user.setRequestFields(
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userService.save(user);
+
+        //When
+        UserBriefInformationResponseDto foundUserInfo = userService.userBriefInformation("testUsername");
+
+        //Then
+        assertEquals(foundUserInfo.getUserId(), user.getId());
+        assertEquals(foundUserInfo.getNickname(), user.getNickname());
+        assertEquals(foundUserInfo.getProfileImgURL(), user.getProfileImgURL());
+    }
+
+    @Test
+    void validateJwtTokenFailureNotFoundUserName() {
+
+        //Given
+        User user = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","testUsername", "press");
+        user.setRequestFields(
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userService.save(user);
+
+        //Then
+        org.junit.jupiter.api.Assertions.assertThrows(InvalidAccessTokenException.class, () -> {
+            //When
+            userService.userBriefInformation("notFoundTestUsername");
+        });
+    }
+
+    @Test
+    void validateJwtTokenFailureNotMatchedUserName() {
+
+        //Given
+        User user = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","testUsername", "press");
+        user.setRequestFields(
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userService.save(user);
+
+        User anotherUser = new User();
+        SignUpRequestDto anotherSignUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","anotherTestUsername", "press");
+        anotherUser.setRequestFields(
+                "anyURL",
+                anotherSignUpRequest.getNickname(),
+                anotherSignUpRequest.getPhoneNumber(),
+                anotherSignUpRequest.getEmail(),
+                anotherSignUpRequest.getRealName(),
+                anotherSignUpRequest.getStatusMsg(),
+                anotherSignUpRequest.getUsername(),
+                Role.valueOf(anotherSignUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userService.save(anotherUser);
+
+        //When
+        UserBriefInformationResponseDto foundUserInfo = userService.userBriefInformation("anotherTestUsername");
+
+        //Then
+        assertNotEquals(foundUserInfo.getUserId(), user.getId());
     }
 
 }

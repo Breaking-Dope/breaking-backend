@@ -34,54 +34,25 @@ public class UserAPI {
     private final MediaService mediaService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping("/oauth2/sign-up/validate-phone-number")
-    public ResponseEntity<MessageResponseDto> validatePhoneNumber(@RequestBody PhoneNumberValidateRequestDto phoneNumberValidateRequest){
+    @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
+    public ResponseEntity<Void> validatePhoneNumber(@PathVariable String phoneNumber){
 
-        if(!UserService.isValidPhoneNumberFormat(phoneNumberValidateRequest.getPhoneNumber())){
-            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.INVALID_PHONE_NUMBER.getMessage()));
-        }
-
-        Optional<User> user = userService.findByPhoneNumber(phoneNumberValidateRequest.getPhoneNumber());
-
-        if (user.isPresent()){
-            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage()));
-        }
-        else{
-            return ResponseEntity.ok().build();
-        }
-
+        userService.validatePhoneNumber(phoneNumber);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/oauth2/sign-up/validate-email")
-    public ResponseEntity<MessageResponseDto> validateEmail(@RequestBody EmailValidateRequestDto emailValidateRequest){
+    @GetMapping("/oauth2/sign-up/validate-email/{phoneNumber}")
+    public ResponseEntity<Void> validateEmail(@PathVariable String phoneNumber){
 
-        if(!UserService.isValidEmailFormat(emailValidateRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.INVALID_EMAIL.getMessage()));
-        }
-
-        Optional<User> user = userService.findByEmail(emailValidateRequest.getEmail());
-
-        if (user.isPresent()){
-            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.EMAIL_DUPLICATE.getMessage()));
-        }
-        else{
-            return ResponseEntity.ok().build();
-        }
-
+        userService.validateEmail(phoneNumber);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/oauth2/sign-up/validate-nickname")
-    public ResponseEntity<MessageResponseDto> validateNickname(@RequestBody NicknameValidateRequestDto nicknameValidateRequest){
+    @GetMapping("/oauth2/sign-up/validate-nickname/{nickname}")
+    public ResponseEntity<Void> validateNickname(@PathVariable String nickname){
 
-        Optional<User> user = userService.findByNickname(nicknameValidateRequest.getNickname());
-
-        if (user.isPresent()){
-            return ResponseEntity.badRequest().body(new MessageResponseDto(SignUpErrorType.NICKNAME_DUPLICATE.getMessage()));
-        }
-        else{
-            return ResponseEntity.ok().build();
-        }
-
+        userService.validateNickname(nickname);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})

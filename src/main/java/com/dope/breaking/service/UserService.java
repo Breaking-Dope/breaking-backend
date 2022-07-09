@@ -6,7 +6,9 @@ import com.dope.breaking.dto.user.SignUpErrorType;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UpdateRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
-import com.dope.breaking.exception.oauth.InvalidAccessTokenException;
+import com.dope.breaking.exception.auth.DuplicatedInformationException;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.auth.invalidUserInformationFormatException;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,34 +27,9 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public static boolean isValidEmailFormat(String email) {
 
-        boolean err = false;
-        String regex = "^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$";
 
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(email);
-
-        if(m.matches()) {
-            err = true;
-        }
-        return err;
-
-    }
-
-    public static boolean isValidPhoneNumberFormat(String phoneNumber){
-
-        boolean err = false;
-        String regex = "^(01\\d{1}|02|0\\d{2})-?(\\d{8})";
-
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(phoneNumber);
-
-        if (m.matches()){
-            err = true;
-        }
-        return err;
-
+    private boolean isValidNicknameFormat(String email) {
     }
 
     public static boolean isValidRole(String role) {
@@ -126,27 +103,12 @@ public class UserService {
 
     }
 
-    public String validateUsername(Principal principal){
-
-        if (principal == null){
-            return PostResType.NOT_FOUND_USER.getMessage();
-        }
-        if (!existByUsername(principal.getName())){
-            return PostResType.NOT_REGISTERED_USER.getMessage();
-        }
-        return "";
-    }
-
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     public Optional<User> findByNickname(String nickname) {
         return userRepository.findByNickname(nickname);
-    }
-
-    public Optional<User> findByPhoneNumber(String phoneNumber) {
-        return userRepository.findByPhoneNumber(phoneNumber);
     }
 
     public Optional<User> findByEmail(String email) {
@@ -175,4 +137,39 @@ public class UserService {
         return new UserBriefInformationResponseDto(user.getProfileImgURL(), user.getNickname(), user.getId());
     }
 
+    public void validatePhoneNumber(String phoneNumber) {
+
+        if(Pattern.matches("^(01\\d{1}|02|0\\d{2})-?(\\d{8})", phoneNumber)){
+            throw new invalidUserInformationFormatException(DuplicableUserInformation.PHONENUMBER);
+        }
+
+        Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
+        if (user.isPresent()){
+            throw new DuplicatedInformationException(DuplicableUserInformation.PHONENUMBER);
+        }
+    }
+
+    public void validateEmail(String email) {
+
+        if(Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)){
+            throw new invalidUserInformationFormatException(DuplicableUserInformation.EMAIL);
+        }
+
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()){
+            throw new DuplicatedInformationException(DuplicableUserInformation.EMAIL);
+        }
+    }
+
+    public void validateNickname(String nickname) {
+
+        if(Pattern.matches("^[가-힣ㄱ-ㅎa-zA-Z0-9. -]{2,}\\$", nickname)){
+            throw new invalidUserInformationFormatException(DuplicableUserInformation.NICKNAME);
+        }
+
+        Optional<User> user = userRepository.findByNickname(nickname);
+        if (user.isPresent()){
+            throw new DuplicatedInformationException(DuplicableUserInformation.NICKNAME);
+        }
+    }
 }

@@ -9,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Objects;
@@ -28,7 +25,7 @@ public class RelationshipAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/follow/{userId}")
-    public ResponseEntity<?> followUser(Principal principal, @PathVariable Long userId) {
+    public ResponseEntity<?> followUser( Principal principal, @PathVariable Long userId) {
 
         // 1. username validation 을 시행한다.
         if (!Objects.equals(userService.validateUsername(principal), "")){
@@ -68,6 +65,7 @@ public class RelationshipAPI {
 
         User followingUser = userService.findByUsername(principal.getName()).get();
 
+
         // 2. userId 존재여부를 확인한다.
         if(!userService.existById(userId)){
             return ResponseEntity.badRequest().body(new MessageResponseDto("invalid user Id"));
@@ -83,6 +81,16 @@ public class RelationshipAPI {
         followService.AUnfollowB(followingUser,followedUser);
         return ResponseEntity.ok().build();
 
+    }
+
+    @GetMapping("follow/following/{userId}")
+    public ResponseEntity<?> followingUsers (@PathVariable Long userId){
+        return followService.followingUsers(userId);
+    }
+
+    @GetMapping("follow/follower/{userId}")
+    public ResponseEntity<?> followerUsers (@PathVariable Long userId){
+        return followService.followerUsers(userId);
     }
 
 }

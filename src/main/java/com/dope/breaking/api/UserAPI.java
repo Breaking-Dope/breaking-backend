@@ -34,6 +34,7 @@ public class UserAPI {
     private final MediaService mediaService;
     private final JwtTokenProvider jwtTokenProvider;
 
+
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
     public ResponseEntity<Void> validatePhoneNumber(@PathVariable String phoneNumber){
 
@@ -41,10 +42,10 @@ public class UserAPI {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/oauth2/sign-up/validate-email/{phoneNumber}")
-    public ResponseEntity<Void> validateEmail(@PathVariable String phoneNumber){
+    @GetMapping("/oauth2/sign-up/validate-email/{email}")
+    public ResponseEntity<Void> validateEmail(@PathVariable String email){
 
-        userService.validateEmail(phoneNumber);
+        userService.validateEmail(email);
         return ResponseEntity.ok().build();
     }
 
@@ -56,59 +57,14 @@ public class UserAPI {
     }
 
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> signInConfirm(
+    public ResponseEntity<Void> signUp(
             @RequestPart String signUpRequest,
-            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
+            @RequestPart (required = false) List<MultipartFile> profileImg) {
 
-        ObjectMapper mapper = new ObjectMapper();
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        String username = userService.signUp(signUpRequest, profileImg);
 
-        //ObjectMapper의 readerFor는 @Valid가 적용되지 않습니다. 고로 validator로 추가 검증 절차가 필요합니다.
-        SignUpRequestDto signUpRequestDto = mapper.readerFor(SignUpRequestDto.class).readValue(signUpRequest);
-
-        //validator를 통해 User entity 중 @NotNull 조건은 만족하지 못하는 필드를 getPropertyPath()로 잡아냅니다.
-        Validator validator = factory.getValidator();
-        Set<ConstraintViolation<SignUpRequestDto>> violations = validator.validate(signUpRequestDto);
-
-        Map<String,String> nullFieldMap = new LinkedHashMap<>();
-        for (ConstraintViolation<SignUpRequestDto> violation : violations) {
-            nullFieldMap.put(String.valueOf(violation.getPropertyPath()),violation.getMessage());
-        }
-
-        //nullFieldList가 empty하지 않으면 있으면 안되는 null 값이 있다는 것입니다.
-        //고로 이 nullFieldList를 담은 map을 body에 넣어 400 HttpStatus를 전송합니다.
-        if(!nullFieldMap.isEmpty()){
-            return ResponseEntity.badRequest().body(nullFieldMap);
-        }
-
-        String invalidMessage = userService.invalidMessage(signUpRequestDto);
-
-        if (invalidMessage != ""){
-            return ResponseEntity.badRequest().body(new MessageResponseDto(invalidMessage));
-        }
-
-        String profileImgFileName = mediaService.getBasicProfileDir();
-
-        if (profileImg != null){
-            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
-        }
-
-        User user = new User();
-        user.setRequestFields(
-                profileImgFileName,
-                signUpRequestDto.getNickname(),
-                signUpRequestDto.getPhoneNumber(),
-                signUpRequestDto.getEmail(),
-                signUpRequestDto.getRealName(),
-                signUpRequestDto.getStatusMsg(),
-                signUpRequestDto.getUsername(),
-                Role.valueOf(signUpRequestDto.getRole().toUpperCase(Locale.ROOT))
-        );
-
-        userService.save(user);
-        String accessjwt = jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername());
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", accessjwt);
+        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
         return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
 
     }

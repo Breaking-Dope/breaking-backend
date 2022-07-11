@@ -1,14 +1,15 @@
 package com.dope.breaking.service;
 
-public enum DuplicableUserInformation {
+public enum FailableUserInformation {
 
     PHONENUMBER("휴대폰 번호"),
     EMAIL("이메일"),
-    NICKNAME("닉네임");
+    NICKNAME("닉네임"),
+    ROLE("유저 구분");
 
     private final String label;
 
-    DuplicableUserInformation(String label) {
+    FailableUserInformation(String label) {
         this.label = label;
     }
 

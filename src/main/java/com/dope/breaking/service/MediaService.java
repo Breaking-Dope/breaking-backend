@@ -58,7 +58,7 @@ public class MediaService {
 
     private final String thumbDirName = System.getProperty("user.dir") + "/thumb";
 
-    public List<String> uploadMedias(List<MultipartFile> medias) throws Exception {
+    public List<String> uploadMedias(List<MultipartFile> medias) {
 
         List<String> fileNameList = new ArrayList<String>();
 

@@ -1,7 +1,7 @@
 package com.dope.breaking.exception.auth;
 
 import com.dope.breaking.exception.BreakingException;
-import com.dope.breaking.service.DuplicableUserInformation;
+import com.dope.breaking.service.FailableUserInformation;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,13 +9,13 @@ import org.springframework.http.HttpStatus;
  */
 public class DuplicatedInformationException extends BreakingException {
 
-    private static String createMessage(DuplicableUserInformation duplicableUserInformation) {
-        return "이미 사용중인" + duplicableUserInformation.toString() + "입니다.";
+    private static String createMessage(FailableUserInformation failableUserInformation) {
+        return "이미 사용중인" + failableUserInformation.toString() + "입니다.";
 
     }
 
-    public DuplicatedInformationException(DuplicableUserInformation duplicableUserInformation) {
-        super(createMessage(duplicableUserInformation), HttpStatus.BAD_REQUEST);
+    public DuplicatedInformationException(FailableUserInformation failableUserInformation) {
+        super(createMessage(failableUserInformation), HttpStatus.BAD_REQUEST);
     }
 
 

@@ -1,7 +1,7 @@
 package com.dope.breaking.exception.auth;
 
 import com.dope.breaking.exception.BreakingException;
-import com.dope.breaking.service.DuplicableUserInformation;
+import com.dope.breaking.service.FailableUserInformation;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
  */
 public class invalidUserInformationFormatException extends BreakingException {
 
-    private static String createMessage(DuplicableUserInformation duplicableUserInformation) {
-        switch (duplicableUserInformation) {
+    private static String createMessage(FailableUserInformation failableUserInformation) {
+        switch (failableUserInformation) {
             case PHONENUMBER:
                 return "올바른 전화번호 형식이 아닙니다.";
             case EMAIL:
@@ -23,7 +23,7 @@ public class invalidUserInformationFormatException extends BreakingException {
 
     }
 
-    public invalidUserInformationFormatException(DuplicableUserInformation duplicableUserInformation) {
-        super(createMessage(duplicableUserInformation), HttpStatus.BAD_REQUEST);
+    public invalidUserInformationFormatException(FailableUserInformation failableUserInformation) {
+        super(createMessage(failableUserInformation), HttpStatus.BAD_REQUEST);
     }
 }

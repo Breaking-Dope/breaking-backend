@@ -1,5 +1,6 @@
 package com.dope.breaking.security.jwt;
 
+import com.dope.breaking.service.UserService;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +17,19 @@ import java.util.*;
 @RequiredArgsConstructor
 @Component //빈 등록
 public class JwtTokenProvider {
+
     @Value("${jwt.secret}")
     private  String secret;
 
     private final String accessheader = "Authorization";
+    private final String refreshheader = "Authorization-refresh";
 
     private static final String BEARER = "Bearer ";
 
-    private final long accesstokenValidityInMilliseconds = 30 * 60 * 1000L; //엑세스 토큰 유효기간  엑세스 토큰 30분
+    private final long accesstokenValidityInMilliseconds = 30 * 60 * 1000L; //엑세스 토큰 유효기간 30분
+    private final long refreshtokenValidityInMilliseconds = 604800 * 1000L; //리플리쉬 토큰 유효기간 1주
+
+    private final UserService userService;
 
     // JWT 토큰 생성
     @PostConstruct
@@ -43,9 +49,42 @@ public class JwtTokenProvider {
                 .compact(); //토큰생성
     }
 
+    public String createRefreshToken(){
+        Date now = new Date();
+        return Jwts.builder().setSubject("RefreshToken")
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + refreshtokenValidityInMilliseconds))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact(); //리플리쉬 토큰 생성.
+    }
+
+
+    public void updateRefreshToken(String username, String refreshToken) {
+        userService.findByUsername(username)
+                .ifPresentOrElse(
+                        user -> user.updateRefreshToken(refreshToken),
+                        () -> new Exception("회원이 없습니다")
+                );
+    }
+
+
+
+    public void destroyRefreshToken(String username) {
+        userService.findByUsername(username)
+                .ifPresentOrElse(
+                        user -> user.destroyRefreshToken(),
+                        () -> new Exception("회원이 없습니다")
+                );
+    }
+
     public Optional<String> extractAccessToken(HttpServletRequest request) throws IOException, ServletException {
         return Optional.ofNullable(request.getHeader(accessheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
     }
+
+    public Optional<String> extractRefreshToken(HttpServletRequest request) throws IOException, ServletException {
+        return Optional.ofNullable(request.getHeader(refreshheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
+    }
+
 
     // 토큰에서 Username추출하는 과정.
     public String getUsername(String token) { //Username을 얻자.

@@ -147,5 +147,4 @@ public class PostAPI {
         }
         return ResponseEntity.status(HttpStatus.OK).body("Post is Modified");
     }
-
 }

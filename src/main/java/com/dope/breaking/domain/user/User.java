@@ -76,6 +76,10 @@ public class User {
 
     private String profileImgURL;
 
+    @Column(length = 1000)
+    private String refreshToken;
+
+
     public void setRequestFields (String generatedImgURL, String nickname, String phoneNumber, String email,
              String realName, String statusMsg, String username, Role role) {
 
@@ -97,5 +101,16 @@ public class User {
     public String getRoleKey(){
         return this.role.getKey();
     }
+
+
+    public void updateRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
+    }
+
+    public void destroyRefreshToken(){
+        this.refreshToken = null;
+    }
+
+
 
 }

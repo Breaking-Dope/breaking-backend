@@ -20,7 +20,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/oauth/sign-in")
+@RequestMapping("/oauth2/sign-in")
 @RestController
 public class Oauth2LoginController {
     private final UserService userService;
@@ -52,11 +52,11 @@ public class Oauth2LoginController {
         JSONObject jsonObject = (JSONObject) jsonParser.parse(profileResponse.getBody());
         log.info(jsonObject.toJSONString());
         String userinfo = jsonObject.get("response").toString();
-        JSONObject jsonObject1 = (JSONObject) jsonParser.parse(userinfo);
+        JSONObject infoObject = (JSONObject) jsonParser.parse(userinfo);
         UserDto dto = new UserDto();
-        dto.setFullname(jsonObject1.get("name").toString());
-        dto.setUsername(jsonObject1.get("id").toString());
-        dto.setEmail(jsonObject1.get("email").toString());
+        dto.setFullname(infoObject.get("name").toString());
+        dto.setUsername(infoObject.get("id").toString());
+        dto.setEmail(infoObject.get("email").toString());
         log.info(dto.toString());
         User user = userService.findByUsername(dto.getUsername()).orElse(null);
         if (user == null) {
@@ -73,7 +73,7 @@ public class Oauth2LoginController {
 
 
     @PostMapping("/kakao")
-    public ResponseEntity<?> kakaoOauthRedirect(@RequestBody Map<String, String> accessToken) throws ParseException {
+    public ResponseEntity<?> kakaoOauthLogin(@RequestBody Map<String, String> accessToken) throws ParseException {
         HttpHeaders headers = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
         String token = accessToken.get("accessToken");
@@ -104,24 +104,24 @@ public class Oauth2LoginController {
         UserDto dto = new UserDto();
         dto.setUsername(jsonObject.get("id").toString()+"k");
         String kakao_account = jsonObject.get("kakao_account").toString();
-        JSONObject jsonObject1 = (JSONObject) jsonParser.parse(kakao_account);
-        log.info(jsonObject1.toJSONString());
+        JSONObject infoObject = (JSONObject) jsonParser.parse(kakao_account);
+        log.info(infoObject.toJSONString());
         try {
-            dto.setEmail(jsonObject1.get("email").toString());
+            dto.setEmail(infoObject.get("email").toString());
         } catch (Exception e) {
             log.info("이메일 정보를 불러올 수 없음");
             dto.setEmail(null);
         }
-        String profile = jsonObject1.get("profile").toString();
-        jsonObject1 = (JSONObject) jsonParser.parse(profile);
+        String profile = infoObject.get("profile").toString();
+        infoObject = (JSONObject) jsonParser.parse(profile);
         try {
-            dto.setFullname(jsonObject1.get("nickname").toString());
+            dto.setFullname(infoObject.get("nickname").toString());
         } catch (Exception e) {
             log.info("유저 이름을 불러올 수 없음");
             dto.setFullname(null);
         }
         try {
-            dto.setProfileImgURL(jsonObject1.get("profile_image_url").toString());
+            dto.setProfileImgURL(infoObject.get("profile_image_url").toString());
         } catch (Exception e) {
             log.info("기존 프로필 사진을 불러올 수 없음");
             dto.setProfileImgURL(null);
@@ -141,7 +141,7 @@ public class Oauth2LoginController {
 
 
     @PostMapping("/google")
-    public ResponseEntity<?> googleOauthRedirect(@RequestBody Map<String, String> accessToken) throws ParseException {
+    public ResponseEntity<?> googleOauthLogin(@RequestBody Map<String, String> accessToken) throws ParseException {
         HttpHeaders headers = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
         String token = accessToken.get("accessToken");
@@ -189,6 +189,7 @@ public class Oauth2LoginController {
             log.info("기존 프로필 사진을 불러올 수 없음");
             dto.setProfileImgURL(null);
         }
+
         if (!userService.existByUsername(dto.getUsername())) {
             log.info("유저 정보가 없음");
             return ResponseEntity.status(200).body(dto);

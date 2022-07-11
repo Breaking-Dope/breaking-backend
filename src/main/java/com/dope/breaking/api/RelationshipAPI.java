@@ -30,11 +30,6 @@ public class RelationshipAPI {
     @PostMapping("/follow/{userId}")
     public ResponseEntity<?> followUser(Principal principal, @PathVariable Long userId) {
 
-        // 1. username validation 을 시행한다.
-        if (!Objects.equals(userService.validateUsername(principal), "")){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(userService.validateUsername(principal)));
-        }
-
         User followingUser = userService.findByUsername(principal.getName()).get();
 
         // 2. userId 존재여부를 확인한다.
@@ -60,11 +55,6 @@ public class RelationshipAPI {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/follow/{userId}")
     public ResponseEntity<?> unfollowUser(Principal principal, @PathVariable Long userId) {
-
-        // 1. username validation 을 시행한다.
-        if (!Objects.equals(userService.validateUsername(principal), "")){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(userService.validateUsername(principal)));
-        }
 
         User followingUser = userService.findByUsername(principal.getName()).get();
 

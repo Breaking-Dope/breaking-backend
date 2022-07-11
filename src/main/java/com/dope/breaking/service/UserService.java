@@ -2,9 +2,8 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.user.SignUpErrorType;
 import com.dope.breaking.dto.user.SignUpRequestDto;
-import com.dope.breaking.dto.user.UpdateRequestDto;
+import com.dope.breaking.dto.user.UpdateUserRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.auth.DuplicatedInformationException;
@@ -21,6 +20,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.io.File;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -61,6 +61,55 @@ public class UserService {
         
     }
 
+    public void updateProfile(String username, String updateRequestDto, List<MultipartFile> profileImg) {
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+
+        UpdateUserRequestDto updateUserRequestDto = transformUserInformationToObject(updateRequestDto, username);
+
+        validateUserInformation(updateUserRequestDto, user);
+
+        // 5. update profile
+
+        String profileImgFileName = mediaService.getBasicProfileDir();
+        String originalProfileUrl = user.getProfileImgURL();
+
+        // case 1: 기본 이미지 -> 기본 이미지 : 변경 없음
+
+        // case 2: 유저 본인 선택 이미지 -> 기본 이미지
+        if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg == null){
+            File file = new File(mediaService.getDirName()+File.separator+originalProfileUrl);
+            file.delete();
+        }
+
+        // case 3: 기본 이미지 -> 유저 본인 선택 이미지
+        else if (originalProfileUrl == mediaService.getBasicProfileDir() && profileImg != null){
+            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
+        }
+
+        // case 4: 유저 본인 선택 이미지 -> 유저 본인 선택 이미지
+        else if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg != null){
+            File file = new File(mediaService.getDirName()+File.separator+originalProfileUrl);
+            file.delete();
+            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
+        }
+
+        // 6. update the user information
+        user.setRequestFields(
+                profileImgFileName,
+                updateUserRequestDto.getNickname(),
+                updateUserRequestDto.getPhoneNumber(),
+                updateUserRequestDto.getEmail(),
+                updateUserRequestDto.getRealName(),
+                updateUserRequestDto.getStatusMsg(),
+                updateUserRequestDto.getUsername(),
+                Role.valueOf(updateUserRequestDto.getRole().toUpperCase(Locale.ROOT))
+        );
+
+        userRepository.save(user);
+
+    }
+
     public UserBriefInformationResponseDto userBriefInformation(String username) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
@@ -82,6 +131,23 @@ public class UserService {
         return signUpRequestDto;
     }
 
+    private UpdateUserRequestDto transformUserInformationToObject(String signUpRequest, String username) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        UpdateUserRequestDto updateUserRequestDto;
+
+        //String 으로 되어있는 객체를 변환
+        try {
+            updateUserRequestDto = mapper.readerFor(SignUpRequestDto.class).readValue(signUpRequest);
+        } catch(Exception e) {
+            throw new CustomInternalErrorException(e.getMessage());
+        }
+
+        updateUserRequestDto.setUsername(username);
+
+        return updateUserRequestDto;
+    }
+
     public void validateUserInformation (SignUpRequestDto signUpRequestDto){
 
         //null 체크
@@ -97,6 +163,30 @@ public class UserService {
         validateEmail(signUpRequestDto.getEmail());
         validateNickname(signUpRequestDto.getNickname());
         validateRole(signUpRequestDto.getRole());
+
+    }
+
+    public void validateUserInformation (UpdateUserRequestDto updateUserRequestDto, User preUserInformation){
+
+        //null 체크
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<UpdateUserRequestDto>> violations = validator.validate(updateUserRequestDto);
+
+        for(ConstraintViolation<UpdateUserRequestDto> violation : violations) {
+            throw new MissingFormatArgumentException(String.valueOf(violation.getPropertyPath()));
+        }
+
+        if(!updateUserRequestDto.getPhoneNumber().equals(preUserInformation.getPhoneNumber())) {
+            validatePhoneNumber(updateUserRequestDto.getPhoneNumber());
+        }
+        if(!updateUserRequestDto.getEmail().equals(preUserInformation.getEmail())) {
+            validateEmail(updateUserRequestDto.getEmail());
+        }
+        if(!updateUserRequestDto.getNickname().equals(preUserInformation.getNickname())) {
+            validateNickname(updateUserRequestDto.getNickname());
+        }
+        validateRole(updateUserRequestDto.getRole());
 
     }
 
@@ -143,39 +233,6 @@ public class UserService {
         if(upperCasedRole.equals("PRESS") || upperCasedRole.equals("USER")) {
             throw new invalidUserInformationFormatException(FailableUserInformation.ROLE);
         }
-
-    }
-
-    public String invalidMessage (UpdateRequestDto updateRequest, User user){
-
-        if(!isValidRole(updateRequest.getRole())){
-            return SignUpErrorType.INVALID_ROLE.getMessage();
-        }
-
-        if(!isValidEmailFormat(updateRequest.getEmail())){
-            return SignUpErrorType.INVALID_EMAIL.getMessage();
-        }
-
-        if(!isValidPhoneNumberFormat(updateRequest.getPhoneNumber()) ){
-            return SignUpErrorType.INVALID_PHONE_NUMBER.getMessage();
-        }
-
-        if (findByPhoneNumber(updateRequest.getPhoneNumber()).isPresent()
-                && !Objects.equals(user.getPhoneNumber(), updateRequest.getPhoneNumber())) {
-            return SignUpErrorType.PHONE_NUMBER_DUPLICATE.getMessage();
-        }
-
-        if (findByEmail(updateRequest.getEmail()).isPresent()
-                && !Objects.equals(user.getEmail(), updateRequest.getEmail())) {
-            return SignUpErrorType.EMAIL_DUPLICATE.getMessage();
-        }
-
-        if (findByNickname(updateRequest.getNickname()).isPresent()
-                && !Objects.equals(user.getNickname(), updateRequest.getNickname())){
-            return SignUpErrorType.NICKNAME_DUPLICATE.getMessage();
-        }
-
-        return "";
 
     }
 

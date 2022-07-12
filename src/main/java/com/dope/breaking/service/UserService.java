@@ -192,7 +192,7 @@ public class UserService {
 
     public void validatePhoneNumber(String phoneNumber) {
 
-        if(Pattern.matches("^(01\\d{1}|02|0\\d{2})-?(\\d{8})", phoneNumber)){
+        if(!Pattern.matches("^(\\d{11}|\\d{3}\\d{4}\\d{4})$", phoneNumber)){
             throw new invalidUserInformationFormatException(FailableUserInformation.PHONENUMBER);
         }
 

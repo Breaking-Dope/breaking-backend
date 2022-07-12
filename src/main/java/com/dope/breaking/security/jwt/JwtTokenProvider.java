@@ -26,8 +26,8 @@ public class JwtTokenProvider {
 
     private static final String BEARER = "Bearer ";
 
-    private final long accesstokenValidityInMilliseconds = 30 * 60 * 1000L; //엑세스 토큰 유효기간 30분
-    private final long refreshtokenValidityInMilliseconds = 604800 * 1000L; //리플리쉬 토큰 유효기간 1주
+    private final long accesstokenValidityInMilliseconds = 604800 *  1000L; //엑세스 토큰 유효기간 1주
+    private final long refreshtokenValidityInMilliseconds = 2 * 604800 * 1000L; //리플리쉬 토큰 유효기간 2주
 
     private final UserService userService;
 
@@ -58,24 +58,14 @@ public class JwtTokenProvider {
                 .compact(); //리플리쉬 토큰 생성.
     }
 
-
-    public void updateRefreshToken(String username, String refreshToken) {
-        userService.findByUsername(username)
-                .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
-                        () -> new Exception("회원이 없습니다")
-                );
-    }
-
-
-
     public void destroyRefreshToken(String username) {
-        userService.findByUsername(username)
-                .ifPresentOrElse(
-                        user -> user.destroyRefreshToken(),
-                        () -> new Exception("회원이 없습니다")
-                );
+        if (userService.findByUsername(username).isPresent()) {
+            userService.findByUsername(username).get().destroyRefreshToken();
+        } else {
+            log.info("토큰 삭제에 실패함.");
+        }
     }
+
 
     public Optional<String> extractAccessToken(HttpServletRequest request) throws IOException, ServletException {
         return Optional.ofNullable(request.getHeader(accessheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
@@ -89,7 +79,6 @@ public class JwtTokenProvider {
     // 토큰에서 Username추출하는 과정.
     public String getUsername(String token) { //Username을 얻자.
         String username = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
-        log.info("JwtProvider's getUsername method : {}", username);
         return username;
     }
 

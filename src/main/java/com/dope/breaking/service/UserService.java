@@ -192,7 +192,7 @@ public class UserService {
 
     public void validatePhoneNumber(String phoneNumber) {
 
-        if(Pattern.matches("^(01\\d{1}|02|0\\d{2})-?(\\d{8})", phoneNumber)){
+        if(!Pattern.matches("^\\d{2,3}-\\d{3,4}-\\d{4}$", phoneNumber)){
             throw new invalidUserInformationFormatException(FailableUserInformation.PHONENUMBER);
         }
 
@@ -204,7 +204,7 @@ public class UserService {
 
     public void validateEmail(String email) {
 
-        if(Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)){
+        if(!Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)){
             throw new invalidUserInformationFormatException(FailableUserInformation.EMAIL);
         }
 
@@ -216,7 +216,7 @@ public class UserService {
 
     public void validateNickname(String nickname) {
 
-        if(Pattern.matches("^[가-힣ㄱ-ㅎa-zA-Z0-9. -]{2,}\\$", nickname)){
+        if(!Pattern.matches("^(?=.*[a-z0-9가-힣])[a-z0-9가-힣]{2,16}$", nickname)){
             throw new invalidUserInformationFormatException(FailableUserInformation.NICKNAME);
         }
 

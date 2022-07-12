@@ -33,21 +33,21 @@ class UserRepositoryTest {
 
     }
 
-    @Test
-    void findByPhoneNumber() {
-
-        //Given
-        User user = new User();
-        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
-
-        //When
-        User savedUser = userService.save(user);
-        User foundUser = userService.findByPhoneNumber(savedUser.getPhoneNumber()).get();
-
-        //Then
-        Assertions.assertThat(foundUser).isEqualTo(savedUser);
-
-    }
+//    @Test
+//    void findByPhoneNumber() {
+//
+//        //Given
+//        User user = new User();
+//        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
+//
+//        //When
+//        User savedUser = userService.save(user);
+//        User foundUser = userService.findByPhoneNumber(savedUser.getPhoneNumber()).get();
+//
+//        //Then
+//        Assertions.assertThat(foundUser).isEqualTo(savedUser);
+//
+//    }
 
     @Test
     void findByEmail() {

@@ -1,4 +1,4 @@
-package com.dope.breaking.exception.oauth;
+package com.dope.breaking.exception.auth;
 
 import com.dope.breaking.exception.BreakingException;
 import org.springframework.http.HttpStatus;

@@ -3,13 +3,15 @@ package com.dope.breaking.dto.user;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateRequestDto {
+public class UpdateUserRequestDto {
 
     private String statusMsg;
     @NotNull
@@ -22,6 +24,7 @@ public class UpdateRequestDto {
     private String realName;
     @NotNull
     private String role;
+    private String Username;
 
 }
 

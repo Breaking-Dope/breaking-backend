@@ -3,6 +3,7 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.MediaType;
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.repository.MediaRepository;
 import com.dope.breaking.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class MediaService {
 
     private final String thumbDirName = System.getProperty("user.dir") + "/thumb";
 
-    public List<String> uploadMedias(List<MultipartFile> medias) throws Exception {
+    public List<String> uploadMedias(List<MultipartFile> medias) {
 
         List<String> fileNameList = new ArrayList<String>();
 
@@ -82,10 +83,10 @@ public class MediaService {
                 media.transferTo(destination);
 
             }
-        } catch (Exception e) {
+        } catch (CustomInternalErrorException | IOException e) {
 
             log.error("error: " + e.getMessage());
-            throw e;
+            throw new CustomInternalErrorException(e.getMessage());
 
         }
         return fileNameList;

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -264,5 +265,15 @@ public class UserService {
         return userRepository.existsById(userId);
     }
 
-    
+
+
+    public Optional<User> findByRefreshToken(String refreshToken){
+        return userRepository.findByRefreshToken(refreshToken);
+    }
+
+    @Transactional
+    public void setRefreshToken(String username, String refreshToken){
+        User user = userRepository.findByUsername(username).get();
+        user.updateRefreshToken(refreshToken);
+    }
 }

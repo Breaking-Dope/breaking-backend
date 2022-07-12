@@ -32,7 +32,7 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorResponseDto> handleCustomException(BreakingException e) {
+    protected ResponseEntity<ErrorResponseDto> handleCustomException(Exception e) {
 
         log.error(e.getMessage());
         return ResponseEntity

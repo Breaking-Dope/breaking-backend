@@ -1,17 +1,15 @@
 package com.dope.breaking.service;
 
-import com.dope.breaking.exception.auth.InvalidAccessTokenFromOauth2Exception;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.security.userInfoDto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
@@ -42,7 +40,7 @@ public class Oauth2LoginService {
             );
         } catch (Exception e) {
             log.info(e.toString());
-            throw new InvalidAccessTokenFromOauth2Exception();
+            throw new InvalidAccessTokenException();
         }
         return kakaoUserinfo;
     }
@@ -108,7 +106,7 @@ public class Oauth2LoginService {
             );
         } catch (Exception e) {
             log.info(e.toString());
-            throw new InvalidAccessTokenFromOauth2Exception();
+            throw new InvalidAccessTokenException();
         }
         return GoogleUserinfo;
     }

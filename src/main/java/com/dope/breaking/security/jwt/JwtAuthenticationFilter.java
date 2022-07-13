@@ -2,9 +2,7 @@ package com.dope.breaking.security.jwt;
 
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
 import com.dope.breaking.service.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -35,63 +34,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        String accesstoken = jwtTokenProvider.extractAccessToken(request).orElse(null); //accesstoken으로 받아졌는지 확인
-        log.info("accessToken :  {}" , accesstoken );
-        String refreshtoken = jwtTokenProvider.extractRefreshToken(request).orElse(null); //refreshtoken으로 받야졌는지 확인
-        log.info("refreshToken : {}", refreshtoken);
+        String accesstoken = jwtTokenProvider.extractAccessToken(request).orElse(null);
+        String refreshtoken = jwtTokenProvider.extractRefreshToken(request).orElse(null);
 
-
-        //엑세스 토큰은 null이 아니고 엑세스 토큰이 유효하다면
-
-        /*
-        refresh토큰이 우선적으로 유효한지를 살펴보아야 한다고 생각함. 그리고 유효하다면? 재발행한다. 엑세스 토큰만 주는 경우는 접근하기 위함이고, refresh토큰을 지녔다는 것은 재발행 요청을 했다는 뜻. 둘다 보내도, 리플리쉬 토큰을 보냈음으로 재발행한다.
-         */
-        if(refreshtoken != null && jwtTokenProvider.validateToken(refreshtoken) == true){
+        if (refreshtoken != null && jwtTokenProvider.validateToken(refreshtoken) == true) {
             log.info(String.valueOf(userService.findByRefreshToken(refreshtoken).isPresent()));
-            if(userService.findByRefreshToken(refreshtoken).isPresent()){
+            if (userService.findByRefreshToken(refreshtoken).isPresent()) {
 
                 String reissueAccessToken = jwtTokenProvider.createAccessToken(userService.findByRefreshToken(refreshtoken).get().getUsername());
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.setHeader("Authorization", reissueAccessToken);
                 Map<String, String> responseBody = new HashMap<>();
-                responseBody.put("message", "AccessToken 재발급 완료");
-                return; //바로 반환한다.
+                responseBody.put("message", "Access Token 재발급이 완료되었습니다.");
+                return;
+            } else {
+                request.setAttribute("exception", "Refresh Token이 유효하지 않습니다.");
             }
-            else{
-                request.setAttribute("exception", "RefreshToken is invalid");
-            }
-        }
-        else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == true) {
+        } else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == true) {
 
             String username = jwtTokenProvider.getUsername(accesstoken);
             log.info(username);
 
             try {
                 UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
-                log.info("Userdetail : {}", userDetails.getUsername());
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());//비밀번호는 인증단계에서는 필요없으므로,
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
 
-                SecurityContext context = SecurityContextHolder.createEmptyContext(); //컨텍스트 텅 비어있는 컨텍스트 객체 생성
-                context.setAuthentication(authentication);//SecurityContext에 Authentication 객체를 저장
-                SecurityContextHolder.setContext(context); //contextholder에 authentication 객체를 저장한 컨텍스트를 담게함.
-            }
-            catch(Exception e){
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(authentication);
+                SecurityContextHolder.setContext(context);
+            } catch (UsernameNotFoundException e) {
                 log.info("유저 정보 찾지 못함");
-                request.setAttribute("exception", "User Not Found");
+                request.setAttribute("exception", "유저 정보를 찾지 못했습니다.");
             }
-            //스프링 시큐리티가 수행해주는 권한 처리를 위해 아래와 같이 토큰을 만들어서 Authentication 객체를 강제로 만들고 컨텍스트에 저장한다.
-
-            //다음 체인필터로 이동
-        }
-        else if(accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == false){
+        } else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == false) {
             try {
-                String username = jwtTokenProvider.getUsername(accesstoken); //해독 과정 중 에러가 발생함.
-            } catch (SecurityException | MalformedJwtException | IllegalArgumentException e) {
-                request.setAttribute("exception", "Invalid Signature");
-            } catch (ExpiredJwtException e) {
-                request.setAttribute("exception", "Expiration date");
-            } catch (Exception e) {
-                request.setAttribute("exception", "Other errors related to jwt");
+                String username = jwtTokenProvider.getUsername(accesstoken);
+            }catch (ExpiredJwtException e) {
+                log.info("Expiraion date");
+                request.setAttribute("exception", "Access Token이 만료되었습니다.");
+            }
+            catch (SecurityException | IllegalArgumentException | JwtException e) {
+                log.info("invalid sign");
+                request.setAttribute("exception", "Access Token이 유효하지 않습니다.");
             }
         }
         filterChain.doFilter(request, response);

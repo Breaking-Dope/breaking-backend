@@ -1,9 +1,8 @@
 package com.dope.breaking.security.jwt;
 
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import com.dope.breaking.service.UserService;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -18,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,42 +28,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
 
     private final PrincipalDetailsService principalDetailsService;
 
+    private final UserService userService;
+
     //인증작업을 실시함.
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        String accesstoken = jwtTokenProvider.extractAccessToken(request).orElse(null); //accesstoken으로 받아졌는지 확인
+        String accesstoken = jwtTokenProvider.extractAccessToken(request).orElse(null);
+        String refreshtoken = jwtTokenProvider.extractRefreshToken(request).orElse(null);
 
-        //엑세스 토큰은 null이 아니고 엑세스 토큰이 유효하다면
-        if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == true) {
+        if (refreshtoken != null && jwtTokenProvider.validateToken(refreshtoken) == true) {
+            log.info(String.valueOf(userService.findByRefreshToken(refreshtoken).isPresent()));
+            if (userService.findByRefreshToken(refreshtoken).isPresent()) {
+
+                String reissueAccessToken = jwtTokenProvider.createAccessToken(userService.findByRefreshToken(refreshtoken).get().getUsername());
+                response.setStatus(HttpServletResponse.SC_OK);
+                response.setHeader("Authorization", reissueAccessToken);
+                Map<String, String> responseBody = new HashMap<>();
+                responseBody.put("message", "Access Token 재발급이 완료되었습니다.");
+                return;
+            } else {
+                request.setAttribute("exception", "Refresh Token이 유효하지 않습니다.");
+            }
+        } else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == true) {
 
             String username = jwtTokenProvider.getUsername(accesstoken);
+            log.info(username);
 
             try {
                 UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
-                log.info("Userdetail : {}", userDetails.getUsername());
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());//비밀번호는 인증단계에서는 필요없으므로,
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
 
-                SecurityContext context = SecurityContextHolder.createEmptyContext(); //컨텍스트 텅 비어있는 컨텍스트 객체 생성
-                context.setAuthentication(authentication);//SecurityContext에 Authentication 객체를 저장
-                SecurityContextHolder.setContext(context); //contextholder에 authentication 객체를 저장한 컨텍스트를 담게함.
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(authentication);
+                SecurityContextHolder.setContext(context);
+            } catch (UsernameNotFoundException e) {
+                log.info("유저 정보 찾지 못함");
+                request.setAttribute("exception", "유저 정보를 찾지 못했습니다.");
             }
-            catch(Exception e){
-                request.setAttribute("exception", "User Not Found");
-            }
-            //스프링 시큐리티가 수행해주는 권한 처리를 위해 아래와 같이 토큰을 만들어서 Authentication 객체를 강제로 만들고 컨텍스트에 저장한다.
-
-            //다음 체인필터로 이동
-        }
-        else if(accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == false){
+        } else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == false) {
             try {
-                String username = jwtTokenProvider.getUsername(accesstoken); //해독 과정 중 에러가 발생함.
-            } catch (SecurityException | MalformedJwtException | IllegalArgumentException e) {
-                request.setAttribute("exception", "Invalid Signature");
-            } catch (ExpiredJwtException e) {
-                request.setAttribute("exception", "Expiration date");
-            } catch (Exception e) {
-                request.setAttribute("exception", "Other errors related to jwt");
+                String username = jwtTokenProvider.getUsername(accesstoken);
+            }catch (ExpiredJwtException e) {
+                log.info("Expiraion date");
+                request.setAttribute("exception", "Access Token이 만료되었습니다.");
+            }
+            catch (SecurityException | IllegalArgumentException | JwtException e) {
+                log.info("invalid sign");
+                request.setAttribute("exception", "Access Token이 유효하지 않습니다.");
             }
         }
         filterChain.doFilter(request, response);

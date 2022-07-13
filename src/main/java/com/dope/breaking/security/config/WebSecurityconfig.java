@@ -5,6 +5,7 @@ import com.dope.breaking.security.jwt.JwtAuthenticationFilter;
 import com.dope.breaking.security.jwt.JwtEntryPoint;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
+import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,8 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
     private final PrincipalDetailsService principalDetailsService;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final UserService userService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -66,7 +69,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService, userService);
         return jwtAuthenticationFilter;
     }
 }

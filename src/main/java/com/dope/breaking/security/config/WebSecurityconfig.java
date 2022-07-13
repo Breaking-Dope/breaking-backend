@@ -19,6 +19,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,6 +45,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.httpBasic().disable() //rest api만 고려하면 해제해도 되는듯하다.
                 .csrf().disable() //csrf() 설정은 로컬환경이므로 필요가 없다.
+                .cors().configurationSource(corsConfigurationSource()).and()
                 .headers()
                 .addHeaderWriter(new XFrameOptionsHeaderWriter( //h2 콘솔을사용하기 위해
                         XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
@@ -48,6 +55,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable() // Restapi이므로 form 로그인은 필요가 없다.
                 .authorizeRequests() //요청에 대한 권한 체크
                 .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight Request 허용해주기 ->CORS 정책
+                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/press/**").hasRole("PRESS") //PRESS를 가진 권한만이 접근이 허용됨
                 .antMatchers("/user/**").hasRole("USER") //USER를 가진 권한만이 접근이 허용됨
                 .antMatchers("/**").permitAll() //그외 접근은 모두 허용됨.
@@ -72,4 +80,21 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService, userService);
         return jwtAuthenticationFilter;
     }
+
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+        configuration.addExposedHeader("*");
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 }

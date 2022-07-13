@@ -22,6 +22,7 @@ public class CustomExceptionHandler {
                 .body(new ErrorResponseDto("서버 내부 오류"));
     }
 
+
     @ExceptionHandler(BreakingException.class)
     protected ResponseEntity<ErrorResponseDto> handleBreakingCustomException(BreakingException e) {
 
@@ -31,13 +32,5 @@ public class CustomExceptionHandler {
                 .body(new ErrorResponseDto(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorResponseDto> handleCustomException(Exception e) {
-
-        log.error(e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseDto("서버 내부 오류"));
-    }
 
 }

@@ -60,7 +60,7 @@ class JwtAuthenticationFilterTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static String USERNAME = "2318483287k";
+    private static String USERNAME = "";
     private static String PASSWORD = "123456789";
 
     static String accessjwt;
@@ -75,8 +75,7 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "vdICZpZVx_AMd_Jm8_uu7QpNK0xhPQH8Lyu7azL8Cj11XAAAAYHw4mnS";
-        //String idtoken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFiZDY4NWY1ZThmYzYyZDc1ODcwNWMxZWIwZThhNzUyNGM0NzU5NzUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI3MzY0NTMzMjUxMzItYjNqcmVydTJzaTQydTltYnFudjBuOWVxdmNucDQxMDkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI3MzY0NTMzMjUxMzItYjNqcmVydTJzaTQydTltYnFudjBuOWVxdmNucDQxMDkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDQ0MzEyNjk4ODIwNjA1NjIxMzUiLCJoZCI6ImtodS5hYy5rciIsImVtYWlsIjoiY2h5MDMxMEBraHUuYWMua3IiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IlRHWVV2b0JnZlVzclJEdWNCam1zTkEiLCJuYW1lIjoi4oCN7LWc7ZiE7JiBW-2VmeyDnV0o7IaM7ZSE7Yq47Juo7Ja07Jy17ZWp64yA7ZWZIOy7tO2TqO2EsOqzte2Vmeu2gCkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUl0YnZtbUp0RTBrMXo1T2hUMm5OcHpsZjV6anBiUm0yVWJOeEliaDQwcWw9czk2LWMiLCJnaXZlbl9uYW1lIjoi7LWc7ZiE7JiBW-2VmeyDnV0o7IaM7ZSE7Yq47Juo7Ja07Jy17ZWp64yA7ZWZIOy7tO2TqO2EsOqzte2Vmeu2gCkiLCJmYW1pbHlfbmFtZSI6IuKAjSIsImxvY2FsZSI6ImtvIiwiaWF0IjoxNjU3NTk0NTcwLCJleHAiOjE2NTc1OTgxNzB9.ay4i1huUnRZbfne0T1EBGQ5JLCJ5auP_E9BLeFqco7xuGF0W0m2RPKMSkGUpZ_8QDjmNh0RbGTLn-ycF9SXafWg37jl-HF2F7xoSmpvwmt53YDK2YH-3DvlaMc9wQI8IvaqFB5B-vr0FG9Cjf-iuBGVVgCAV0ZjCH_rxdZYlnO7b2Nz305hx5KFAWZ34yIkx3qbqV449DUWsGlnV6okyom9visVXhkrmXFRg3KZJBoeDLlI37qcdv7LeCDmlr9orFgFwT8GjAPaL0dDBGhQL_n534ZkV-Z2IF0UuAwseKe2IhxBbIIDnkJyIAL_pI8jMdJP_R6KJ7FsKgYyUN445kA";
+        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);

@@ -54,9 +54,7 @@ class Oauth2LoginControllerTest {
     @DisplayName("구글 Oauth2 로그인")
     @Test
     void googleOauthLogin() throws Exception {
-        String accesstoken = "ya29.A0AVA9y1uxYysIWVXbntvBZMNkYZnWdDaYo4xZCZwZP_msI7sDQlu_TygXhrUm5nccF8wlLSFBBJuiSNIojztNc88h5HwDuiSuNO6I2_OvTr7opR28-RJkeHZBSlDIQgqQFmWG3UjfpVoY2lmcv4JG3ne51GjYtAYUNnWUtBVEFTQVRBU0ZRRTY1ZHI4cjVTR0M2ek5EWVBSOU53Tkh1S1UzQQ0165";
-        String idtoken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFiZDY4NWY1ZThmYzYyZDc1ODcwNWMxZWIwZThhNzUyNGM0NzU5NzUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI3MzY0NTMzMjUxMzItYjNqcmVydTJzaTQydTltYnFudjBuOWVxdmNucDQxMDkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI3MzY0NTMzMjUxMzItYjNqcmVydTJzaTQydTltYnFudjBuOWVxdmNucDQxMDkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDQ0MzEyNjk4ODIwNjA1NjIxMzUiLCJoZCI6ImtodS5hYy5rciIsImVtYWlsIjoiY2h5MDMxMEBraHUuYWMua3IiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Im5UQWF3d292azZWc0F4SXRCRWlYUGciLCJuYW1lIjoi4oCN7LWc7ZiE7JiBW-2VmeyDnV0o7IaM7ZSE7Yq47Juo7Ja07Jy17ZWp64yA7ZWZIOy7tO2TqO2EsOqzte2Vmeu2gCkiLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EvQUl0YnZtbUp0RTBrMXo1T2hUMm5OcHpsZjV6anBiUm0yVWJOeEliaDQwcWw9czk2LWMiLCJnaXZlbl9uYW1lIjoi7LWc7ZiE7JiBW-2VmeyDnV0o7IaM7ZSE7Yq47Juo7Ja07Jy17ZWp64yA7ZWZIOy7tO2TqO2EsOqzte2Vmeu2gCkiLCJmYW1pbHlfbmFtZSI6IuKAjSIsImxvY2FsZSI6ImtvIiwiaWF0IjoxNjU3NTM0NzU0LCJleHAiOjE2NTc1MzgzNTR9.kA6z_ABgsiai-MMQ_rUDiTajsas9RR3Vac57G4w9BKPMmRP8KxjAXhO-3I9mQ6lsYVB3NkbztS2dBg1d1mDdHd7qgLxkpE358KmmaYzmTEu971GZ6sN35N-1KSgszkQ92wM-pibgYGXlfI4xxMXYaotU8jWuVT7YcnqSYc0mHsR_iK4cK7q6f11kzUHSvArln-QQB6Ea7QgSX9f5SxAPoKtx_Uj3tbScVJTrfjW6AqcOsxx-jxaJ_EJQJGaAzWmnOYqKPquKk4d9fv7cnWGD75G8EdZG9_j9KrHQ3_0RN-LA_C7g092DU9yx8Vjly86dT1uC19trKVWdtfPBf_SQbg";
-
+        String accesstoken = ""; String idtoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -71,8 +69,8 @@ class Oauth2LoginControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.fullname").value("최현영[학생](소프트웨어융합대학 컴퓨터공학부)"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("104431269882060562135g"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("chy0310@khu.ac.kr"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value(""))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(""))
                 .andReturn();
 
         MockHttpServletResponse response = result.getResponse();

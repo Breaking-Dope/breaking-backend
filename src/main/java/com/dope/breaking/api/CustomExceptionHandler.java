@@ -3,6 +3,7 @@ package com.dope.breaking.api;
 import com.dope.breaking.dto.ErrorResponseDto;
 import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.CustomInternalErrorException;
+import com.dope.breaking.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class CustomExceptionHandler {
         log.error(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseDto("서버 내부 오류"));
+                .body(new ErrorResponseDto(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
 
@@ -29,7 +30,7 @@ public class CustomExceptionHandler {
         log.info(e.getMessage());
         return ResponseEntity
                 .status(e.getStatus())
-                .body(new ErrorResponseDto(e.getMessage()));
+                .body(new ErrorResponseDto(e.getErrorCode()));
     }
 
 

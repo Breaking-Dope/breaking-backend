@@ -3,24 +3,20 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Follow;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.dto.user.FollowInfoResponseDto;
-import com.dope.breaking.exception.oauth.InvalidAccessTokenException;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.follow.AlreadyFollowingException;
+import com.dope.breaking.exception.follow.AlreadyUnfollowingException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
-import static org.springframework.http.ResponseEntity.ok;
 
 @Transactional
 @Service
@@ -35,7 +31,7 @@ public class FollowService {
     }
 
     public Optional<Follow> findById(Long followId) {return followRepository.findById(followId);}
-
+    
     public Boolean isFollowing (User followingUser, User followedUser) {
 
         List<Follow> followingList = followingUser.getFollowingList();
@@ -74,7 +70,37 @@ public class FollowService {
         }
     }
 
-    public ResponseEntity<?> followingUsers (Long userId){
+    public void followUser(String username, Long userId) {
+
+        User followingUser = userService.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        User followedUser = userService.findById(userId).orElseThrow(NoSuchUserException::new);
+
+        if (isFollowing(followingUser,followedUser)){
+            throw new AlreadyFollowingException();
+        }
+
+        AFollowB(followingUser,followedUser);
+        userService.save(followingUser);
+        userService.save(followedUser);
+
+    }
+
+    public void unfollowUser(String username, Long userId) {
+
+        User followingUser = userService.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        User followedUser = userService.findById(userId).orElseThrow(NoSuchUserException::new);
+
+        if (!isFollowing(followingUser,followedUser)){
+            throw new AlreadyUnfollowingException();
+        }
+
+        AUnfollowB(followingUser,followedUser);
+        userService.save(followingUser);
+        userService.save(followedUser);
+
+    }
+
+    public List<FollowInfoResponseDto> followingUsers (Long userId){
 
         User user = userService.findById(userId).orElseThrow(NoSuchUserException::new);
 
@@ -86,14 +112,13 @@ public class FollowService {
             followInfoResponseDtoList.add (new FollowInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
         }
 
-        return ResponseEntity.ok().body(followInfoResponseDtoList);
+        return followInfoResponseDtoList;
+
     }
 
-    public ResponseEntity<?> followerUsers (Long userId){
-
+    public List<FollowInfoResponseDto> followerUsers (Long userId){
 
         User user = userService.findById(userId).orElseThrow(NoSuchUserException::new);
-
 
         List<Follow> followerList = user.getFollowerList();
         List<FollowInfoResponseDto> followInfoResponseDtoList = new ArrayList<>();
@@ -103,6 +128,6 @@ public class FollowService {
             followInfoResponseDtoList.add (new FollowInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
         }
 
-        return ResponseEntity.ok().body(followInfoResponseDtoList);
+        return followInfoResponseDtoList;
     }
 }

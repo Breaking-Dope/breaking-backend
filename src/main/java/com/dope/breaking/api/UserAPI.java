@@ -57,9 +57,9 @@ public class UserAPI {
         String username = userService.signUp(signUpRequest, profileImg);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
-        String refreshjwt = jwtTokenProvider.createRefreshToken();
-        httpHeaders.set("Authorization-Refresh", refreshjwt);
-        redisService.setDataWithExpiration(refreshjwt, username, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
+        String refreshToken = jwtTokenProvider.createRefreshToken(username);
+        httpHeaders.set("Authorization-Refresh", refreshToken);
+        redisService.setDataWithExpiration(username, refreshToken, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
         return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
 
     }

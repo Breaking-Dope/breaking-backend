@@ -86,11 +86,11 @@ public class Oauth2LoginService {
         } else {
             log.info("기존 유저 정보가 있음.");
             String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
-            String refreshToken = jwtTokenProvider.createRefreshToken();
+            String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", accessToken);
             httpHeaders.set("Authorization-Refresh", refreshToken);
-            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
+            redisService.setDataWithExpiration( dto.getUsername(),refreshToken, 2 * 604800L);
             JSONObject response = new JSONObject();
             response.put("message", "토큰이 발행되었습니다.");
             return new ResponseEntity<String>(response.toJSONString(), httpHeaders, HttpStatus.OK);
@@ -154,11 +154,11 @@ public class Oauth2LoginService {
         } else {
             log.info("유저 정보가 있다.");
             String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
-            String refreshToken = jwtTokenProvider.createRefreshToken();
+            String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", accessToken);
             httpHeaders.set("Authorization-Refresh", refreshToken);
-            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
+            redisService.setDataWithExpiration(dto.getUsername(), refreshToken , 2 * 604800L);
             JSONObject response = new JSONObject();
             response.put("message", "토큰이 발행되었습니다.");
             return new ResponseEntity<String>(response.toJSONString(), httpHeaders, HttpStatus.OK);

@@ -79,4 +79,9 @@ public class UserAPI {
 
     }
 
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<ProfileInformationResponseDto> profileInformation(@PathVariable Long userId){
+        return ResponseEntity.ok().body(userService.profileInformation(userId));
+    }
+
 }

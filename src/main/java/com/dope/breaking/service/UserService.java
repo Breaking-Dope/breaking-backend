@@ -2,6 +2,7 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.user.ProfileInformationResponseDto;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UpdateUserRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
@@ -9,10 +10,13 @@ import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.user.DuplicatedUserInformationException;
 import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
+import com.dope.breaking.exception.user.NoSuchUserException;
+import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MediaService mediaService;
+    private final FollowRepository followRepository;
 
     public String signUp(String signUpRequest, List<MultipartFile> profileImg) {
 
@@ -275,5 +280,24 @@ public class UserService {
     public void setRefreshToken(String username, String refreshToken){
         User user = userRepository.findByUsername(username).get();
         user.updateRefreshToken(refreshToken);
+    }
+
+    public ProfileInformationResponseDto profileInformation(Long userId) {
+
+        User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
+        int followerCount = followRepository.countFollowsByFollowed(user);
+        int followingCount = followRepository.countFollowsByFollowing(user);
+
+        return ProfileInformationResponseDto.builder()
+                .userId(user.getId())
+                .profileImgURL(user.getProfileImgURL())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .statusMsg(user.getStatusMsg())
+                .role(user.getRole())
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .build();
+
     }
 }

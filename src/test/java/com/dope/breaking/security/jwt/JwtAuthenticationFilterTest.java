@@ -4,6 +4,7 @@ import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
+import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,6 +60,9 @@ class JwtAuthenticationFilterTest {
     PrincipalDetailsService principalDetailsService;
 
     @Autowired
+    RedisService redisService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private static String USERNAME = "";
@@ -96,7 +100,7 @@ class JwtAuthenticationFilterTest {
         accessjwt = (String) response.getHeaderValue("Authorization");
         System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
         refreshjwt = (String) response.getHeaderValue("Authorization-refresh");
-        System.out.println("user refreshtoken : " + userRepository.findByRefreshToken(refreshjwt).get().getRefreshToken());
+        System.out.println("user refreshtoken : " + redisService.getData(refreshjwt));
     }
 
     @DisplayName("No AccessJwt and RefreshJwt")
@@ -132,9 +136,6 @@ class JwtAuthenticationFilterTest {
     @Order(5)
     @Test
     void validRefreshWithoutAccessToken() throws Exception{
-
-        System.out.println(refreshjwt);
-        System.out.println(userRepository.findByUsername(USERNAME).get().getRefreshToken());
 
 
         MvcResult result  = this.mockMvc.perform(MockMvcRequestBuilders.get("/hello").header("Authorization-refresh", "Bearer " + refreshjwt))

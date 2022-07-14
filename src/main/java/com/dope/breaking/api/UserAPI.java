@@ -62,8 +62,6 @@ public class UserAPI {
             @RequestPart String signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) {
         return userService.signUp(signUpRequest, profileImg);
-
-
     }
 
     @PreAuthorize("isAuthenticated()")

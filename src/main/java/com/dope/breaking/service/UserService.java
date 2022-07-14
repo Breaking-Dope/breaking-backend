@@ -82,7 +82,7 @@ public class UserService {
         httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername()));
         String refreshjwt = jwtTokenProvider.createRefreshToken();
         httpHeaders.set("Authorization-Refresh", refreshjwt);
-        redisService.setDataWithExpiration(refreshjwt, username, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
+        redisService.setDataWithExpiration(refreshjwt, signUpRequestDto.getUsername(), 2 * 604800L); //리플리쉬 토큰 redis에 저장.
 
         UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                 .balance(user.getBalance())

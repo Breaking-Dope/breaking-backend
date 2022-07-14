@@ -49,9 +49,11 @@ public class JwtTokenProvider {
                 .compact(); //토큰생성
     }
 
-    public String createRefreshToken(){
+    public String createRefreshToken(String username){
+        Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
         return Jwts.builder().setSubject("RefreshToken")
+                .setClaims(claims) //유저이름 지정.
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshtokenValidityInMilliseconds))
                 .signWith(SignatureAlgorithm.HS256, secret)

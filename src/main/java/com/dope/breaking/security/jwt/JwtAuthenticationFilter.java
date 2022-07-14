@@ -41,8 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
         String refreshToken = jwtTokenProvider.extractRefreshToken(request).orElse(null);
 
         if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken) == true) {
-            log.info(String.valueOf(redisService.getData(refreshToken)));
-            String username = redisService.getData(refreshToken);
+            String username = jwtTokenProvider.getUsername(refreshToken);
             if (username != null) {
                 String reissueAccessToken = jwtTokenProvider.createAccessToken(username);
                 response.setContentType("application/json;charset=UTF-8");

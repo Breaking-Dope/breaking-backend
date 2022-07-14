@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,17 +19,24 @@ public class JwtEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException authException) throws IOException {
 
         String exception = (String) request.getAttribute("exception");
-        if (exception != null) {
-            setResponse(response, exception);
-        }
+
         //jwt 없이 접급하려고 할때.
         if(authException instanceof InsufficientAuthenticationException){
-            JSONObject responseJson = new JSONObject();
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            responseJson.put("message", "로그인이 필요합니다.");
+            if (exception != null) {
+                setResponse(response, exception);
+            }
+            else {
+                JSONObject responseJson = new JSONObject();
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                responseJson.put("message", "로그인이 필요합니다.");
 
-            response.getWriter().print(responseJson);
+                response.getWriter().print(responseJson);
+            }
+        }
+
+        else if (exception != null) {
+            setResponse(response, exception);
         }
     }
 

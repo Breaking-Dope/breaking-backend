@@ -5,6 +5,7 @@ import com.dope.breaking.security.jwt.JwtAuthenticationFilter;
 import com.dope.breaking.security.jwt.JwtEntryPoint;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
+import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +25,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
 @Slf4j
 @RequiredArgsConstructor
 @Configuration //빈으로 등록
 @EnableGlobalMethodSecurity(prePostEnabled = true)//로그인인증을 거친자와 안거친 자를 구별할 수 있도록 함.
 @EnableWebSecurity //스프링 시큐리티를 활성화하겠다.
-public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -39,7 +38,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final UserService userService;
+    private final RedisService redisService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -77,7 +76,7 @@ public class WebSecurityconfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService, userService);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService, redisService );
         return jwtAuthenticationFilter;
     }
 

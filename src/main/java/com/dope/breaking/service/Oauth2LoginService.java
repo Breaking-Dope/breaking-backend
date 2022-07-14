@@ -23,6 +23,8 @@ public class Oauth2LoginService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final RedisService redisService;
+
 
     public ResponseEntity<String> kakaoUserInfo(String accessToken){
         HttpHeaders headers = new HttpHeaders();
@@ -83,13 +85,15 @@ public class Oauth2LoginService {
             return ResponseEntity.status(200).body(dto);
         } else {
             log.info("기존 유저 정보가 있음.");
-            String accessjwt = jwtTokenProvider.createAccessToken(dto.getUsername());
-            String refreshjwt = jwtTokenProvider.createRefreshToken();
+            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+            String refreshToken = jwtTokenProvider.createRefreshToken();
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", accessjwt);
-            httpHeaders.set("Authorization-refresh", refreshjwt);
-            userService.setRefreshToken(dto.getUsername(), refreshjwt);
-            return new ResponseEntity<String>("토큰 발행", httpHeaders, HttpStatus.OK);
+            httpHeaders.set("Authorization", accessToken);
+            httpHeaders.set("Authorization-Refresh", refreshToken);
+            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
+            JSONObject response = new JSONObject();
+            response.put("message", "토큰이 발행되었습니다.");
+            return new ResponseEntity<String>(response.toJSONString(), httpHeaders, HttpStatus.OK);
         }
     }
 
@@ -149,13 +153,15 @@ public class Oauth2LoginService {
             return ResponseEntity.status(200).body(dto);
         } else {
             log.info("유저 정보가 있다.");
-            String accessjwt = jwtTokenProvider.createAccessToken(dto.getUsername());
-            String refreshjwt = jwtTokenProvider.createRefreshToken();
+            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+            String refreshToken = jwtTokenProvider.createRefreshToken();
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", accessjwt);
-            httpHeaders.set("Authorization-refresh", refreshjwt);
-            userService.setRefreshToken(dto.getUsername(), refreshjwt);
-            return new ResponseEntity<String>("토큰 발행", httpHeaders, HttpStatus.OK);
+            httpHeaders.set("Authorization", accessToken);
+            httpHeaders.set("Authorization-Refresh", refreshToken);
+            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
+            JSONObject response = new JSONObject();
+            response.put("message", "토큰이 발행되었습니다.");
+            return new ResponseEntity<String>(response.toJSONString(), httpHeaders, HttpStatus.OK);
         }
     }
 

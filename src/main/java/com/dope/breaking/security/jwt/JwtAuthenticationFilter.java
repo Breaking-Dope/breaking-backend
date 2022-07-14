@@ -1,10 +1,12 @@
 package com.dope.breaking.security.jwt;
 
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
+import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -28,33 +30,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
 
     private final PrincipalDetailsService principalDetailsService;
 
-    private final UserService userService;
+    private final RedisService redisService;
+
 
     //인증작업을 실시함.
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        String accesstoken = jwtTokenProvider.extractAccessToken(request).orElse(null);
-        String refreshtoken = jwtTokenProvider.extractRefreshToken(request).orElse(null);
+        String accessToken = jwtTokenProvider.extractAccessToken(request).orElse(null);
+        String refreshToken = jwtTokenProvider.extractRefreshToken(request).orElse(null);
 
-        if (refreshtoken != null && jwtTokenProvider.validateToken(refreshtoken) == true) {
-            log.info(String.valueOf(userService.findByRefreshToken(refreshtoken).isPresent()));
-            if (userService.findByRefreshToken(refreshtoken).isPresent()) {
-
-                String reissueAccessToken = jwtTokenProvider.createAccessToken(userService.findByRefreshToken(refreshtoken).get().getUsername());
+        if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken) == true) {
+            log.info(String.valueOf(redisService.getData(refreshToken)));
+            String username = redisService.getData(refreshToken);
+            if (username != null) {
+                String reissueAccessToken = jwtTokenProvider.createAccessToken(username);
+                response.setContentType("application/json;charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.setHeader("Authorization", reissueAccessToken);
-                Map<String, String> responseBody = new HashMap<>();
-                responseBody.put("message", "Access Token 재발급이 완료되었습니다.");
+                JSONObject responseJson = new JSONObject();
+                responseJson.put("message", "Access Token 재발급이 완료되었습니다.");
+                response.getWriter().print(responseJson);
                 return;
             } else {
-                request.setAttribute("exception", "Refresh Token이 유효하지 않습니다.");
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                JSONObject responseJson = new JSONObject();
+                responseJson.put("message", "유저 정보를 찾지 못헀습니다.");
+                response.getWriter().print(responseJson);
+                return;
             }
-        } else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == true) {
+        } else if (accessToken == null && refreshToken != null && jwtTokenProvider.validateToken(refreshToken) == false) {
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            JSONObject responseJson = new JSONObject();
+            responseJson.put("message", "로그인이 필요합니다.");
+            response.getWriter().print(responseJson);
+            return;
+        } else if(accessToken != null && refreshToken != null && jwtTokenProvider.validateToken(accessToken) == false && jwtTokenProvider.validateToken(refreshToken) == false){
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            JSONObject responseJson = new JSONObject();
+            responseJson.put("message", "로그인이 필요합니다.");
+            response.getWriter().print(responseJson);
+            return;
+        }
+        else if (accessToken != null && jwtTokenProvider.validateToken(accessToken) == true) {
 
-            String username = jwtTokenProvider.getUsername(accesstoken);
-            log.info(username);
-
+            String username = jwtTokenProvider.getUsername(accessToken);
             try {
                 UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
                 Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
@@ -62,22 +85,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
                 SecurityContext context = SecurityContextHolder.createEmptyContext();
                 context.setAuthentication(authentication);
                 SecurityContextHolder.setContext(context);
-            } catch (UsernameNotFoundException e) {
-                log.info("유저 정보 찾지 못함");
-                request.setAttribute("exception", "유저 정보를 찾지 못했습니다.");
+            }catch (UsernameNotFoundException e){
+                log.info("유저 정보 없음");
+                request.setAttribute("exception", "유저 정보를 찾을 수 없음");
             }
-        } else if (accesstoken != null && jwtTokenProvider.validateToken(accesstoken) == false) {
+        } else if (accessToken != null && jwtTokenProvider.validateToken(accessToken) == false) {
             try {
-                String username = jwtTokenProvider.getUsername(accesstoken);
-            }catch (ExpiredJwtException e) {
+                String username = jwtTokenProvider.getUsername(accessToken);
+            } catch (ExpiredJwtException e) {
                 log.info("Expiraion date");
                 request.setAttribute("exception", "Access Token이 만료되었습니다.");
-            }
-            catch (SecurityException | IllegalArgumentException | JwtException e) {
+            } catch (SecurityException | IllegalArgumentException | JwtException e) {
                 log.info("invalid sign");
                 request.setAttribute("exception", "Access Token이 유효하지 않습니다.");
             }
         }
+
+
         filterChain.doFilter(request, response);
     }
 }

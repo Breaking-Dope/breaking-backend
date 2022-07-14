@@ -1,6 +1,7 @@
 package com.dope.breaking.exception.user;
 
 import com.dope.breaking.exception.BreakingException;
+import com.dope.breaking.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -8,10 +9,8 @@ import org.springframework.http.HttpStatus;
  */
 public class NoSuchUserException extends BreakingException {
 
-    private static final String MESSAGE = "존재하지 않는 회원입니다.";
-
     public NoSuchUserException() {
-        super(MESSAGE, HttpStatus.NOT_FOUND);
+        super(ErrorCode.NO_SUCH_USER, HttpStatus.NOT_FOUND);
     }
 
 }

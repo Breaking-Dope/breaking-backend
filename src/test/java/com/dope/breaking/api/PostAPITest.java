@@ -69,25 +69,25 @@ class PostAPITest {
         userRepository.deleteAll();
     }
 
-    @DisplayName("POST 등록 테스트")
-    @WithMockCustomUser
-    @Test
-    public void testpost() throws Exception{
-        MockMultipartFile multipartFile1 = new MockMultipartFile("file", "test1.jpg", "image/png", new FileInputStream(System.getProperty("user.dir") + "/files/test1.png"));
-
-        MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.multipart("/posttest")
-                        .file(multipartFile1)
-                        .content("hello")
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .characterEncoding("UTF-8"))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
-
-
-        MockHttpServletResponse response = resultActions.getResponse();
-        String content = response.getContentAsString();
-
-        Assertions.assertThat(content.contains("hello")).isTrue();
-
-    }
+//    @DisplayName("POST 등록 테스트")
+//    @WithMockCustomUser
+//    @Test
+//    public void testpost() throws Exception{
+//        MockMultipartFile multipartFile1 = new MockMultipartFile("file", "test1.jpg", "image/png", new FileInputStream(System.getProperty("user.dir") + "/files/test1.png"));
+//
+//        MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.multipart("/posttest")
+//                        .file(multipartFile1)
+//                        .content("hello")
+//                        .contentType(MediaType.MULTIPART_FORM_DATA)
+//                        .characterEncoding("UTF-8"))
+//                .andDo(MockMvcResultHandlers.print())
+//                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+//
+//
+//        MockHttpServletResponse response = resultActions.getResponse();
+//        String content = response.getContentAsString();
+//
+//        Assertions.assertThat(content.contains("hello")).isTrue();
+//
+//    }
 }

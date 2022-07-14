@@ -6,9 +6,9 @@ import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UpdateUserRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
-import com.dope.breaking.exception.auth.DuplicatedInformationException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
-import com.dope.breaking.exception.auth.invalidUserInformationFormatException;
+import com.dope.breaking.exception.user.DuplicatedUserInformationException;
+import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
 import com.dope.breaking.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -194,36 +194,36 @@ public class UserService {
     public void validatePhoneNumber(String phoneNumber) {
 
         if(!Pattern.matches("^(\\d{11}|\\d{3}\\d{4}\\d{4})$", phoneNumber)){
-            throw new invalidUserInformationFormatException(FailableUserInformation.PHONENUMBER);
+            throw new InvalidUserInformationFormatException(FailableUserInformation.PHONENUMBER);
         }
 
         Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
         if (user.isPresent()){
-            throw new DuplicatedInformationException(FailableUserInformation.PHONENUMBER);
+            throw new DuplicatedUserInformationException(FailableUserInformation.PHONENUMBER);
         }
     }
 
     public void validateEmail(String email) {
 
         if(!Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)){
-            throw new invalidUserInformationFormatException(FailableUserInformation.EMAIL);
+            throw new InvalidUserInformationFormatException(FailableUserInformation.EMAIL);
         }
 
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()){
-            throw new DuplicatedInformationException(FailableUserInformation.EMAIL);
+            throw new DuplicatedUserInformationException(FailableUserInformation.EMAIL);
         }
     }
 
     public void validateNickname(String nickname) {
 
         if(!Pattern.matches("^(?=.*[a-z0-9가-힣])[a-z0-9가-힣]{2,16}$", nickname)){
-            throw new invalidUserInformationFormatException(FailableUserInformation.NICKNAME);
+            throw new InvalidUserInformationFormatException(FailableUserInformation.NICKNAME);
         }
 
         Optional<User> user = userRepository.findByNickname(nickname);
         if (user.isPresent()){
-            throw new DuplicatedInformationException(FailableUserInformation.NICKNAME);
+            throw new DuplicatedUserInformationException(FailableUserInformation.NICKNAME);
         }
     }
 
@@ -231,8 +231,8 @@ public class UserService {
 
         String upperCasedRole = role.toUpperCase();
 
-        if(upperCasedRole.equals("PRESS") || upperCasedRole.equals("USER")) {
-            throw new invalidUserInformationFormatException(FailableUserInformation.ROLE);
+        if(!(upperCasedRole.equals("PRESS") || upperCasedRole.equals("USER"))) {
+            throw new InvalidUserInformationFormatException(FailableUserInformation.ROLE);
         }
 
     }

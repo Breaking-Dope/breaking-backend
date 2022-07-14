@@ -21,8 +21,8 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private  String secret;
 
-    private final String accessheader = "Authorization";
-    private final String refreshheader = "Authorization-refresh";
+    private final String accessHeader = "Authorization";
+    private final String refreshHeader = "Authorization-Refresh";
 
     private static final String BEARER = "Bearer ";
 
@@ -58,21 +58,13 @@ public class JwtTokenProvider {
                 .compact(); //리플리쉬 토큰 생성.
     }
 
-    public void destroyRefreshToken(String username) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            userRepository.findByUsername(username).get().destroyRefreshToken();
-        } else {
-            log.info("토큰 삭제에 실패함.");
-        }
-    }
-
 
     public Optional<String> extractAccessToken(HttpServletRequest request) throws IOException, ServletException {
-        return Optional.ofNullable(request.getHeader(accessheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
+        return Optional.ofNullable(request.getHeader(accessHeader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
     public Optional<String> extractRefreshToken(HttpServletRequest request) throws IOException, ServletException {
-        return Optional.ofNullable(request.getHeader(refreshheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
+        return Optional.ofNullable(request.getHeader(refreshHeader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
 

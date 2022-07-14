@@ -25,6 +25,8 @@ public class Oauth2LoginService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final RedisService redisService;
+
 
     public ResponseEntity<String> kakaoUserInfo(String accessToken){
         HttpHeaders headers = new HttpHeaders();
@@ -85,12 +87,12 @@ public class Oauth2LoginService {
             return ResponseEntity.status(200).body(dto);
         } else {
             log.info("기존 유저 정보가 있음.");
-            String accessjwt = jwtTokenProvider.createAccessToken(dto.getUsername());
-            String refreshjwt = jwtTokenProvider.createRefreshToken();
+            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+            String refreshToken = jwtTokenProvider.createRefreshToken();
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", accessjwt);
-            httpHeaders.set("Authorization-refresh", refreshjwt);
-            userService.setRefreshToken(dto.getUsername(), refreshjwt);
+            httpHeaders.set("Authorization", accessToken);
+            httpHeaders.set("Authorization-Refresh", refreshToken);
+            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
@@ -158,12 +160,12 @@ public class Oauth2LoginService {
             return ResponseEntity.status(200).body(dto);
         } else {
             log.info("유저 정보가 있다.");
-            String accessjwt = jwtTokenProvider.createAccessToken(dto.getUsername());
-            String refreshjwt = jwtTokenProvider.createRefreshToken();
+            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+            String refreshToken = jwtTokenProvider.createRefreshToken();
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", accessjwt);
-            httpHeaders.set("Authorization-refresh", refreshjwt);
-            userService.setRefreshToken(dto.getUsername(), refreshjwt);
+            httpHeaders.set("Authorization", accessToken);
+            httpHeaders.set("Authorization-Refresh", refreshToken);
+            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
@@ -172,6 +174,7 @@ public class Oauth2LoginService {
                     .profileImgURL(user.getOriginalProfileImgURL())
                     .build();
             return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
+
         }
     }
 }

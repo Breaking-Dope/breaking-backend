@@ -23,6 +23,8 @@ public enum ErrorCode {
     DUPLICATED_NICKNAME("BSE413", "사용중인 닉네임입니다."),
     DUPLICATED_PHONE_NUMBER("BSE414", "사용중인 전화번호입니다."),
     DUPLICATED_EMAIL("BSE415", "사용중인 이메일입니다."),
+    ALREADY_FOLLOWING("BSE420","이미 팔로우 중인 유저입니다."),
+    ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
 
     INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패.")
     ;

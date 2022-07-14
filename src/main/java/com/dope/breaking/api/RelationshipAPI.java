@@ -22,7 +22,7 @@ public class RelationshipAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/follow/{userId}")
-    public ResponseEntity<?> followUser(Principal principal, @PathVariable Long userId) {
+    public ResponseEntity<?> followUser( Principal principal, @PathVariable Long userId) {
 
        followService.followUser(principal.getName(),userId);
        return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -53,5 +53,7 @@ public class RelationshipAPI {
         return ResponseEntity.ok().body(followInfoResponseDtoList);
 
     }
+
+
 
 }

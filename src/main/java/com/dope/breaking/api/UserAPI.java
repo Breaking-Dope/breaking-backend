@@ -3,6 +3,7 @@ package com.dope.breaking.api;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.MediaService;
+import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,8 @@ public class UserAPI {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final RedisService redisService;
 
 
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
@@ -55,8 +58,8 @@ public class UserAPI {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
         String refreshjwt = jwtTokenProvider.createRefreshToken();
-        httpHeaders.set("Authorization-refresh", refreshjwt);
-        userService.setRefreshToken(username, refreshjwt); //리플리쉬 토큰 저장.
+        httpHeaders.set("Authorization-Refresh", refreshjwt);
+        redisService.setDataWithExpiration(refreshjwt, username, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
         return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
 
     }

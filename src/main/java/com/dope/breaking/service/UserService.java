@@ -13,6 +13,7 @@ import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
+import com.dope.breaking.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,10 @@ public class UserService {
     private final FollowService followService;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final RedisService redisService;
+
+
 
     public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) {
 
@@ -74,10 +79,11 @@ public class UserService {
         userRepository.save(user);
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(user.getUsername()));
+        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername()));
         String refreshjwt = jwtTokenProvider.createRefreshToken();
-        user.updateRefreshToken(refreshjwt);
-        httpHeaders.set("Authorization-refresh", refreshjwt);
+        httpHeaders.set("Authorization-Refresh", refreshjwt);
+        redisService.setDataWithExpiration(refreshjwt, username, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
+
         UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                 .balance(user.getBalance())
                 .userId(user.getId())

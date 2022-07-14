@@ -1,6 +1,8 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.user.*;
+
+
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.util.*;
 public class UserAPI {
 
     private final UserService userService;
+
 
 
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
@@ -59,6 +62,8 @@ public class UserAPI {
             @RequestPart String signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) {
         return userService.signUp(signUpRequest, profileImg);
+
+
     }
 
     @PreAuthorize("isAuthenticated()")

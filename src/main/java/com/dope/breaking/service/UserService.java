@@ -313,16 +313,6 @@ public class UserService {
     }
 
 
-    public Optional<User> findByRefreshToken(String refreshToken) {
-        return userRepository.findByRefreshToken(refreshToken);
-    }
-
-    @Transactional
-    public void setRefreshToken(String username, String refreshToken) {
-        User user = userRepository.findByUsername(username).get();
-        user.updateRefreshToken(refreshToken);
-    }
-
     public ProfileInformationResponseDto profileInformation(String username, Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);

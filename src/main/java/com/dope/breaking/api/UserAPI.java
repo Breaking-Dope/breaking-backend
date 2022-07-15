@@ -5,6 +5,11 @@ import com.dope.breaking.dto.user.*;
 
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
+=======
+import org.json.simple.JSONObject;
+import org.springframework.http.HttpHeaders;
+>>>>>>> d858f22 (feat: add JwtAuthenticationAPI for refrsh token reissue)
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.*;
 
@@ -65,12 +71,6 @@ public class UserAPI {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/oauth2/validate-jwt")
-    public ResponseEntity<UserBriefInformationResponseDto> validateJwt(Principal principal) {
-        return ResponseEntity.ok().body(userService.userBriefInformation(principal.getName()));
-    }
-    
-    @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/profile", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> profileUpdateConfirm(
             Principal principal,
@@ -96,5 +96,6 @@ public class UserAPI {
     public ResponseEntity<FullUserInformationResponse> fullUserInformation(Principal principal) {
         return ResponseEntity.ok().body(userService.getFullUserInformation(principal.getName()));
     }
+
 
 }

@@ -36,45 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
     //인증작업을 실시함.
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-
-        String accessToken = jwtTokenProvider.extractAccessToken(request).orElse(null);
-        String refreshToken = jwtTokenProvider.extractRefreshToken(request).orElse(null);
-
-        if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken) == true) {
-            String username = jwtTokenProvider.getUsername(refreshToken);
-            if (username != null) {
-                String reissueAccessToken = jwtTokenProvider.createAccessToken(username);
-                response.setContentType("application/json;charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_OK);
-                response.setHeader("Authorization", reissueAccessToken);
-                JSONObject responseJson = new JSONObject();
-                responseJson.put("message", "Access Token 재발급이 완료되었습니다.");
-                response.getWriter().print(responseJson);
-                return;
-            } else {
-                response.setContentType("application/json;charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                JSONObject responseJson = new JSONObject();
-                responseJson.put("message", "유저 정보를 찾지 못헀습니다.");
-                response.getWriter().print(responseJson);
-                return;
-            }
-        } else if (accessToken == null && refreshToken != null && jwtTokenProvider.validateToken(refreshToken) == false) {
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            JSONObject responseJson = new JSONObject();
-            responseJson.put("message", "로그인이 필요합니다.");
-            response.getWriter().print(responseJson);
-            return;
-        } else if(accessToken != null && refreshToken != null && jwtTokenProvider.validateToken(accessToken) == false && jwtTokenProvider.validateToken(refreshToken) == false){
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            JSONObject responseJson = new JSONObject();
-            responseJson.put("message", "로그인이 필요합니다.");
-            response.getWriter().print(responseJson);
+        if(request.getRequestURI().equals("/reissue")) {
+            filterChain.doFilter(request, response); // GET: /reissue의 요청이라면 밑의 로직을 무시하고 Controller단까지 진입.
             return;
         }
-        else if (accessToken != null && jwtTokenProvider.validateToken(accessToken) == true) {
+
+        String accessToken = jwtTokenProvider.extractAccessToken(request).orElse(null);
+
+
+        if (accessToken != null && jwtTokenProvider.validateToken(accessToken) == true) {
 
             String username = jwtTokenProvider.getUsername(accessToken);
             try {

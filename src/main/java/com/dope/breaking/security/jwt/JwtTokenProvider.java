@@ -65,8 +65,14 @@ public class JwtTokenProvider {
         return Optional.ofNullable(request.getHeader(accessHeader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
-    public Optional<String> extractRefreshToken(HttpServletRequest request) throws IOException, ServletException {
-        return Optional.ofNullable(request.getHeader(refreshHeader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
+
+    public Optional<String> extractAccessToken(String request) throws IOException{
+        return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
+    }
+
+
+    public Optional<String> extractRefreshToken(String request) throws IOException{
+        return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
 

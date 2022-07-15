@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @Setter
@@ -21,13 +23,15 @@ public class FeedResultPostDto {
     private Long userId;
     private String profileImgURL;
     private String realName;
+    private int price;
     private Boolean isLiked;
     private Boolean isBookmarked;
+    private LocalDateTime createdTime;
 
     @QueryProjection
     public FeedResultPostDto(Long postId, String title, String region, String thumbnailImgURL, int likeCount,
                              PostType postType, Boolean isSold, int viewCount, Long userId, String profileImgURL,
-                             String realName, Boolean isLiked, Boolean isBookmarked) {
+                             String realName, int price, Boolean isLiked, Boolean isBookmarked, LocalDateTime createdTime) {
         this.postId = postId;
         this.title = title;
         this.region = region;
@@ -39,8 +43,10 @@ public class FeedResultPostDto {
         this.userId = userId;
         this.profileImgURL = profileImgURL;
         this.realName = realName;
+        this.price = price;
         this.isLiked = isLiked;
         this.isBookmarked = isBookmarked;
+        this.createdTime = createdTime;
     }
 
 }

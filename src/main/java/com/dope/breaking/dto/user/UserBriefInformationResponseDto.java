@@ -13,4 +13,6 @@ public class UserBriefInformationResponseDto {
 
     Long userId;
 
+    int balance;
+
 }

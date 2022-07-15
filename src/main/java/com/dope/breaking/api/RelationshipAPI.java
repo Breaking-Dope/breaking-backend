@@ -38,7 +38,7 @@ public class RelationshipAPI {
 
     }
 
-    @GetMapping("follow/following/{userId}")
+    @GetMapping("/follow/following/{userId}")
     public ResponseEntity<?> followingUsers (@PathVariable Long userId) {
 
         List<FollowInfoResponseDto> followInfoResponseDtoList = followService.followingUsers(userId);
@@ -46,7 +46,7 @@ public class RelationshipAPI {
 
     }
 
-    @GetMapping("follow/follower/{userId}")
+    @GetMapping("/follow/follower/{userId}")
     public ResponseEntity<?> followerUsers (@PathVariable Long userId){
 
         List<FollowInfoResponseDto> followInfoResponseDtoList = followService.followerUsers(userId);

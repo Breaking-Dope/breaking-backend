@@ -5,7 +5,6 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.FollowService;
-import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -46,9 +45,6 @@ class RelationshipAPITest {
     private FollowRepository followRepository;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -64,7 +60,7 @@ class RelationshipAPITest {
                 .role(Role.USER) // 최초 가입시 USER 로 설정
                 .build();
 
-        userService.save(user);
+        userRepository.save(user);
 
     }
 
@@ -80,7 +76,7 @@ class RelationshipAPITest {
 
         //Given
         User followedUser = new User();
-        userService.save(followedUser);
+        userRepository.save(followedUser);
 
         //When
         this.mockMvc.perform(post("/follow/{userId}",followedUser.getId()))
@@ -88,7 +84,7 @@ class RelationshipAPITest {
 
         //Then
         Assertions.assertThat(followedUser.getFollowerList().size()).isEqualTo(1);
-        Assertions.assertThat(userService.findById(1L).get().getFollowingList().size()).isEqualTo(1);
+        Assertions.assertThat(userRepository.findById(1L).get().getFollowingList().size()).isEqualTo(1);
 
     }
 
@@ -109,14 +105,14 @@ class RelationshipAPITest {
     public void followUserThatIsAlreadyFollowing() throws Exception{
 
         //Given
-        User followingUser = userService.findByUsername("12345g").get();
+        User followingUser = userRepository.findByUsername("12345g").get();
         User followedUser = new User();
-        userService.save(followedUser);
+        userRepository.save(followedUser);
 
         //When
-        followService.AFollowB(followingUser,followedUser);
-        userService.save(followingUser);
-        userService.save(followedUser);
+        followService.follow(followingUser,followedUser);
+        userRepository.save(followingUser);
+        userRepository.save(followedUser);
 
         //Then
         this.mockMvc.perform(post("/follow/{userId}",followedUser.getId()))
@@ -130,11 +126,11 @@ class RelationshipAPITest {
     public void unfollowUser() throws Exception{
 
         //Given
-        User followingUser = userService.findByUsername("12345g").get();
+        User followingUser = userRepository.findByUsername("12345g").get();
         User followedUser = new User();
 
-        followService.AFollowB(followingUser,followedUser);
-        userService.save(followedUser);
+        followService.follow(followingUser,followedUser);
+        userRepository.save(followedUser);
 
         //When
         this.mockMvc.perform(delete("/follow/{userId}", followedUser.getId()))
@@ -163,7 +159,7 @@ class RelationshipAPITest {
 
         //Given
         User notFollowedUser  = new User();
-        userService.save(notFollowedUser);
+        userRepository.save(notFollowedUser);
 
         //When
         this.mockMvc.perform(delete("/follow/{userId}",notFollowedUser.getId()))
@@ -179,12 +175,12 @@ class RelationshipAPITest {
         User followedUser1 = new User();
         User followedUser2 = new User();
 
-        followService.AFollowB(followingUser,followedUser1);
-        followService.AFollowB(followingUser,followedUser2);
+        followService.follow(followingUser,followedUser1);
+        followService.follow(followingUser,followedUser2);
 
-        userService.save(followingUser);
-        userService.save(followedUser1);
-        userService.save(followedUser2);
+        userRepository.save(followingUser);
+        userRepository.save(followedUser1);
+        userRepository.save(followedUser2);
 
         //When
          this.mockMvc.perform(get("/follow/following/{userId}",followingUser.getId()))
@@ -198,7 +194,7 @@ class RelationshipAPITest {
 
         //Given
         User user = new User();
-        userService.save(user);
+        userRepository.save(user);
 
         //When
         this.mockMvc.perform(get("/follow/following/{userId}",user.getId()))
@@ -215,12 +211,12 @@ class RelationshipAPITest {
         User followingUser2 = new User();
         User followedUser = new User();
 
-        followService.AFollowB(followingUser1,followedUser);
-        followService.AFollowB(followingUser2,followedUser);
+        followService.follow(followingUser1,followedUser);
+        followService.follow(followingUser2,followedUser);
 
-        userService.save(followingUser1);
-        userService.save(followingUser2);
-        userService.save(followedUser);
+        userRepository.save(followingUser1);
+        userRepository.save(followingUser2);
+        userRepository.save(followedUser);
 
         //When
         this.mockMvc.perform(get("/follow/follower/{userId}",followedUser.getId()))

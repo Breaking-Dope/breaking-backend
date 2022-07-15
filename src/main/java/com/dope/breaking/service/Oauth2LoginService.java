@@ -1,6 +1,7 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.security.userInfoDto.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 public class Oauth2LoginService {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -76,7 +78,7 @@ public class Oauth2LoginService {
             dto.setProfileImgURL(null);
         }
 
-        if (!userService.existByUsername(dto.getUsername())) {
+        if (!userRepository.existsByUsername(dto.getUsername())) {
             log.info("기존 유저 정보가 없음.");
             return ResponseEntity.status(200).body(dto);
         } else {
@@ -142,7 +144,7 @@ public class Oauth2LoginService {
             dto.setProfileImgURL(null);
         }
 
-        if (!userService.existByUsername(dto.getUsername())) {
+        if (!userRepository.existsByUsername(dto.getUsername())) {
             log.info("유저 정보가 없음");
             return ResponseEntity.status(200).body(dto);
         } else {

@@ -4,7 +4,6 @@ import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
-import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -44,9 +43,6 @@ class PostAPITest {
     PostAPI postAPI;
 
     @Autowired
-    UserService userService;
-
-    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -60,7 +56,7 @@ class PostAPITest {
                 .role(Role.PRESS) // 최초 가입시 USER 로 설정
                 .build();
 
-        userService.save(user);
+        userRepository.save(user);
     }
 
 

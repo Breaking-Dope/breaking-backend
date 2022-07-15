@@ -5,6 +5,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     @Autowired UserService userService;
+    @Autowired UserRepository userRepository;
     @Autowired EntityManager em;
 
 //    @Test
@@ -83,10 +85,10 @@ class UserServiceTest {
 
         );
 
-        User savedUser = userService.save(user);
+        User savedUser = userRepository.save(user);
 
         // Then
-        User foundUser = userService.findById(savedUser.getId()).get();
+        User foundUser = userRepository.findById(savedUser.getId()).get();
         assertThat(foundUser).isEqualTo(user);
 
     }
@@ -151,7 +153,7 @@ class UserServiceTest {
                 signUpRequest.getUsername(),
                 Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
         );
-        userService.save(user);
+        userRepository.save(user);
 
         //When
         UserBriefInformationResponseDto foundUserInfo = userService.userBriefInformation("testUsername");
@@ -179,7 +181,7 @@ class UserServiceTest {
                 signUpRequest.getUsername(),
                 Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
         );
-        userService.save(user);
+        userRepository.save(user);
 
         //Then
         org.junit.jupiter.api.Assertions.assertThrows(InvalidAccessTokenException.class, () -> {
@@ -205,7 +207,7 @@ class UserServiceTest {
                 signUpRequest.getUsername(),
                 Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
         );
-        userService.save(user);
+        userRepository.save(user);
 
         User anotherUser = new User();
         SignUpRequestDto anotherSignUpRequest =  new SignUpRequestDto
@@ -220,7 +222,7 @@ class UserServiceTest {
                 anotherSignUpRequest.getUsername(),
                 Role.valueOf(anotherSignUpRequest.getRole().toUpperCase(Locale.ROOT))
         );
-        userService.save(anotherUser);
+        userRepository.save(anotherUser);
 
         //When
         UserBriefInformationResponseDto foundUserInfo = userService.userBriefInformation("anotherTestUsername");

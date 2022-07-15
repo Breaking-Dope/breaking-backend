@@ -5,10 +5,10 @@ import com.dope.breaking.dto.post.*;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.response.MessageResponseDto;
+import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.SearchFeedService;
 import com.dope.breaking.service.SortStrategy;
-import com.dope.breaking.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -39,7 +39,7 @@ public class PostAPI {
 
     private final SearchFeedService searchFeedService;
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     private final PostService postService;
 
@@ -79,7 +79,7 @@ public class PostAPI {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
         }//유저 정보 없으면 일치하지 않다고 반환하기.
-        if (!userService.existByUsername(principal.getName())) {
+        if (!userRepository.existsByUsername(principal.getName())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }
 
@@ -119,10 +119,10 @@ public class PostAPI {
         if (principal == null) { //인증된 사용자가 없다면 403반환.
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new MessageResponseDto(PostResType.NOT_FOUND_USER.getMessage()));
         }//유저 정보 없으면 일치하지 않는다면 401반환
-        if (!userService.existByUsername(principal.getName())) {
+        if (!userRepository.existsByUsername(principal.getName())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponseDto(PostResType.NOT_REGISTERED_USER.getMessage()));
         }//작성자와 수정을 시도하려는 자가 일치하지 않는다면 400 반환
-        if(!postService.existByPostIdAndUserId(postid ,userService.findByUsername(principal.getName()).get().getId())){
+        if(!postService.existByPostIdAndUserId(postid , userRepository.findByUsername(principal.getName()).get().getId())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.NO_PERMISSION.getMessage()));
         }
 

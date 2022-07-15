@@ -237,35 +237,6 @@ public class UserService {
 
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    public Optional<User> findByNickname(String nickname) {
-        return userRepository.findByNickname(nickname);
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public Optional<User> findById(Long id){
-        return userRepository.findById(id);
-    }
-
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-
-    public Boolean existByUsername(String username){
-        return userRepository.existsByUsername(username);
-    }
-
-    public Boolean existById(Long userId){
-        return userRepository.existsById(userId);
-    }
-
-
 
     public Optional<User> findByRefreshToken(String refreshToken){
         return userRepository.findByRefreshToken(refreshToken);

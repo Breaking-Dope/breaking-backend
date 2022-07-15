@@ -9,15 +9,13 @@ import com.dope.breaking.exception.follow.AlreadyFollowingException;
 import com.dope.breaking.exception.follow.AlreadyUnfollowingException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
+import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -27,7 +25,7 @@ import java.util.Optional;
 public class FollowService {
 
     private final FollowRepository followRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     public void deleteById(Long followId){
         followRepository.deleteById(followId);
@@ -47,7 +45,7 @@ public class FollowService {
         return false;
     }
 
-    public void AFollowB (User followingUser, User followedUser){
+    public void follow(User followingUser, User followedUser){
 
         Follow follow = new Follow();
 
@@ -59,7 +57,7 @@ public class FollowService {
 
     }
 
-    public void AUnfollowB (User followingUser, User followedUser){
+    public void unfollow(User followingUser, User followedUser){
 
         for (Follow follow : followingUser.getFollowingList()) {
 
@@ -75,37 +73,37 @@ public class FollowService {
 
     public void followUser(String username, Long userId) {
 
-        User followingUser = userService.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
-        User followedUser = userService.findById(userId).orElseThrow(NoSuchUserException::new);
+        User followingUser = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        User followedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
         if (isFollowing(followingUser,followedUser)){
             throw new AlreadyFollowingException();
         }
 
-        AFollowB(followingUser,followedUser);
-        userService.save(followingUser);
-        userService.save(followedUser);
+        follow(followingUser,followedUser);
+        userRepository.save(followingUser);
+        userRepository.save(followedUser);
 
     }
 
     public void unfollowUser(String username, Long userId) {
 
-        User followingUser = userService.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
-        User followedUser = userService.findById(userId).orElseThrow(NoSuchUserException::new);
+        User followingUser = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        User followedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
         if (!isFollowing(followingUser,followedUser)){
             throw new AlreadyUnfollowingException();
         }
 
-        AUnfollowB(followingUser,followedUser);
-        userService.save(followingUser);
-        userService.save(followedUser);
+        unfollow(followingUser,followedUser);
+        userRepository.save(followingUser);
+        userRepository.save(followedUser);
 
     }
 
     public List<FollowInfoResponseDto> followingUsers (Long userId){
 
-        User user = userService.findById(userId).orElseThrow(NoSuchUserException::new);
+        User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
         List<Follow> followingList = user.getFollowingList();
         List<FollowInfoResponseDto> followInfoResponseDtoList = new ArrayList<>();
@@ -121,14 +119,14 @@ public class FollowService {
 
     public List<FollowInfoResponseDto> followerUsers (Long userId){
 
-        User user = userService.findById(userId).orElseThrow(NoSuchUserException::new);
+        User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
         List<Follow> followerList = user.getFollowerList();
         List<FollowInfoResponseDto> followInfoResponseDtoList = new ArrayList<>();
 
         for (Follow follow : followerList) {
-            User followedUser = follow.getFollowing ();
-            followInfoResponseDtoList.add (new FollowInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
+            User followedUser = follow.getFollowing();
+            followInfoResponseDtoList.add(new FollowInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
         }
 
         return followInfoResponseDtoList;

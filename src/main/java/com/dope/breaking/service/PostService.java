@@ -6,6 +6,7 @@ import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.repository.PostRepository;
+import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ import java.util.*;
 public class PostService {
     private final PostRepository postRepository;
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     private final MediaService mediaService;
 
@@ -51,7 +52,7 @@ public class PostService {
                     .price(postRequestDto.getPrice())
                     .build();
 
-            User user = userService.findByUsername(username).get();
+            User user = userRepository.findByUsername(username).get();
             post.setUser(user);
             postid = postRepository.save(post).getId();
 

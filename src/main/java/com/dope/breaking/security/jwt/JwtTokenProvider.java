@@ -1,6 +1,6 @@
 package com.dope.breaking.security.jwt;
 
-import com.dope.breaking.service.UserService;
+import com.dope.breaking.repository.UserRepository;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class JwtTokenProvider {
     private final long accesstokenValidityInMilliseconds = 604800 *  1000L; //엑세스 토큰 유효기간 1주
     private final long refreshtokenValidityInMilliseconds = 2 * 604800 * 1000L; //리플리쉬 토큰 유효기간 2주
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     // JWT 토큰 생성
     @PostConstruct
@@ -59,8 +59,8 @@ public class JwtTokenProvider {
     }
 
     public void destroyRefreshToken(String username) {
-        if (userService.findByUsername(username).isPresent()) {
-            userService.findByUsername(username).get().destroyRefreshToken();
+        if (userRepository.findByUsername(username).isPresent()) {
+            userRepository.findByUsername(username).get().destroyRefreshToken();
         } else {
             log.info("토큰 삭제에 실패함.");
         }

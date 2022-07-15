@@ -71,10 +71,6 @@ class UserAPITest {
         mockMvc.perform(get("/profile/" + 1000000000))
                 .andExpect(status().isNotFound());
 
-        ProfileInformationResponseDto build = ProfileInformationResponseDto.builder()
-                .userId(1L)
-                .build();
-        System.out.println("build = " + build);
     }
 
 }

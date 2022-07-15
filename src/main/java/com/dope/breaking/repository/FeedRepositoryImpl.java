@@ -61,8 +61,11 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         user.id,
                         user.profileImgURL,
                         user.realName,
+                        post.price,
                         Expressions.asBoolean(false),
-                        Expressions.asBoolean(false)
+                        Expressions.asBoolean(false),
+                        post.createdDate
+
                 ))
                 .from(post)
                 .leftJoin(post.user, user)

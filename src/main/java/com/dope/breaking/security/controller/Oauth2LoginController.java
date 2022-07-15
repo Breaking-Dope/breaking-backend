@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -21,6 +22,7 @@ public class Oauth2LoginController {
     private final Oauth2LoginService oauth2LoginService;
 
 
+    @PreAuthorize("isAnonymous")
     @PostMapping("/kakao")
     public ResponseEntity<?> kakaoOauthLogin(@RequestBody Map<String, String> accessToken) throws InvalidAccessTokenException, ParseException {
         String token = accessToken.get("accessToken");
@@ -29,6 +31,7 @@ public class Oauth2LoginController {
     }
 
 
+    @PreAuthorize("isAnonymous")
     @PostMapping("/google")
     public ResponseEntity<?> googleOauthLogin(@RequestBody Map<String, String> accessToken) throws InvalidAccessTokenException, ParseException {
         String token = accessToken.get("accessToken");

@@ -45,6 +45,7 @@ public class UserAPI {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("isAnonymous")
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Void> signUp(
             @RequestPart String signUpRequest,

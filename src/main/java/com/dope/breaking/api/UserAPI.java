@@ -6,6 +6,7 @@ import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.json.simple.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.*;
 
@@ -64,11 +66,7 @@ public class UserAPI {
 
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/oauth2/validate-jwt")
-    public ResponseEntity<UserBriefInformationResponseDto> validateJwt(Principal principal) {
-        return ResponseEntity.ok().body(userService.userBriefInformation(principal.getName()));
-    }
+
 
 
     @PreAuthorize("isAuthenticated()")
@@ -87,5 +85,6 @@ public class UserAPI {
     public ResponseEntity<ProfileInformationResponseDto> profileInformation(@PathVariable Long userId){
         return ResponseEntity.ok().body(userService.profileInformation(userId));
     }
+
 
 }

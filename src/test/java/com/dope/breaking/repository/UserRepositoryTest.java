@@ -2,7 +2,6 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.service.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 class UserRepositoryTest {
 
     @Autowired
-    UserService userService;
+    UserRepository userRepository;
 
     @Test
     void findByNickname() {
@@ -25,8 +24,8 @@ class UserRepositoryTest {
         user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
 
         //When
-        User savedUser = userService.save(user);
-        User foundUser = userService.findByNickname(savedUser.getNickname()).get();
+        User savedUser = userRepository.save(user);
+        User foundUser = userRepository.findByNickname(savedUser.getNickname()).get();
 
         //Then
         Assertions.assertThat(foundUser).isEqualTo(savedUser);
@@ -57,8 +56,8 @@ class UserRepositoryTest {
         user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
 
         //When
-        User savedUser = userService.save(user);
-        User foundUser = userService.findByEmail(savedUser.getEmail()).get();
+        User savedUser = userRepository.save(user);
+        User foundUser = userRepository.findByEmail(savedUser.getEmail()).get();
 
         //Then
         Assertions.assertThat(foundUser).isEqualTo(savedUser);

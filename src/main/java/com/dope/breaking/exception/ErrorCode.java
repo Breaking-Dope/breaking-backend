@@ -15,7 +15,7 @@ public enum ErrorCode {
     EXPIRED_REFRESH_TOKEN("BSE004", "Refresh Token이 만료되었습니다."),
 
     BAD_REQUEST("BSE400", "클라이언트 요청오류."),
-    NO_SUCH_USER("BSE401", "해당 유저를 찾을 수 업습니다."),
+    NO_SUCH_USER("BSE401", "해당 유저를 찾을 수 없니다."),
     INVALID_NICKNAME_FORMAT("BSE410", "닉네임 형식이 잘못되었습니다."),
     INVALID_PHONE_NUMBER_FORMAT("BSE411", "전화번호 형식이 잘못되었습니다."),
     INVALID_EMAIL_FORMAT("BSE412", "이메일 형식이 잘못되었습니다."),
@@ -23,6 +23,8 @@ public enum ErrorCode {
     DUPLICATED_NICKNAME("BSE413", "사용중인 닉네임입니다."),
     DUPLICATED_PHONE_NUMBER("BSE414", "사용중인 전화번호입니다."),
     DUPLICATED_EMAIL("BSE415", "사용중인 이메일입니다."),
+    ALREADY_FOLLOWING("BSE420","이미 팔로우 중인 유저입니다."),
+    ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
 
     INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패.")
     ;

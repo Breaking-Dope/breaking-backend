@@ -2,6 +2,7 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.user.ProfileInformationResponseDto;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
@@ -229,6 +230,31 @@ class UserServiceTest {
 
         //Then
         assertNotEquals(foundUserInfo.getUserId(), user.getId());
+    }
+
+    @Test
+    void getUserInformationInProfilePage() {
+
+        User user = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
+        user.setRequestFields(
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userRepository.save(user);
+
+        ProfileInformationResponseDto profileInformationResponseDto = userService.profileInformation(user.getId());
+
+        assertThat(profileInformationResponseDto.getEmail().equals(user.getEmail()));
+        assertThat(profileInformationResponseDto.getNickname().equals(user.getNickname()));
+
     }
 
 }

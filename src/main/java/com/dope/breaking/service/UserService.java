@@ -119,7 +119,7 @@ public class UserService {
     public UserBriefInformationResponseDto userBriefInformation(String username) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
-        return new UserBriefInformationResponseDto(user.getProfileImgURL(), user.getNickname(), user.getId());
+        return new UserBriefInformationResponseDto(user.getProfileImgURL(), user.getNickname(), user.getId(), user.getBalance());
     }
 
     private SignUpRequestDto transformUserInformationToObject(String signUpRequest) {

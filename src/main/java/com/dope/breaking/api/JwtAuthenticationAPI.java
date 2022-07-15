@@ -5,6 +5,7 @@ import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.auth.InvalidRefreshTokenException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
+import com.dope.breaking.service.JwtAuthenticationService;
 import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,7 @@ public class JwtAuthenticationAPI {
 
     private final UserService userService;
 
-    private final JwtTokenProvider jwtTokenProvider;
-
-    private final RedisService redisService;
+    private final JwtAuthenticationService jwtAuthenticationService;
 
 
 
@@ -47,28 +46,7 @@ public class JwtAuthenticationAPI {
     public ResponseEntity<?> refreshTokenReissue(@RequestHeader(value = "Authorization", required = true) String accessToken,
                                                  @RequestHeader(value = "Authorization-Refresh", required = true) String refreshToken) throws IOException {
 
-        String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
-        String getRefreshToken = jwtTokenProvider.extractRefreshToken(refreshToken).orElse(null);
-
-        if (refreshToken != null && jwtTokenProvider.validateToken(getRefreshToken) == false) { //리플리쉬 토큰이 있고, 유효하지 않다면?
-            throw new InvalidRefreshTokenException();
-        }
-        else if(getAccessToken != null && jwtTokenProvider.validateToken(getRefreshToken) == true){
-            String username = jwtTokenProvider.getUsername(getRefreshToken);
-            String redisRefreshToken = redisService.getData(username);
-            if(!getRefreshToken.equals(redisRefreshToken)){
-                throw new InvalidRefreshTokenException();
-            }
-
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
-            String newRefrsehToken = jwtTokenProvider.createRefreshToken(username);
-            httpHeaders.set("Authorization-Refresh", newRefrsehToken);
-            redisService.setDataWithExpiration(username, newRefrsehToken, 2 * 604800L );
-
-            return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return jwtAuthenticationService.reissue(accessToken, refreshToken);
     }
 
 

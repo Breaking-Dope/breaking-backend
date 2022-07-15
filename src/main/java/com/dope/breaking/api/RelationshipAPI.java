@@ -22,7 +22,7 @@ public class RelationshipAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/follow/{userId}")
-    public ResponseEntity<?> followUser( Principal principal, @PathVariable Long userId) {
+    public ResponseEntity followUser( Principal principal, @PathVariable Long userId) {
 
        followService.followUser(principal.getName(),userId);
        return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -31,7 +31,7 @@ public class RelationshipAPI {
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/follow/{userId}")
-    public ResponseEntity<?> unfollowUser(Principal principal, @PathVariable Long userId) {
+    public ResponseEntity unfollowUser(Principal principal, @PathVariable Long userId) {
 
        followService.unfollowUser(principal.getName(),userId);
        return ResponseEntity.ok().build();
@@ -39,21 +39,17 @@ public class RelationshipAPI {
     }
 
     @GetMapping("/follow/following/{userId}")
-    public ResponseEntity<?> followingUsers (@PathVariable Long userId) {
+    public ResponseEntity<List<FollowInfoResponseDto>>followingUsers (@PathVariable Long userId) {
 
-        List<FollowInfoResponseDto> followInfoResponseDtoList = followService.followingUsers(userId);
-        return ResponseEntity.ok().body(followInfoResponseDtoList);
+        return ResponseEntity.ok().body(followService.followingUsers(userId));
 
     }
 
     @GetMapping("/follow/follower/{userId}")
-    public ResponseEntity<?> followerUsers (@PathVariable Long userId){
+    public ResponseEntity<List<FollowInfoResponseDto>> followerUsers (@PathVariable Long userId){
 
-        List<FollowInfoResponseDto> followInfoResponseDtoList = followService.followerUsers(userId);
-        return ResponseEntity.ok().body(followInfoResponseDtoList);
+        return ResponseEntity.ok().body(followService.followerUsers(userId));
 
     }
-
-
 
 }

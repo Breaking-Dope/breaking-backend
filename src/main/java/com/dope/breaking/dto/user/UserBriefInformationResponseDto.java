@@ -1,10 +1,12 @@
 package com.dope.breaking.dto.user;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class UserBriefInformationResponseDto {
 
     String profileImgURL;
@@ -14,5 +16,7 @@ public class UserBriefInformationResponseDto {
     Long userId;
 
     int balance;
+
+
 
 }

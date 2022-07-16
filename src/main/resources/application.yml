@@ -19,6 +19,13 @@ spring:
       enabled: true
       path: /console
 
+  mvc:
+    static-path-pattern: /static/**
+
+  resources:
+    static-locations: classpath:/static/
+    add-mappings: true
+
 
   servlet:
     multipart:

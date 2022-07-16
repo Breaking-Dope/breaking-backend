@@ -81,8 +81,12 @@ public class UserAPI {
     }
 
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<ProfileInformationResponseDto> profileInformation(@PathVariable Long userId){
-        return ResponseEntity.ok().body(userService.profileInformation(userId));
+    public ResponseEntity<ProfileInformationResponseDto> profileInformation(Principal principal, @PathVariable Long userId){
+        String userName = null;
+        if (principal != null) {
+            userName = principal.getName();
+        }
+        return ResponseEntity.ok().body(userService.profileInformation(userName, userId));
     }
 
 }

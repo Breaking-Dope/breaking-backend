@@ -37,6 +37,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final MediaService mediaService;
     private final FollowRepository followRepository;
+    private final FollowService followService;
 
     public String signUp(String signUpRequest, List<MultipartFile> profileImg) {
 
@@ -253,11 +254,17 @@ public class UserService {
         user.updateRefreshToken(refreshToken);
     }
 
-    public ProfileInformationResponseDto profileInformation(Long userId) {
+    public ProfileInformationResponseDto profileInformation(String username, Long userId) {
 
         User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
         int followerCount = followRepository.countFollowsByFollowed(user);
         int followingCount = followRepository.countFollowsByFollowing(user);
+
+        boolean isFollowing = false;
+        if(username != null) {
+            User me = userRepository.findByUsername(username).orElseThrow();
+            isFollowing = followRepository.existsFollowsByFollowedAndFollowing(user, me);
+        }
 
         return ProfileInformationResponseDto.builder()
                 .userId(user.getId())
@@ -268,6 +275,7 @@ public class UserService {
                 .role(user.getRole())
                 .followerCount(followerCount)
                 .followingCount(followingCount)
+                .isFollowing(isFollowing)
                 .build();
 
     }

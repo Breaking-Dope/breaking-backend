@@ -42,11 +42,8 @@ public class MediaService {
 
     private final PostRepository postRepository;
 
-    //디렉토리는 추후 AWS내의 디렉토리로 변경
-    //private final String dirName = "/Users/gimmin-u/Desktop/testImgFolder";
 
-    //Martin0o0 dir
-    private final String dirName = System.getProperty("user.dir") + "/files";
+    private final String dirName = System.getProperty("user.dir") + "/src/main/resources/static";
     private final String basicProfileDir = "profile.png";
 
     public String getBasicProfileDir() {

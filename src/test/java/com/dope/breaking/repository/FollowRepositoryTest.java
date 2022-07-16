@@ -4,6 +4,8 @@ import com.dope.breaking.domain.user.Follow;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.SignUpRequestDto;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.Locale;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,12 +25,12 @@ class FollowRepositoryTest {
     @Autowired FollowRepository followRepository;
     @Autowired EntityManager em;
 
-    @Test
-    void countFollowerAndFollowing() {
+    @BeforeEach //DB에 유저정보를 먼저 저장.
+    public void createUserInfo() {
 
         User hero = new User();
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
-                ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
+                ("statusMsg","hero","phoneNumber","test@email.com","realname","testUsername", "press");
         hero.setRequestFields(
                 "anyURL",
                 signUpRequest.getNickname(),
@@ -42,7 +45,7 @@ class FollowRepositoryTest {
 
         User follower1 = new User();
         SignUpRequestDto signUpRequest2 =  new SignUpRequestDto
-                ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
+                ("statusMsg","follower1","phoneNumber","test@email.com","realname","testUsername", "press");
         follower1.setRequestFields(
                 "anyURL",
                 signUpRequest2.getNickname(),
@@ -57,7 +60,7 @@ class FollowRepositoryTest {
 
         User follower2 = new User();
         SignUpRequestDto signUpRequest3 =  new SignUpRequestDto
-                ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
+                ("statusMsg","follower2","phoneNumber","test@email.com","realname","testUsername", "press");
         follower2.setRequestFields(
                 "anyURL",
                 signUpRequest3.getNickname(),
@@ -69,7 +72,6 @@ class FollowRepositoryTest {
                 Role.valueOf(signUpRequest3.getRole().toUpperCase(Locale.ROOT))
         );
         userRepository.save(follower2);
-
 
         Follow follow1 = new Follow();
 
@@ -88,6 +90,22 @@ class FollowRepositoryTest {
         follower2.getFollowingList().add(follow2);
         hero.getFollowerList().add(follow2);
 
+    }
+
+    @AfterEach
+    public void afterCleanUp() {
+        userRepository.deleteAll();
+        followRepository.deleteAll();
+    }
+
+    @Test
+    void countFollowerAndFollowing() {
+
+        User hero = userRepository.findByNickname("hero").get();
+        User follower1 = userRepository.findByNickname("follower1").get();
+        User follower2 = userRepository.findByNickname("follower2").get();
+
+
         assertEquals(2, followRepository.countFollowsByFollowing(hero));
         assertEquals(0, followRepository.countFollowsByFollowed(hero));
 
@@ -96,5 +114,18 @@ class FollowRepositoryTest {
 
         assertEquals(0, followRepository.countFollowsByFollowing(follower1));
         assertEquals(0, followRepository.countFollowsByFollowing(follower2));
+    }
+
+    @Test
+    void existsFollowsByFollowedAndFollowing() {
+
+        User hero = userRepository.findByNickname("hero").get();
+        User follower1 = userRepository.findByNickname("follower1").get();
+        User follower2 = userRepository.findByNickname("follower2").get();
+
+        assertTrue(followRepository.existsFollowsByFollowedAndFollowing(follower1, hero), () -> "hero 은 follower1 를 팔로우 중입니다.");
+        assertTrue(followRepository.existsFollowsByFollowedAndFollowing(follower2, hero), () -> "follower2 은 hero 를 팔로우 중입니다.");
+        assertFalse(followRepository.existsFollowsByFollowedAndFollowing(hero, follower1), () -> "hero 은 hero 를 팔로우 하지 않습니다.");
+        assertFalse(followRepository.existsFollowsByFollowedAndFollowing(follower1, follower2), () -> "follower1 은 follower2 를 팔로우 하지 않습니다.");
     }
 }

@@ -47,18 +47,10 @@ public class UserAPI {
 
     @PreAuthorize("isAnonymous")
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> signUp(
+    public ResponseEntity<?> signUp(
             @RequestPart String signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) {
-
-        String username = userService.signUp(signUpRequest, profileImg);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
-        String refreshjwt = jwtTokenProvider.createRefreshToken();
-        httpHeaders.set("Authorization-refresh", refreshjwt);
-        userService.setRefreshToken(username, refreshjwt); //리플리쉬 토큰 저장.
-        return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
-
+        return userService.signUp(signUpRequest, profileImg);
     }
 
     @PreAuthorize("isAuthenticated()")

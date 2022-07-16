@@ -13,9 +13,12 @@ import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +41,9 @@ public class UserService {
     private final MediaService mediaService;
     private final FollowRepository followRepository;
 
-    public String signUp(String signUpRequest, List<MultipartFile> profileImg) {
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) {
 
         SignUpRequestDto signUpRequestDto = transformUserInformationToObject(signUpRequest);
 
@@ -63,8 +68,20 @@ public class UserService {
         );
 
         userRepository.save(user);
-        return user.getUsername();
-        
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(user.getUsername()));
+        String refreshjwt = jwtTokenProvider.createRefreshToken();
+        user.updateRefreshToken(refreshjwt);
+        httpHeaders.set("Authorization-refresh", refreshjwt);
+        UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
+                .balance(user.getBalance())
+                .userId(user.getId())
+                .nickname(user.getNickname())
+                .profileImgURL(user.getProfileImgURL())
+                .build();
+
+        return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.CREATED);
     }
 
     public void updateProfile(String username, String updateRequestDto, List<MultipartFile> profileImg) {

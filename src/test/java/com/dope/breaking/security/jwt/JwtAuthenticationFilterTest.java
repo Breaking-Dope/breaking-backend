@@ -4,6 +4,7 @@ import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.userDetails.PrincipalDetailsService;
+import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
+@Disabled
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -56,6 +58,9 @@ class JwtAuthenticationFilterTest {
 
     @Autowired
     PrincipalDetailsService principalDetailsService;
+
+    @Autowired
+    RedisService redisService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -95,14 +100,14 @@ class JwtAuthenticationFilterTest {
         accessjwt = (String) response.getHeaderValue("Authorization");
         System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
         refreshjwt = (String) response.getHeaderValue("Authorization-refresh");
-        System.out.println("user refreshtoken : " + userRepository.findByRefreshToken(refreshjwt).get().getRefreshToken());
+        System.out.println("user refreshtoken : " + redisService.getData(refreshjwt));
     }
 
     @DisplayName("No AccessJwt and RefreshJwt")
     @Order(2)
     @Test
     void noAccessAndRefreshToken() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/oauth2/validate-jwt"))//login이 아닌 다른 임의의 주소
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/hello"))//login이 아닌 다른 임의의 주소
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError()); //아무것도 없다면 4xx 반환
     }
@@ -132,13 +137,10 @@ class JwtAuthenticationFilterTest {
     @Test
     void validRefreshWithoutAccessToken() throws Exception{
 
-        System.out.println(refreshjwt);
-        System.out.println(userRepository.findByUsername(USERNAME).get().getRefreshToken());
-
 
         MvcResult result  = this.mockMvc.perform(MockMvcRequestBuilders.get("/hello").header("Authorization-refresh", "Bearer " + refreshjwt))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn(); //재발급이기 때문.
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn(); //재발급이기 때문.
 
         MockHttpServletResponse response = result.getResponse();
         System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
@@ -147,15 +149,6 @@ class JwtAuthenticationFilterTest {
     }
 
 
-    @DisplayName("invalid RefershJwt without AccessToken") //유효하지 않은 refreshtoken으로 접근하면 4xx 발생
-    @Order(6)
-    @Test
-    void invalidRefreshWithoutAccessToken() throws Exception {
-        this.mockMvc.perform(MockMvcRequestBuilders.get("/hello").header("Authorization-refresh", "Bearer " + refreshjwt+ "1214"))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
-    }
-
 
     @DisplayName("valid AccessJwt and RefreshJwt")
     @Order(7)
@@ -163,13 +156,13 @@ class JwtAuthenticationFilterTest {
     void validAccessAndRefreshToken() throws Exception{
         MvcResult result  = this.mockMvc.perform(MockMvcRequestBuilders.get("/hello")
                         .header("Authorization", "Bearer " + accessjwt) //accessjwt
-                        .header("Authorization-refresh", "Bearer " + refreshjwt))//refershjwt
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt))//refershjwt
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk()).andReturn(); //재발급이기 때문.
 
         MockHttpServletResponse response = result.getResponse();
         System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
-        System.out.println("refershToken : " + response.getHeaderValue("Authorization-refresh"));
+        System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
         String reaccessjwt = (String) response.getHeaderValue("Authorization");
         String rerefreshjwt = (String) response.getHeaderValue("Authorization-refresh");
         Assertions.assertThat(rerefreshjwt).isNull();
@@ -182,18 +175,10 @@ class JwtAuthenticationFilterTest {
     void invalidAccessButValidRefresh() throws Exception{
         MvcResult result  = this.mockMvc.perform(MockMvcRequestBuilders.get("/hello")
                         .header("Authorization", "Bearer " + accessjwt+ "2134") //accessjwt
-                        .header("Authorization-refresh", "Bearer " + refreshjwt))//refershjwt
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt))//refershjwt
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn(); //refresh 토큰이 유효하기에 재발급함.
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
 
-        MockHttpServletResponse response = result.getResponse();
-        System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
-        System.out.println("refershToken : " + response.getHeaderValue("Authorization-refresh"));
-        String reaccessjwt = (String) response.getHeaderValue("Authorization");
-        String rerefreshjwt = (String) response.getHeaderValue("Authorization-refresh");
-        Assertions.assertThat(reaccessjwt).isNotEmpty();
-        Assertions.assertThat(rerefreshjwt).isNull();
-        System.out.println(reaccessjwt);
 
     }
 
@@ -205,7 +190,7 @@ class JwtAuthenticationFilterTest {
     void validAccessButinvalidRefresh() throws Exception{
         this.mockMvc.perform(MockMvcRequestBuilders.get("/hello")
                         .header("Authorization", "Bearer " + accessjwt)
-                        .header("Authorization-refresh", "Bearer " + refreshjwt+ "1214"))
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt+ "1214"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -217,19 +202,65 @@ class JwtAuthenticationFilterTest {
     void invalidAccessAndRefresh() throws Exception{
         MvcResult result  = this.mockMvc.perform(MockMvcRequestBuilders.get("/hello")
                         .header("Authorization", "Bearer " + accessjwt+ "2134") //accessjwt
-                        .header("Authorization-refresh", "Bearer " + refreshjwt + "1245"))//refershjwt
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt + "1245"))//refershjwt
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn(); //모두 잘못된 토큰이기에 4xx
 
         MockHttpServletResponse response = result.getResponse();
         System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
-        System.out.println("refershToken : " + response.getHeaderValue("Authorization-refresh"));
+        System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
         String reaccessjwt = (String) response.getHeaderValue("Authorization");
         String rerefreshjwt = (String) response.getHeaderValue("Authorization-refresh");
         Assertions.assertThat(reaccessjwt).isNull();
         Assertions.assertThat(rerefreshjwt).isNull();
     }
 
+
+    @DisplayName("reissue controller test : Valid Access and Refresh")
+    @Order(11)
+    @Test
+    void reissueWithValidTokens() throws Exception {
+        MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders.get("/reissue")
+                        .header("Authorization", "Bearer " + accessjwt) //accessjwt
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt))//refershjwt
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+        System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
+        System.out.println("refreshToken : " + response.getHeaderValue("Authorization-Refresh"));
+        String reaccessjwt = (String) response.getHeaderValue("Authorization");
+        String rerefreshjwt = (String) response.getHeaderValue("Authorization-refresh");
+        Assertions.assertThat(reaccessjwt).isNotNull();
+        Assertions.assertThat(rerefreshjwt).isNotNull();
+
+    }
+
+    @DisplayName("reissue controller test : Valid Access but Invalid Refresh")
+    @Order(11)
+    @Test
+    void reissueWithvalidAccessButInvalidRefrsh() throws Exception {
+        MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders.get("/reissue")
+                        .header("Authorization", "Bearer " + accessjwt) //accessjwt
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt + "dsafsaf"))//refershjwt
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
+
+    }
+
+    @DisplayName("reissue controller test : Invalid Tokens")
+    @Order(11)
+    @Test
+    void reissueWith() throws Exception {
+        Thread.sleep(1000);
+
+        MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders.get("/reissue")
+                        .header("Authorization", "Bearer " + accessjwt) //accessjwt
+                        .header("Authorization-Refresh", "Bearer " + refreshjwt + "dsaf2"))//refershjwt
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
+
+    }
 
 
 

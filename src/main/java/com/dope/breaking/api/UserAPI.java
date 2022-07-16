@@ -3,8 +3,10 @@ package com.dope.breaking.api;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.MediaService;
+import com.dope.breaking.service.RedisService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.json.simple.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.*;
 
@@ -22,6 +25,8 @@ public class UserAPI {
 
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final RedisService redisService;
 
 
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
@@ -54,18 +59,14 @@ public class UserAPI {
         String username = userService.signUp(signUpRequest, profileImg);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
-        String refreshjwt = jwtTokenProvider.createRefreshToken();
-        httpHeaders.set("Authorization-refresh", refreshjwt);
-        userService.setRefreshToken(username, refreshjwt); //리플리쉬 토큰 저장.
+        String refreshToken = jwtTokenProvider.createRefreshToken(username);
+        httpHeaders.set("Authorization-Refresh", refreshToken);
+        redisService.setDataWithExpiration(username, refreshToken, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
         return ResponseEntity.status(HttpStatus.CREATED).headers(httpHeaders).build();
 
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/oauth2/validate-jwt")
-    public ResponseEntity<UserBriefInformationResponseDto> validateJwt(Principal principal) {
-        return ResponseEntity.ok().body(userService.userBriefInformation(principal.getName()));
-    }
+
 
 
     @PreAuthorize("isAuthenticated()")
@@ -84,5 +85,6 @@ public class UserAPI {
     public ResponseEntity<ProfileInformationResponseDto> profileInformation(@PathVariable Long userId){
         return ResponseEntity.ok().body(userService.profileInformation(userId));
     }
+
 
 }

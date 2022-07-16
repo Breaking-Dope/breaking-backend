@@ -1,5 +1,7 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
@@ -89,7 +91,14 @@ public class Oauth2LoginService {
             httpHeaders.set("Authorization", accessjwt);
             httpHeaders.set("Authorization-refresh", refreshjwt);
             userService.setRefreshToken(dto.getUsername(), refreshjwt);
-            return new ResponseEntity<String>("토큰 발행", httpHeaders, HttpStatus.OK);
+            User user = userRepository.findByUsername(dto.getUsername()).get();
+            UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
+                    .userId(user.getId())
+                    .nickname(user.getNickname())
+                    .profileImgURL(user.getProfileImgURL())
+                    .balance(user.getBalance())
+                    .build();
+            return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
         }
     }
 
@@ -155,7 +164,14 @@ public class Oauth2LoginService {
             httpHeaders.set("Authorization", accessjwt);
             httpHeaders.set("Authorization-refresh", refreshjwt);
             userService.setRefreshToken(dto.getUsername(), refreshjwt);
-            return new ResponseEntity<String>("토큰 발행", httpHeaders, HttpStatus.OK);
+            User user = userRepository.findByUsername(dto.getUsername()).get();
+            UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
+                    .userId(user.getId())
+                    .balance(user.getBalance())
+                    .nickname(user.getNickname())
+                    .profileImgURL(user.getProfileImgURL())
+                    .build();
+            return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
         }
     }
 

@@ -18,9 +18,7 @@ import java.util.Map;
 @RestController
 public class Oauth2LoginController {
 
-
     private final Oauth2LoginService oauth2LoginService;
-
 
     @PreAuthorize("isAnonymous")
     @PostMapping("/kakao")
@@ -29,7 +27,6 @@ public class Oauth2LoginController {
         ResponseEntity<String> kakaoUserinfo = oauth2LoginService.kakaoUserInfo(token);
         return oauth2LoginService.kakaoLogin(kakaoUserinfo);
     }
-
 
     @PreAuthorize("isAnonymous")
     @PostMapping("/google")

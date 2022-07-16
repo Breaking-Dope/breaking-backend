@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -90,7 +89,7 @@ class UserServiceTest {
 
         // Then
         User foundUser = userRepository.findById(savedUser.getId()).get();
-        assertThat(foundUser).isEqualTo(user);
+        assertEquals(foundUser, user);
 
     }
 
@@ -250,10 +249,10 @@ class UserServiceTest {
         );
         userRepository.save(user);
 
-        ProfileInformationResponseDto profileInformationResponseDto = userService.profileInformation(user.getId());
+        ProfileInformationResponseDto profileInformationResponseDto = userService.profileInformation(null, user.getId());
 
-        assertThat(profileInformationResponseDto.getEmail().equals(user.getEmail()));
-        assertThat(profileInformationResponseDto.getNickname().equals(user.getNickname()));
+        assertEquals(profileInformationResponseDto.getEmail(), user.getEmail());
+        assertEquals(profileInformationResponseDto.getNickname(), user.getNickname());
 
     }
 

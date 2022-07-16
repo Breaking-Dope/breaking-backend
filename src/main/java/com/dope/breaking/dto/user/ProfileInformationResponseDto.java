@@ -28,8 +28,10 @@ public class ProfileInformationResponseDto {
 
     int followingCount;
 
+    boolean isFollowing;
+
     @Builder
-    public ProfileInformationResponseDto(Long userId, String profileImgURL, String nickname, String email, String statusMsg, Role role, int followerCount, int followingCount) {
+    public ProfileInformationResponseDto(Long userId, String profileImgURL, String nickname, String email, String statusMsg, Role role, int followerCount, int followingCount, boolean isFollowing) {
         this.userId = userId;
         this.profileImgURL = profileImgURL;
         this.nickname = nickname;
@@ -38,6 +40,7 @@ public class ProfileInformationResponseDto {
         this.role = role;
         this.followerCount = followerCount;
         this.followingCount = followingCount;
+        this.isFollowing = isFollowing;
     }
 
 }

@@ -1,13 +1,13 @@
 package com.dope.breaking.service;
 
-public enum MyPageSoldOption {
+public enum SoldOption {
 
     ALL,
     SOLD,
     UNSOLD;
 
-    public static MyPageSoldOption findMatchedEnum(String str) {
-        for (MyPageSoldOption el : MyPageSoldOption.values()) {
+    public static SoldOption findMatchedEnum(String str) {
+        for (SoldOption el : SoldOption.values()) {
             if (el.name().equalsIgnoreCase(str))
                 return el;
         }

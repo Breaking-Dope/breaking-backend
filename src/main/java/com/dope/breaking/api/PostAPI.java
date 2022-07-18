@@ -1,23 +1,15 @@
 package com.dope.breaking.api;
 
-import com.dope.breaking.dto.post.*;
-
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.dto.post.PostResType;
 import com.dope.breaking.dto.response.MessageResponseDto;
 import com.dope.breaking.repository.UserRepository;
-import com.dope.breaking.service.PostService;
-import com.dope.breaking.service.SearchFeedService;
-import com.dope.breaking.service.SortStrategy;
+import com.dope.breaking.service.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +21,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -37,38 +28,13 @@ import java.util.*;
 @RestController
 public class PostAPI {
 
-    private final SearchFeedService searchFeedService;
+
 
     private final UserRepository userRepository;
 
     private final PostService postService;
 
-    @GetMapping("/post/feed")
-    public ResponseEntity<Page<FeedResultPostDto>> searchFeed(
-            @RequestParam(value="page") int page,
-            @RequestParam(value="size") int size,
-            @RequestParam(value="search", required = false) String searchKeyword,
-            @RequestParam(value="sort-strategy", required = false) String sortStrategy,
-            @RequestParam(value="visible-sold", required = false) Boolean visibleSold,
-            @RequestParam(value="date-from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateFrom,
-            @RequestParam(value="date-to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateTo,
-            @RequestParam(value="for-last-min", required = false) Integer forLastMin) {
 
-        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
-                .searchKeyword(searchKeyword)
-                .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
-                .visibleSold(visibleSold)
-                .dateFrom(dateFrom)
-                .dateFrom(dateFrom)
-                .dateTo(dateTo)
-                .forLastMin(forLastMin)
-                .build();
-
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok().body(searchFeedService.searchFeedPagination(searchFeedConditionDto, pageable));
-
-
-    }
 
 
     @PreAuthorize("isAuthenticated()")//인증 되었는가? //403 Forbidden 반환.

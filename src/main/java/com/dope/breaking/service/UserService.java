@@ -2,10 +2,7 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.user.ProfileInformationResponseDto;
-import com.dope.breaking.dto.user.SignUpRequestDto;
-import com.dope.breaking.dto.user.UpdateUserRequestDto;
-import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
+import com.dope.breaking.dto.user.*;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.user.DuplicatedUserInformationException;
@@ -295,5 +292,18 @@ public class UserService {
                 .isFollowing(isFollowing)
                 .build();
 
+    }
+
+    public FullUserInformationResponse getFullUserInformation(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        return FullUserInformationResponse.builder()
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .email(user.getEmail())
+                .realName(user.getRealName())
+                .role(user.getRole())
+                .statusMsg(user.getStatusMsg())
+                .profileImgURL(user.getProfileImgURL())
+                .build();
     }
 }

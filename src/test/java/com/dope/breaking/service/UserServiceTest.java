@@ -2,6 +2,7 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.user.FullUserInformationResponse;
 import com.dope.breaking.dto.user.ProfileInformationResponseDto;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
@@ -254,6 +255,30 @@ class UserServiceTest {
         assertEquals(profileInformationResponseDto.getEmail(), user.getEmail());
         assertEquals(profileInformationResponseDto.getNickname(), user.getNickname());
 
+    }
+
+    @Test
+    void getFullUserInformation() {
+
+        User user = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
+        user.setRequestFields(
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userRepository.save(user);
+
+        FullUserInformationResponse fullUserInformationResponse = userService.getFullUserInformation(user.getUsername());
+
+        assertEquals(fullUserInformationResponse.getPhoneNumber(), user.getPhoneNumber());
+        assertEquals(fullUserInformationResponse.getRealName(), user.getRealName());
     }
 
 }

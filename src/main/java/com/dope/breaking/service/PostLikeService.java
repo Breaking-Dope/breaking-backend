@@ -39,17 +39,14 @@ public class PostLikeService {
 
     public void unlikePost(User user, Post post){
 
-        if (postLikeRepository.existsPostLikesByUserAndPost(user, post)){
+        if (!postLikeRepository.existsPostLikesByUserAndPost(user, post)){
             throw new AlreadyUnlikedException();
         }
 
-        for (PostLike postLike : user.getPostLikeList()){
-            if (postLike.getPost() == post){
-                user.getPostLikeList().remove(postLike);
-                post.getPostLikeList().remove(postLike);
-                break;
-            }
-        }
+        PostLike postLike = postLikeRepository.findPostLikeByUserAndPost(user,post).get();
+        user.getPostLikeList().remove(postLike);
+        post.getPostLikeList().remove(postLike);
+
     }
 
     public void likePostById (String username, Long postId){

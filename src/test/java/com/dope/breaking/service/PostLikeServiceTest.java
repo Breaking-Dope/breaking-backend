@@ -112,5 +112,25 @@ class PostLikeServiceTest {
         Assertions.assertThat(postLikeRepository.countPostLikesByPost(post)).isEqualTo(0);
 
     }
-    
+
+    @Test
+    void likedUserList(){
+
+        //Given
+        User user1 = new User();
+        User user2 = new User();
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        //When
+        postLikeService.likePost(user1,post);
+        postLikeService.likePost(user2,post);
+
+        //Then
+        Assertions.assertThat(postLikeService.likedUserList(post.getId()).size()).isEqualTo(2);
+    }
+
 }

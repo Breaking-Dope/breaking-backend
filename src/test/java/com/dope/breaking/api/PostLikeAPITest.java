@@ -23,8 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -134,5 +135,26 @@ class PostLikeAPITest {
                 .andExpect(status().isBadRequest()); //Then
 
     }
-    
+
+    @Test
+    void likedUserList() throws Exception{
+
+        //Given
+        User user1 = new User();
+        User user2 = new User();
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        postLikeService.likePost(user1,post);
+        postLikeService.likePost(user2,post);
+
+        //When
+        this.mockMvc.perform(get("/post/like-list/{postId}",post.getId()))
+                .andExpect(status().isOk()) //Then
+                .andExpect(jsonPath("$", hasSize(2)));
+    }
+
 }

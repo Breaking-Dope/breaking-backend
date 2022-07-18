@@ -42,10 +42,6 @@ public class User {
     @OneToMany(mappedBy = "blocking")
     private List<Block> blockerList = new ArrayList<Block>();
 
-    //좋아요한 제보 리스트
-    @OneToMany(mappedBy="post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostLike> postLikeList = new ArrayList<PostLike>();
-
     //입출금 내역
     @OneToMany(mappedBy = "user")
     private List<Statement> statementList =  new ArrayList<Statement>();

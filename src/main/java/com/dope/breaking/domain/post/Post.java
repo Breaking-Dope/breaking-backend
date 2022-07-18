@@ -37,9 +37,6 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post")
     private List<Comment> commentList = new ArrayList<Comment>();
 
-    @OneToMany(mappedBy="post", orphanRemoval = true)
-    private List<PostLike> postLikeList = new ArrayList<PostLike>();
-
     @OneToMany(mappedBy="post")
     private List<Media> mediaList = new ArrayList<Media>();
 

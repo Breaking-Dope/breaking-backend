@@ -1,7 +1,5 @@
 package com.dope.breaking.domain.post;
 
-
-import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import lombok.Getter;
 
@@ -23,5 +21,13 @@ public class PostLike {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name="POST_ID")
     private Post post;
+
+    public void updateUser(User user) {
+        this.user = user;
+    }
+
+    public void updatePost(Post post){
+        this.post = post;
+    }
 
 }

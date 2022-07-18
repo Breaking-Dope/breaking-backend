@@ -3,6 +3,7 @@ package com.dope.breaking.domain.user;
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.post.PostLike;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class User {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name="USER_ID")
     private Long id;
 
@@ -40,9 +42,14 @@ public class User {
     @OneToMany(mappedBy = "blocking")
     private List<Block> blockerList = new ArrayList<Block>();
 
+    //좋아요한 제보 리스트
+    @OneToMany(mappedBy="post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostLike> postLikeList = new ArrayList<PostLike>();
+
     //입출금 내역
     @OneToMany(mappedBy = "user")
     private List<Statement> statementList =  new ArrayList<Statement>();
+
     //거래 내역
     @OneToMany(mappedBy = "user")
     private List<Purchase> purchaseList = new ArrayList<Purchase>();

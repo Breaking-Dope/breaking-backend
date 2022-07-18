@@ -5,7 +5,7 @@ import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface PostLikeRepository extends JpaRepository<PostLike,Long> {
 
@@ -16,5 +16,7 @@ public interface PostLikeRepository extends JpaRepository<PostLike,Long> {
     int countPostLikesByUser(User user);
 
     int countPostLikesByPost(Post post);
+
+    List<PostLike> findAllByPost(Post post);
 
 }

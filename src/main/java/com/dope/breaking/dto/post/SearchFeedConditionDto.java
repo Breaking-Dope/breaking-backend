@@ -1,41 +1,37 @@
 package com.dope.breaking.dto.post;
 
-import com.dope.breaking.service.MyPagePostOption;
-import com.dope.breaking.service.MyPageSoldOption;
+import com.dope.breaking.service.SoldOption;
 import com.dope.breaking.service.SortStrategy;
 import lombok.Builder;
 import lombok.Data;
-import java.time.LocalDate;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Data
+@Setter
 public class SearchFeedConditionDto {
 
     String searchKeyword;
 
     SortStrategy sortStrategy;
 
-    private Boolean visibleSold;
+    private SoldOption soldOption;
 
-    private LocalDate dateFrom;
+    private LocalDateTime dateFrom;
 
-    private LocalDate dateTo;
+    private LocalDateTime dateTo;
 
     private Integer forLastMin;
 
-    private MyPagePostOption myPagePostOption;
-
-    private MyPageSoldOption myPageSoldOption;
-
     @Builder
-    public SearchFeedConditionDto(String searchKeyword, SortStrategy sortStrategy, Boolean visibleSold, LocalDate dateFrom, LocalDate dateTo, Integer forLastMin, MyPagePostOption myPagePostOption, MyPageSoldOption myPageSoldOption) {
+    public SearchFeedConditionDto(String searchKeyword, SortStrategy sortStrategy, SoldOption soldOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
         this.searchKeyword = searchKeyword;
         this.sortStrategy = sortStrategy;
-        this.visibleSold = visibleSold;
+        this.soldOption = soldOption;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
         this.forLastMin = forLastMin;
-        this.myPagePostOption = myPagePostOption;
-        this.myPageSoldOption = myPageSoldOption;
     }
 }
 

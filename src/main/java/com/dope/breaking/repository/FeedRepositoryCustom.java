@@ -7,8 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface FeedRepositoryCustom {
 
-    Page<FeedResultPostDto> searchDefaultFeedBy(SearchFeedConditionDto searchFeedConditionDto, Pageable pageable);
-
-    Page<FeedResultPostDto> searchFilteredFeedBy(SearchFeedConditionDto searchFeedConditionDto, Pageable pageable);
+    Page<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Pageable pageable);
 
 }

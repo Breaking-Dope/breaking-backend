@@ -7,5 +7,5 @@ import org.springframework.http.HttpStatus;
 public class AlreadyUnlikedException extends BreakingException {
 
     public  AlreadyUnlikedException() { super (ErrorCode.ALREADY_UNLIKED, HttpStatus.BAD_REQUEST);}
-    
+
 }

@@ -1,6 +1,6 @@
 package com.dope.breaking.api;
 
-import com.dope.breaking.dto.user.FollowInfoResponseDto;
+import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,14 +39,14 @@ public class RelationshipAPI {
     }
 
     @GetMapping("/follow/following/{userId}")
-    public ResponseEntity<List<FollowInfoResponseDto>>followingUsers (@PathVariable Long userId) {
+    public ResponseEntity<List<ForListInfoResponseDto>>followingUsers (@PathVariable Long userId) {
 
         return ResponseEntity.ok().body(followService.followingUsers(userId));
 
     }
 
     @GetMapping("/follow/follower/{userId}")
-    public ResponseEntity<List<FollowInfoResponseDto>> followerUsers (@PathVariable Long userId){
+    public ResponseEntity<List<ForListInfoResponseDto>> followerUsers (@PathVariable Long userId){
 
         return ResponseEntity.ok().body(followService.followerUsers(userId));
 

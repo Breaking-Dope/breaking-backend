@@ -12,6 +12,7 @@ import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -21,34 +22,30 @@ public class PostLikeService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    @Transactional
     public void likePost(User user, Post post){
 
         if (postLikeRepository.existsPostLikesByUserAndPost(user, post)){
             throw new AlreadyLikedException();
         }
 
-        PostLike postLike =  new PostLike();
-
-        postLike.updateUser(user);
-        postLike.updatePost(post);
-
-        user.getPostLikeList().add(postLike);
-        post.getPostLikeList().add(postLike);
+        PostLike postLike =  new PostLike(user, post);
+        postLikeRepository.save(postLike);
 
     }
 
+    @Transactional
     public void unlikePost(User user, Post post){
 
         if (!postLikeRepository.existsPostLikesByUserAndPost(user, post)){
             throw new AlreadyUnlikedException();
         }
 
-        PostLike postLike = postLikeRepository.findPostLikeByUserAndPost(user,post).get();
-        user.getPostLikeList().remove(postLike);
-        post.getPostLikeList().remove(postLike);
+        postLikeRepository.deleteByUserAndPost(user,post);
 
     }
 
+    @Transactional
     public void likePostById (String username, Long postId){
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
@@ -56,20 +53,15 @@ public class PostLikeService {
 
         likePost(user,post);
 
-        userRepository.save(user);
-        postRepository.save(post);
-
     }
 
+    @Transactional
     public void unlikePostById (String username, Long postId){
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
         unlikePost(user,post);
-
-        userRepository.save(user);
-        postRepository.save(post);
 
     }
 

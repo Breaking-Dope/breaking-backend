@@ -2,10 +2,8 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
-import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,6 @@ import java.util.*;
 public class UserAPI {
 
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
 
 
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
@@ -80,5 +77,12 @@ public class UserAPI {
         }
         return ResponseEntity.ok().body(userService.profileInformation(userName, userId));
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile/detail")
+    public ResponseEntity<FullUserInformationResponse> fullUserInformation(Principal principal) {
+        return ResponseEntity.ok().body(userService.getFullUserInformation(principal.getName()));
+    }
+
 
 }

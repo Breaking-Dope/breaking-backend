@@ -26,8 +26,8 @@ public enum ErrorCode {
     DUPLICATED_EMAIL("BSE415", "사용중인 이메일입니다."),
     ALREADY_FOLLOWING("BSE420","이미 팔로우 중인 유저입니다."),
     ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
-    ALREADY_LIKED("BSE421","이미 좋아요를 선택했습니다."),
-    ALREADY_UNLIKED("BSE421","이미 좋아요를 선택하지 않았습니다."),
+    ALREADY_LIKED("BSE458","이미 좋아요를 선택했습니다."),
+    ALREADY_UNLIKED("BSE459","이미 좋아요를 선택하지 않았습니다."),
 
 
     INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패.")

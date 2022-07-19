@@ -1,13 +1,8 @@
 package com.dope.breaking.api;
 
-import com.dope.breaking.dto.post.PostRequestDto;
-import com.dope.breaking.dto.post.PostResType;
-import com.dope.breaking.dto.response.MessageResponseDto;
+
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,10 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.security.Principal;
 import java.util.*;
 
@@ -28,9 +19,6 @@ import java.util.*;
 @RestController
 public class PostAPI {
 
-
-
-    private final UserRepository userRepository;
 
     private final PostService postService;
 

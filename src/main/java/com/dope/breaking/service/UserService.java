@@ -152,14 +152,14 @@ public class UserService {
         return signUpRequestDto;
     }
 
-    private UpdateUserRequestDto transformUserInformationToObject(String signUpRequest, String username) {
+    private UpdateUserRequestDto transformUserInformationToObject(String updateUserRequest, String username) {
 
         ObjectMapper mapper = new ObjectMapper();
         UpdateUserRequestDto updateUserRequestDto;
 
         //String 으로 되어있는 객체를 변환
         try {
-            updateUserRequestDto = mapper.readerFor(SignUpRequestDto.class).readValue(signUpRequest);
+            updateUserRequestDto = mapper.readerFor(UpdateUserRequestDto.class).readValue(updateUserRequest);
         } catch(Exception e) {
             throw new CustomInternalErrorException(e.getMessage());
         }

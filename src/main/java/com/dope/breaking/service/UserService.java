@@ -1,9 +1,11 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.*;
 import com.dope.breaking.exception.CustomInternalErrorException;
+import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.user.DuplicatedUserInformationException;
 import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
@@ -49,8 +51,8 @@ public class UserService {
 
         String profileImgURL = mediaService.getBasicProfileDir();
 
-        if (profileImg != null){
-            profileImgURL =  mediaService.uploadMedias(profileImg).get(0);
+        if (profileImg != null) {
+            profileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
         }
 
         User user = new User();
@@ -98,21 +100,21 @@ public class UserService {
         // case 1: 기본 이미지 -> 기본 이미지 : 변경 없음
 
         // case 2: 유저 본인 선택 이미지 -> 기본 이미지
-        if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg == null){
-            File file = new File(mediaService.getDirName()+File.separator+originalProfileUrl);
+        if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg == null) {
+            File file = new File(mediaService.getDirName() + File.separator + originalProfileUrl);
             file.delete();
         }
 
         // case 3: 기본 이미지 -> 유저 본인 선택 이미지
-        else if (originalProfileUrl == mediaService.getBasicProfileDir() && profileImg != null){
-            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
+        else if (originalProfileUrl == mediaService.getBasicProfileDir() && profileImg != null) {
+            profileImgFileName = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
         }
 
         // case 4: 유저 본인 선택 이미지 -> 유저 본인 선택 이미지
-        else if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg != null){
-            File file = new File(mediaService.getDirName()+File.separator+originalProfileUrl);
+        else if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg != null) {
+            File file = new File(mediaService.getDirName() + File.separator + originalProfileUrl);
             file.delete();
-            profileImgFileName =  mediaService.uploadMedias(profileImg).get(0);
+            profileImgFileName = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
         }
 
         // 6. update the user information
@@ -145,7 +147,7 @@ public class UserService {
         //String 으로 되어있는 객체를 변환
         try {
             signUpRequestDto = mapper.readerFor(SignUpRequestDto.class).readValue(signUpRequest);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CustomInternalErrorException(e.getMessage());
         }
 
@@ -169,14 +171,14 @@ public class UserService {
         return updateUserRequestDto;
     }
 
-    public void validateUserInformation (SignUpRequestDto signUpRequestDto){
+    public void validateUserInformation(SignUpRequestDto signUpRequestDto) {
 
         //null 체크
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         Set<ConstraintViolation<SignUpRequestDto>> violations = validator.validate(signUpRequestDto);
 
-        for(ConstraintViolation<SignUpRequestDto> violation : violations) {
+        for (ConstraintViolation<SignUpRequestDto> violation : violations) {
             throw new MissingFormatArgumentException(String.valueOf(violation.getPropertyPath()));
         }
 
@@ -187,24 +189,34 @@ public class UserService {
 
     }
 
-    public void validateUserInformation (UpdateUserRequestDto updateUserRequestDto, User preUserInformation){
+    public void validateUserInformation(UpdateUserRequestDto updateUserRequestDto, User preUserInformation) {
 
         //null 체크
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         Set<ConstraintViolation<UpdateUserRequestDto>> violations = validator.validate(updateUserRequestDto);
 
-        for(ConstraintViolation<UpdateUserRequestDto> violation : violations) {
-            throw new MissingFormatArgumentException(String.valueOf(violation.getPropertyPath()));
+
+        if (violations.size() > 0) {
+            StringBuffer result = new StringBuffer();
+
+            for (ConstraintViolation<UpdateUserRequestDto> violation : violations) {
+                result.append(String.valueOf(violation.getPropertyPath())).append(", ");
+            }
+
+            result.delete(result.length() - 2, result.length());
+            log.info(result.toString());
+
+            throw new NotValidRequestBodyException(result.toString());
         }
 
-        if(!updateUserRequestDto.getPhoneNumber().equals(preUserInformation.getPhoneNumber())) {
+        if (!updateUserRequestDto.getPhoneNumber().equals(preUserInformation.getPhoneNumber())) {
             validatePhoneNumber(updateUserRequestDto.getPhoneNumber());
         }
-        if(!updateUserRequestDto.getEmail().equals(preUserInformation.getEmail())) {
+        if (!updateUserRequestDto.getEmail().equals(preUserInformation.getEmail())) {
             validateEmail(updateUserRequestDto.getEmail());
         }
-        if(!updateUserRequestDto.getNickname().equals(preUserInformation.getNickname())) {
+        if (!updateUserRequestDto.getNickname().equals(preUserInformation.getNickname())) {
             validateNickname(updateUserRequestDto.getNickname());
         }
         validateRole(updateUserRequestDto.getRole());
@@ -213,36 +225,36 @@ public class UserService {
 
     public void validatePhoneNumber(String phoneNumber) {
 
-        if(!Pattern.matches("^(\\d{11}|\\d{3}\\d{4}\\d{4})$", phoneNumber)){
+        if (!Pattern.matches("^(\\d{11}|\\d{3}\\d{4}\\d{4})$", phoneNumber)) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.PHONENUMBER);
         }
 
         Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
-        if (user.isPresent()){
+        if (user.isPresent()) {
             throw new DuplicatedUserInformationException(FailableUserInformation.PHONENUMBER);
         }
     }
 
     public void validateEmail(String email) {
 
-        if(!Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)){
+        if (!Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.EMAIL);
         }
 
         Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent()){
+        if (user.isPresent()) {
             throw new DuplicatedUserInformationException(FailableUserInformation.EMAIL);
         }
     }
 
     public void validateNickname(String nickname) {
 
-        if(!Pattern.matches("^(?=.*[a-z0-9가-힣])[a-z0-9가-힣]{2,16}$", nickname)){
+        if (!Pattern.matches("^(?=.*[a-z0-9가-힣])[a-z0-9가-힣]{2,16}$", nickname)) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.NICKNAME);
         }
 
         Optional<User> user = userRepository.findByNickname(nickname);
-        if (user.isPresent()){
+        if (user.isPresent()) {
             throw new DuplicatedUserInformationException(FailableUserInformation.NICKNAME);
         }
     }
@@ -251,19 +263,19 @@ public class UserService {
 
         String upperCasedRole = role.toUpperCase();
 
-        if(!(upperCasedRole.equals("PRESS") || upperCasedRole.equals("USER"))) {
+        if (!(upperCasedRole.equals("PRESS") || upperCasedRole.equals("USER"))) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.ROLE);
         }
 
     }
 
 
-    public Optional<User> findByRefreshToken(String refreshToken){
+    public Optional<User> findByRefreshToken(String refreshToken) {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
     @Transactional
-    public void setRefreshToken(String username, String refreshToken){
+    public void setRefreshToken(String username, String refreshToken) {
         User user = userRepository.findByUsername(username).get();
         user.updateRefreshToken(refreshToken);
     }

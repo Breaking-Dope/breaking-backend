@@ -174,5 +174,4 @@ public class Oauth2LoginService {
             return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
         }
     }
-
 }

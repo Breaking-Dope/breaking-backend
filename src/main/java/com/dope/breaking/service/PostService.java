@@ -51,7 +51,6 @@ public class PostService {
         Post post = new Post();
         Long postid = null;
         try {
-            log.info("여기 진입");
             post = Post.builder()
                     .title(postRequestDto.getTitle())
                     .content(postRequestDto.getContent())

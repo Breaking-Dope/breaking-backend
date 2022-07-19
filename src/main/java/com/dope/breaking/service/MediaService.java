@@ -2,17 +2,19 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.MediaType;
+import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.repository.MediaRepository;
 import com.dope.breaking.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnailator;
+
 import org.jcodec.api.FrameGrab;
-
+import org.jcodec.api.JCodecException;
+import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.model.Picture;
-
+import org.jcodec.scale.AWTUtil;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.jcodec.scale.AWTUtil;
 
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,43 +44,48 @@ public class MediaService {
 
     private final PostRepository postRepository;
 
+    private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/resources";
+    private final String SUB_DIR_NAME = "/static";
 
-    private final String dirName = System.getProperty("user.dir") + "/src/main/resources/static";
+
     private final String basicProfileDir = "profile.png";
 
     public String getBasicProfileDir() {
         return basicProfileDir;
     }
 
-    public String getDirName() {
-        return dirName;
+    public String getMAIN_DIR_NAME() {
+        return MAIN_DIR_NAME;
     }
 
-    private final String thumbDirName = System.getProperty("user.dir") + "/thumb";
 
-    public List<String> uploadMedias(List<MultipartFile> medias) {
+    public List<String> uploadMedias(List<MultipartFile> medias, UploadType uploadType) {
 
         List<String> fileNameList = new ArrayList<String>();
 
         try {
-
-            File folder = new File(dirName);
+            File folder = new File(MAIN_DIR_NAME + SUB_DIR_NAME +uploadType.getDirName());
 
             if (!folder.exists()) {
                 folder.mkdirs();
             }
 
             for (MultipartFile media : medias) {
-
                 String fileName = media.getOriginalFilename();
                 String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                String generatedFileName = UUID.randomUUID().toString() + "." + extension;
-
-                fileNameList.add(generatedFileName);
-
-                File destination = new File(dirName + File.separator + generatedFileName);
+                String generateFileName = null;
+                MediaType mediaType = findMediaType(extension); //파일 확장자를 고려함.
+                if (mediaType.equals(MediaType.PHOTO)) {
+                    generateFileName = UUID.randomUUID().toString() + "." + extension;
+                } else {
+                    generateFileName = UUID.randomUUID().toString() + ".mp4";
+                }
+                String mediaURL = SUB_DIR_NAME + uploadType.getDirName() + File.separator + generateFileName;
+                String destinationPath = MAIN_DIR_NAME + mediaURL;
+                File destination = new File(destinationPath);
                 media.transferTo(destination);
 
+                fileNameList.add(mediaURL);
             }
         } catch (CustomInternalErrorException | IOException e) {
 
@@ -87,63 +94,6 @@ public class MediaService {
 
         }
         return fileNameList;
-
-    }
-
-
-    public Map<String, List<String>> uploadMediaAndThumbnail(List<MultipartFile> files, int index) throws Exception {
-
-        Map<String, List<String>> mediaNameList = new LinkedHashMap<>();
-        List<String> list = new LinkedList<>();
-        String generatedThumFileName = new String();
-        try {
-            File folder = new File(dirName);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-            for (int i = 0; i < files.size(); i++) {
-                String fileName = files.get(i).getOriginalFilename();
-                String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-                List<String> videoExtension = Arrays.asList("mp4", "mov", "mpg", "mpeg", "gif", "rm", "vob");
-                String generatedFileName = new String();
-                if (!videoExtension.contains(extension)) {
-                    generatedFileName = UUID.randomUUID().toString() + "." + extension;
-                } else {
-                    generatedFileName = UUID.randomUUID().toString() + ".mp4";
-                }
-                list.add(generatedFileName);
-                File destination = new File(dirName + File.separator + generatedFileName);
-                files.get(i).transferTo(destination);
-                if (index == i) {
-                    File thumfolder = new File(thumbDirName);
-                    if (!thumfolder.exists()) {
-                        thumfolder.mkdirs();
-                    }
-                    if (!videoExtension.contains(extension)) {
-                        generatedThumFileName = "s_" + UUID.randomUUID().toString() + "." + extension;
-                        File thumdestination = new File(thumbDirName + File.separator + generatedThumFileName);
-                        mediaNameList.put("thumbnail", List.of(generatedThumFileName));
-                        Thumbnailator.createThumbnail(destination, thumdestination, 500, 500);
-                    } else {
-                        Picture frame = FrameGrab.getFrameFromFile(destination, 0);
-                        BufferedImage img = AWTUtil.toBufferedImage(frame);
-                        generatedThumFileName = "s_" + UUID.randomUUID().toString() + ".png";
-                        mediaNameList.put("thumbnail", Arrays.asList(generatedThumFileName));
-                        File thumdestination = new File(thumbDirName + File.separator + generatedThumFileName);
-                        ImageIO.write(img, "png", thumdestination);
-                        Thumbnailator.createThumbnail(thumdestination, thumdestination, 500, 500);
-                    }
-                }
-            }
-            mediaNameList.put("mediaList", list);
-        } catch (Exception e) {
-            deletePostMedias(list);
-            DeleteThumbnailImg(generatedThumFileName);
-            log.error("error: " + e.getMessage());
-            throw e;
-
-        }
-        return mediaNameList;
 
     }
 
@@ -162,7 +112,6 @@ public class MediaService {
             return MediaType.PHOTO;
 
         }
-
     }
 
 
@@ -178,7 +127,7 @@ public class MediaService {
 
 
     @Transactional
-    public void modifyMediaEnities(List<String> preFileNameList, List<String> newFileNameList, Long postId) {
+    public void modifyMediaEntities(List<String> preFileNameList, List<String> newFileNameList, Long postId) {
         Post post = postRepository.findById(postId).get();
 
         for (String m : preFileNameList) {
@@ -193,9 +142,9 @@ public class MediaService {
         }
     }
 
-    public void deletePostMedias(List<String> fileNames) {
+    public void deleteMedias(List<String> fileNames) {
         for (String fileName : fileNames) {
-            File savedFile = new File(dirName + File.separator + fileName);
+            File savedFile = new File(MAIN_DIR_NAME + fileName);
             if (savedFile.exists()) {
                 if (savedFile.delete()) {
                     log.info("파일삭제 성공. filename : {}", fileName);
@@ -210,8 +159,8 @@ public class MediaService {
 
 
     //썸네일 사진 삭제 메서드
-    public void DeleteThumbnailImg(String fileName) {
-        File savedThumb = new File(thumbDirName + File.separator + fileName);
+    public void deleteThumbnailImg(String fileName) {
+        File savedThumb = new File(MAIN_DIR_NAME + fileName);
         if (savedThumb.exists()) {
             if (savedThumb.delete()) {
                 log.info("파일삭제 성공. filename : {}", fileName);
@@ -232,10 +181,65 @@ public class MediaService {
         return preMediaURL;
     }
 
+    public String makeThumbnail(String mediaUrl) throws IOException, JCodecException { //파일 주소를 받는다.
+        String FullPath = MAIN_DIR_NAME + mediaUrl;
+        File originalMediaPath = new File(FullPath); //전체 주소 경로를 받음
+        File thumbnailFolder = new File(MAIN_DIR_NAME + SUB_DIR_NAME + File.separator + UploadType.THUMBNAIL_POST_MEDIA.getDirName());
+
+        if (!thumbnailFolder.exists()) {
+            thumbnailFolder.mkdirs();
+        }
+        String generateThumbFileName = null;
+
+        String extension = mediaUrl.substring(mediaUrl.lastIndexOf(".") + 1);
+        MediaType mediaType = findMediaType(extension);
+
+        final int tWidth = 400;
+        final int tHeight = 300;
+
+        try {
+            if (mediaType.equals(MediaType.PHOTO)) {
+                generateThumbFileName = "s_" + UUID.randomUUID().toString() + "." + extension;
+                String thumbDestinationPath =  SUB_DIR_NAME + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator  + generateThumbFileName;
+                File thumbDestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
+                BufferedImage oImage = ImageIO.read(originalMediaPath);
+                BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR);
+                Graphics2D graphic = tImage.createGraphics();
+                Image image = oImage.getScaledInstance(tWidth, tHeight, Image.SCALE_SMOOTH);
+                graphic.drawImage(image, 0, 0, tWidth, tHeight, null);
+                graphic.dispose();
+                ImageIO.write(tImage, "png", thumbDestination);
+
+                return thumbDestinationPath;
+            } else {
+                FrameGrab grab = FrameGrab.createFrameGrab(NIOUtils.readableChannel(originalMediaPath));
+                double startSec = 1;
+                grab.seekToSecondPrecise(startSec);
+                Picture picture = grab.getNativeFrame();
+                BufferedImage oImage = AWTUtil.toBufferedImage(picture);
+                generateThumbFileName = "s_" + UUID.randomUUID().toString() + ".png";
+                String thumbDestinationPath = SUB_DIR_NAME +UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator + generateThumbFileName;
+                File thumdestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
+                BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR); // 썸네일이미지
+                Graphics2D graphic = tImage.createGraphics();
+                Image image = oImage.getScaledInstance(tWidth, tHeight, Image.SCALE_SMOOTH);
+                graphic.drawImage(image, 0, 0, tWidth, tHeight, null);
+                graphic.dispose();
+                ImageIO.write(tImage, "png", thumdestination);
+
+                return thumbDestinationPath;
+            }
+        } catch (JCodecException| IllegalArgumentException e) {
+            e.getMessage();
+            log.info("미디어 포맷을 읽을 수 없습니다.");
+            return null;
+        }
+    }
+
 
     public ResponseEntity<FileSystemResource> responseMediaFile(String fileName) throws IOException {
 
-        String directory = dirName + "/" + fileName;
+        String directory = MAIN_DIR_NAME + "/" + fileName;
         FileSystemResource fsr = new FileSystemResource(directory);
         HttpHeaders header = new HttpHeaders();
         Path filePath = Paths.get(fileName);
@@ -244,5 +248,6 @@ public class MediaService {
         return new ResponseEntity<FileSystemResource>(fsr, header, HttpStatus.OK);
 
     }
+
 
 }

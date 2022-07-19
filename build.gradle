@@ -44,8 +44,8 @@ dependencies {
 	implementation 'commons-io:commons-io:2.11.0'
 
 	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.11'
-	implementation group: 'org.jcodec', name: 'jcodec', version: '0.2.3'
-	implementation group: 'org.jcodec', name: 'jcodec-javase', version: '0.2.3'
+	implementation group: 'org.jcodec', name: 'jcodec', version: '0.2.5'
+	implementation group: 'org.jcodec', name: 'jcodec-javase', version: '0.2.5'
 
 }
 

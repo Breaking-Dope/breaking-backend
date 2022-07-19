@@ -80,7 +80,7 @@ class PostLikeAPITest {
         postRepository.save(post);
 
         //When
-        this.mockMvc.perform(post("/post/like/{postId}",post.getId()))
+        this.mockMvc.perform(post("/post/{postId}/like",post.getId()))
                 .andExpect(status().isCreated()); //Then
 
         //Then
@@ -98,7 +98,7 @@ class PostLikeAPITest {
         postLikeService.likePost(userRepository.findByUsername("12345g").get(),post);
 
         //When
-        this.mockMvc.perform(post("/post/like/{postId}",post.getId()))
+        this.mockMvc.perform(post("/post/{postId}/like",post.getId()))
                 .andExpect(status().isBadRequest()); //Then
 
     }
@@ -115,7 +115,7 @@ class PostLikeAPITest {
         postLikeService.likePost(userRepository.findByUsername("12345g").get(),post);
 
         //When
-        this.mockMvc.perform(delete("/post/like/{postId}",post.getId()))
+        this.mockMvc.perform(delete("/post/{postId}/like",post.getId()))
                 .andExpect(status().isOk()); //Then
 
         //Then
@@ -131,7 +131,7 @@ class PostLikeAPITest {
         postRepository.save(post);
 
         //When
-        this.mockMvc.perform(delete("/post/like/{postId}",post.getId()))
+        this.mockMvc.perform(delete("/post/{postId}/like",post.getId()))
                 .andExpect(status().isBadRequest()); //Then
 
     }
@@ -152,7 +152,7 @@ class PostLikeAPITest {
         postLikeService.likePost(user2,post);
 
         //When
-        this.mockMvc.perform(get("/post/like-list/{postId}",post.getId()))
+        this.mockMvc.perform(get("/post/{postId}/like-list",post.getId()))
                 .andExpect(status().isOk()) //Then
                 .andExpect(jsonPath("$", hasSize(2)));
     }

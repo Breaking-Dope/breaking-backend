@@ -18,20 +18,20 @@ public class PostLikeAPI {
     private final PostLikeService postLikeService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/post/like/{postId}")
+    @PostMapping("/post/{postId}/like")
     public ResponseEntity likePostById(Principal principal, @PathVariable Long postId){
         postLikeService.likePostById(principal.getName(), postId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PreAuthorize("isAuthenticated()")
-    @DeleteMapping("/post/like/{postId}")
+    @DeleteMapping("/post/{postId}/like")
     public ResponseEntity unlikePostById(Principal principal, @PathVariable Long postId){
         postLikeService.unlikePostById(principal.getName(),postId);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("post/like-list/{postId}")
+    @GetMapping("post/{postId}/like-list")
     public ResponseEntity<List<ForListInfoResponseDto>> likedUserList (@PathVariable Long postId){
         return ResponseEntity.ok().body(postLikeService.likedUserList(postId));
     }

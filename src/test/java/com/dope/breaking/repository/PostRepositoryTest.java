@@ -29,5 +29,10 @@ class PostRepositoryTest {
         assertEquals(post.getId(), foundPost.getId());
     }
 
+    @Test
+    public void deletepost(){
+        postRepository.deleteAll();
+    }
+
 
 }

@@ -101,7 +101,7 @@ public class UserService {
 
         // case 2: 유저 본인 선택 이미지 -> 기본 이미지
         if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg == null) {
-            File file = new File(mediaService.getDirName() + File.separator + originalProfileUrl);
+            File file = new File(mediaService.getMAIN_DIR_NAME() + File.separator + originalProfileUrl);
             file.delete();
         }
 
@@ -112,7 +112,7 @@ public class UserService {
 
         // case 4: 유저 본인 선택 이미지 -> 유저 본인 선택 이미지
         else if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg != null) {
-            File file = new File(mediaService.getDirName() + File.separator + originalProfileUrl);
+            File file = new File(mediaService.getMAIN_DIR_NAME() + File.separator + originalProfileUrl);
             file.delete();
             profileImgFileName = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
         }

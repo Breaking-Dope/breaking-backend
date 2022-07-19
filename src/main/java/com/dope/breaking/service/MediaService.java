@@ -44,7 +44,9 @@ public class MediaService {
 
     private final PostRepository postRepository;
 
-    private final String dirName = System.getProperty("user.dir") + "/src/main/resources/static";
+    private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/resources";
+    private final String SUB_DiR_NAME = "/static";
+
 
     private final String basicProfileDir = "profile.png";
 
@@ -52,8 +54,8 @@ public class MediaService {
         return basicProfileDir;
     }
 
-    public String getDirName() {
-        return dirName;
+    public String getMAIN_DIR_NAME() {
+        return MAIN_DIR_NAME;
     }
 
 
@@ -62,7 +64,7 @@ public class MediaService {
         List<String> fileNameList = new ArrayList<String>();
 
         try {
-            File folder = new File(dirName + uploadType.getDirName());
+            File folder = new File(MAIN_DIR_NAME + SUB_DiR_NAME +uploadType.getDirName());
 
             if (!folder.exists()) {
                 folder.mkdirs();
@@ -78,10 +80,12 @@ public class MediaService {
                 } else {
                     generateFileName = UUID.randomUUID().toString() + ".mp4";
                 }
-                String destinationPath = dirName + uploadType.getDirName()  + File.separator  + generateFileName;
+                String mediaURL = SUB_DiR_NAME + uploadType.getDirName() + File.separator + generateFileName;
+                String destinationPath = MAIN_DIR_NAME + mediaURL;
                 File destination = new File(destinationPath);
                 media.transferTo(destination);
-                fileNameList.add(destinationPath);
+
+                fileNameList.add(mediaURL);
             }
         } catch (CustomInternalErrorException | IOException e) {
 
@@ -140,7 +144,7 @@ public class MediaService {
 
     public void deleteMedias(List<String> fileNames) {
         for (String fileName : fileNames) {
-            File savedFile = new File(fileName);
+            File savedFile = new File(MAIN_DIR_NAME + fileName);
             if (savedFile.exists()) {
                 if (savedFile.delete()) {
                     log.info("파일삭제 성공. filename : {}", fileName);
@@ -156,7 +160,7 @@ public class MediaService {
 
     //썸네일 사진 삭제 메서드
     public void deleteThumbnailImg(String fileName) {
-        File savedThumb = new File(fileName);
+        File savedThumb = new File(MAIN_DIR_NAME + fileName);
         if (savedThumb.exists()) {
             if (savedThumb.delete()) {
                 log.info("파일삭제 성공. filename : {}", fileName);
@@ -178,8 +182,9 @@ public class MediaService {
     }
 
     public String makeThumbnail(String mediaUrl) throws IOException, JCodecException { //파일 주소를 받는다.
-        File originalMediaPath = new File(mediaUrl); //전체 주소 경로를 받음
-        File thumbnailFolder = new File(dirName + File.separator + UploadType.THUMBNAIL_POST_MEDIA.getDirName());
+        String FullPath = MAIN_DIR_NAME + mediaUrl;
+        File originalMediaPath = new File(FullPath); //전체 주소 경로를 받음
+        File thumbnailFolder = new File(MAIN_DIR_NAME + SUB_DiR_NAME + File.separator + UploadType.THUMBNAIL_POST_MEDIA.getDirName());
 
         if (!thumbnailFolder.exists()) {
             thumbnailFolder.mkdirs();
@@ -195,8 +200,8 @@ public class MediaService {
         try {
             if (mediaType.equals(MediaType.PHOTO)) {
                 generateThumbFileName = "s_" + UUID.randomUUID().toString() + "." + extension;
-                String thumbDestinationPath = dirName + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator  + generateThumbFileName;
-                File thumbDestination = new File(thumbDestinationPath);
+                String thumbDestinationPath =  SUB_DiR_NAME + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator  + generateThumbFileName;
+                File thumbDestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
                 BufferedImage oImage = ImageIO.read(originalMediaPath);
                 BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR);
                 Graphics2D graphic = tImage.createGraphics();
@@ -213,8 +218,8 @@ public class MediaService {
                 Picture picture = grab.getNativeFrame();
                 BufferedImage oImage = AWTUtil.toBufferedImage(picture);
                 generateThumbFileName = "s_" + UUID.randomUUID().toString() + ".png";
-                String thumbDestinationPath = dirName + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator + generateThumbFileName;
-                File thumdestination = new File(thumbDestinationPath);
+                String thumbDestinationPath = SUB_DiR_NAME +UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator + generateThumbFileName;
+                File thumdestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
                 BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR); // 썸네일이미지
                 Graphics2D graphic = tImage.createGraphics();
                 Image image = oImage.getScaledInstance(tWidth, tHeight, Image.SCALE_SMOOTH);
@@ -234,7 +239,7 @@ public class MediaService {
 
     public ResponseEntity<FileSystemResource> responseMediaFile(String fileName) throws IOException {
 
-        String directory = dirName + "/" + fileName;
+        String directory = MAIN_DIR_NAME + "/" + fileName;
         FileSystemResource fsr = new FileSystemResource(directory);
         HttpHeaders header = new HttpHeaders();
         Path filePath = Paths.get(fileName);

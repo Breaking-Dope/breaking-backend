@@ -4,6 +4,7 @@ import com.dope.breaking.dto.ErrorResponseDto;
 import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.ErrorCode;
+import com.dope.breaking.exception.NotValidRequestBodyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,13 @@ public class CustomExceptionHandler {
         return ResponseEntity
                 .status(e.getStatus())
                 .body(new ErrorResponseDto(e.getErrorCode()));
+    }
+
+
+    @ExceptionHandler(NotValidRequestBodyException.class)
+    protected  ResponseEntity<ErrorResponseDto> handleNotValidRequestBody(NotValidRequestBodyException e){
+        log.info(e.getMessage());
+        return ResponseEntity.status(e.getStatus()).body(new ErrorResponseDto(e.getErrorCode(), e.getMessage()));
     }
 
 

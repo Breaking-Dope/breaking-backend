@@ -14,4 +14,9 @@ public class ErrorResponseDto {
         this.code = code.getCode();
         this.message = code.getMessage();
     }
+
+    public ErrorResponseDto(String errorCode, String message){
+        this.code = errorCode;
+        this.message = message;
+    }
 }

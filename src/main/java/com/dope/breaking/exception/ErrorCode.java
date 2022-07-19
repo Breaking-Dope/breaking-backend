@@ -14,9 +14,11 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN("BSE003", "Refresh Token이 유효하지 않습니다."),
     EXPIRED_REFRESH_TOKEN("BSE004", "Refresh Token이 만료되었습니다."),
 
+    NO_PERMISSION("BSE005", "해당 기능에 대한 권한이 없습니다."),
     BAD_REQUEST("BSE400", "클라이언트 요청오류."),
     NO_SUCH_USER("BSE401", "해당 유저를 찾을 수 없습니다."),
     NO_SUCH_POST("BSE402","해당 제보를 찾을 수 없습니다"),
+
     INVALID_NICKNAME_FORMAT("BSE410", "닉네임 형식이 잘못되었습니다."),
     INVALID_PHONE_NUMBER_FORMAT("BSE411", "전화번호 형식이 잘못되었습니다."),
     INVALID_EMAIL_FORMAT("BSE412", "이메일 형식이 잘못되었습니다."),

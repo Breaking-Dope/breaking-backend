@@ -1,7 +1,7 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.user.FollowInfoResponseDto;
+import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -102,7 +102,7 @@ class FollowServiceTest {
         userRepository.save(followedUser1);
         userRepository.save(followedUser2);
 
-        List<FollowInfoResponseDto> followInfoResponseDtoList = followService.followingUsers(followingUser.getId());
+        List<ForListInfoResponseDto> followInfoResponseDtoList = followService.followingUsers(followingUser.getId());
 
         //Then
         Assertions.assertThat(followInfoResponseDtoList.size()).isEqualTo(2);
@@ -125,7 +125,7 @@ class FollowServiceTest {
         userRepository.save(followingUser2);
         userRepository.save(followedUser);
 
-        List<FollowInfoResponseDto> followInfoResponseDtoList = followService.followerUsers(followedUser.getId());
+        List<ForListInfoResponseDto> followInfoResponseDtoList = followService.followerUsers(followedUser.getId());
 
 
         //Then

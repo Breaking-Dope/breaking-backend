@@ -25,7 +25,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Post extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column (name="POST_ID")
     private Long id;
 
@@ -35,9 +36,6 @@ public class Post extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "post")
     private List<Comment> commentList = new ArrayList<Comment>();
-
-    @OneToMany(mappedBy="post")
-    private List<PostLike> postLikeList = new ArrayList<PostLike>();
 
     @OneToMany(mappedBy="post")
     private List<Media> mediaList = new ArrayList<Media>();

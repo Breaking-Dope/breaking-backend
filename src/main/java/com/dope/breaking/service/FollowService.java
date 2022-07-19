@@ -3,7 +3,7 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.user.Follow;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.user.FollowInfoResponseDto;
+import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.follow.AlreadyFollowingException;
 import com.dope.breaking.exception.follow.AlreadyUnfollowingException;
@@ -101,34 +101,34 @@ public class FollowService {
 
     }
 
-    public List<FollowInfoResponseDto> followingUsers (Long userId){
+    public List<ForListInfoResponseDto> followingUsers (Long userId){
 
         User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
         List<Follow> followingList = user.getFollowingList();
-        List<FollowInfoResponseDto> followInfoResponseDtoList = new ArrayList<>();
+        List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
 
         for (Follow follow : followingList) {
             User followedUser = follow.getFollowed();
-            followInfoResponseDtoList.add (new FollowInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
+            forListInfoResponseDtoList.add (new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
         }
 
-        return followInfoResponseDtoList;
+        return forListInfoResponseDtoList;
 
     }
 
-    public List<FollowInfoResponseDto> followerUsers (Long userId){
+    public List<ForListInfoResponseDto> followerUsers (Long userId){
 
         User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
         List<Follow> followerList = user.getFollowerList();
-        List<FollowInfoResponseDto> followInfoResponseDtoList = new ArrayList<>();
+        List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
 
         for (Follow follow : followerList) {
             User followedUser = follow.getFollowing();
-            followInfoResponseDtoList.add(new FollowInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
+            forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getProfileImgURL()));
         }
 
-        return followInfoResponseDtoList;
+        return forListInfoResponseDtoList;
     }
 }

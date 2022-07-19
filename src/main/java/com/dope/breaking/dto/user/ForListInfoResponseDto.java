@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class FollowInfoResponseDto {
+public class ForListInfoResponseDto {
 
     private Long userId;
     private String nickname;

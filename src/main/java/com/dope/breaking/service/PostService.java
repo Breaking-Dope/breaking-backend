@@ -43,7 +43,7 @@ public class PostService {
     public Long create(String username, String contentData, List<MultipartFile> files) throws Exception {
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
 
-        PostRequestDto postRequestDto = transferPostReqeustToObject(contentData);
+        PostRequestDto postRequestDto = transferPostRequestToObject(contentData);
 
         validatePostRequest(postRequestDto);
 
@@ -89,7 +89,7 @@ public class PostService {
             throw new NoPermissionException();
         }
 
-        PostRequestDto postRequestDto = transferPostReqeustToObject(contentData);
+        PostRequestDto postRequestDto = transferPostRequestToObject(contentData);
 
         validatePostRequest(postRequestDto);
 
@@ -134,7 +134,7 @@ public class PostService {
         return postRepository.existsByIdAndUserId(postid, userid);
     }
 
-    private PostRequestDto transferPostReqeustToObject(String contentData) {
+    private PostRequestDto transferPostRequestToObject(String contentData) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
         PostRequestDto postRequestDto = new PostRequestDto();
         try {

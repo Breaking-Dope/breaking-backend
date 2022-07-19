@@ -49,11 +49,6 @@ public class PostAPI {
     @PutMapping(value = "/post/{postId}", consumes = {"multipart/form-data"})
     public ResponseEntity<?> postModify(@PathVariable("postId") long postId, Principal principal,
                                         @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
-
-        if (!postService.existByPostIdAndUserId(postId, userRepository.findByUsername(principal.getName()).get().getId())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponseDto(PostResType.NO_PERMISSION.getMessage()));
-        }
-
         postService.modify(postId, principal.getName(), contentData, files);
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("Modified postId", postId);

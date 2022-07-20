@@ -195,7 +195,7 @@ class PostAPITest {
     }
 
 
-    @DisplayName("Post 조회 기능")
+    @DisplayName("POST 조회 기능")
     @WithMockCustomUser
     @Order(4)
     @Test

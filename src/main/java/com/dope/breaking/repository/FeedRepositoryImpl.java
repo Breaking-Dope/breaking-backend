@@ -35,51 +35,50 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
 
     @Override
     public Page<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Pageable pageable) {
-//
-//        List<Tuple> paginatedResult = queryFactory
-//                .select(post.id, postLike.post.id.count())
-//                .from(post)
-//                .leftJoin(post.postLikeList, postLike)
-//                .where( // 세부필터 동적 쿼리 함수로 구현하여 추가
-//                        post.isHidden.eq(false),
-//                        soldOption(searchFeedConditionDto.getSoldOption()),
-//                        period(searchFeedConditionDto.getDateFrom(),searchFeedConditionDto.getDateTo())
-//                )
-//                .groupBy(post.id)
-//                .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()))
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize())
-//                .fetch();
-//
-//        List<Long> contentIdList = paginatedResult.stream().map(x -> x.get(post.id)).collect(Collectors.toList());
-//
-//        List<FeedResultPostDto> content = queryFactory
-//                .select(new QFeedResultPostDto(
-//                        post.id,
-//                        post.title,
-//                        post.location.region,
-//                        post.thumbnailImgURL,
-//                        Expressions.asNumber(0),
-//                        post.postType,
-//                        post.isSold,
-//                        post.viewCount,
-//                        user.id,
-//                        user.profileImgURL,
-//                        user.realName,
-//                        post.price,
-//                        Expressions.asBoolean(false),
-//                        Expressions.asBoolean(false),
-//                        post.createdDate
-//
-//                ))
-//                .from(post)
-//                .leftJoin(post.user, user)
-//                .where(post.id.in(contentIdList))
-//                .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()))
-//                .fetch();
-//
-//        return new PageImpl<>(content, pageable, content.size());
-        return null;
+
+        List<Tuple> paginatedResult = queryFactory
+                .select(post.id, postLike.post.id.count())
+                .from(post)
+                .leftJoin(post.postLikeList, postLike)
+                .where( // 세부필터 동적 쿼리 함수로 구현하여 추가
+                        post.isHidden.eq(false),
+                        soldOption(searchFeedConditionDto.getSoldOption()),
+                        period(searchFeedConditionDto.getDateFrom(),searchFeedConditionDto.getDateTo())
+                )
+                .groupBy(post.id)
+                .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        List<Long> contentIdList = paginatedResult.stream().map(x -> x.get(post.id)).collect(Collectors.toList());
+
+        List<FeedResultPostDto> content = queryFactory
+                .select(new QFeedResultPostDto(
+                        post.id,
+                        post.title,
+                        post.location.region,
+                        post.thumbnailImgURL,
+                        Expressions.asNumber(0),
+                        post.postType,
+                        post.isSold,
+                        post.viewCount,
+                        user.id,
+                        user.profileImgURL,
+                        user.realName,
+                        post.price,
+                        Expressions.asBoolean(false),
+                        Expressions.asBoolean(false),
+                        post.createdDate
+
+                ))
+                .from(post)
+                .leftJoin(post.user, user)
+                .where(post.id.in(contentIdList))
+                .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()))
+                .fetch();
+
+        return new PageImpl<>(content, pageable, content.size());
     }
 
 
@@ -92,6 +91,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
             default:
                 return null;
         }
+
     }
 
     private Predicate period(LocalDateTime dateFrom, LocalDateTime dateTo) {
@@ -118,6 +118,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         }
 
         return new OrderSpecifier<>(Order.DESC, post.id);
+
     }
 
 }

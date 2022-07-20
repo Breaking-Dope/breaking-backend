@@ -10,7 +10,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import javax.persistence.*;
 
 @Entity
-@NoArgsConstructor
 @Getter
 @NoArgsConstructor
 public class PostLike {

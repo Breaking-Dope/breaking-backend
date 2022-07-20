@@ -8,7 +8,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.DetailPostResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
-import com.dope.breaking.dto.post.Writer;
+import com.dope.breaking.dto.post.WriterDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
@@ -161,7 +161,7 @@ public class PostService {
         //조회수 증가.
         post.updateViewCount();
 
-        Writer writer = Writer.builder()
+        WriterDto writerDto = WriterDto.builder()
                 .nickname(post.getUser().getNickname())
                 .phoneNumber(post.getUser().getPhoneNumber())
                 .profileImgURL(post.getUser().getProfileImgURL())
@@ -174,7 +174,7 @@ public class PostService {
 
         DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
                 .hasLiked(hasLiked)
-                .writer(writer)
+                .writerDto(writerDto)
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))

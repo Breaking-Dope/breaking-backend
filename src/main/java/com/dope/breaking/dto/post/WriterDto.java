@@ -8,7 +8,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class Writer {
+public class WriterDto {
     private Long userId;
 
     private String profileImgURL;
@@ -18,7 +18,7 @@ public class Writer {
     private String phoneNumber;
 
     @Builder
-    public Writer(Long userId, String profileImgURL, String nickname, String phoneNumber){
+    public WriterDto(Long userId, String profileImgURL, String nickname, String phoneNumber){
         this.userId = userId;
         this.profileImgURL = profileImgURL;
         this.nickname = nickname;

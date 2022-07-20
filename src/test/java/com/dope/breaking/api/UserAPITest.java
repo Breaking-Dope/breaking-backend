@@ -34,6 +34,7 @@ class UserAPITest {
                 ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
         user.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
@@ -57,6 +58,7 @@ class UserAPITest {
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
                 ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
         user.setRequestFields(
+                "anyURL",
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),

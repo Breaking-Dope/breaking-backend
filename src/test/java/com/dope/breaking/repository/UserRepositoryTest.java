@@ -21,7 +21,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
 
         //When
         User savedUser = userRepository.save(user);
@@ -53,7 +53,7 @@ class UserRepositoryTest {
 
         //Given
         User user = new User();
-        user.setRequestFields("URL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username",Role.USER);
 
         //When
         User savedUser = userRepository.save(user);

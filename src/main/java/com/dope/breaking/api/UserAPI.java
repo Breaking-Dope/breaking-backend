@@ -1,7 +1,6 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.user.*;
-import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,7 +45,7 @@ public class UserAPI {
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> signUp(
             @RequestPart String signUpRequest,
-            @RequestPart (required = false) List<MultipartFile> profileImg) {
+            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
         return userService.signUp(signUpRequest, profileImg);
     }
 

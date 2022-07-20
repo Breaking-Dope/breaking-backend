@@ -43,21 +43,25 @@ public class UserService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) {
+    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) throws Exception {
 
         SignUpRequestDto signUpRequestDto = transformUserInformationToObject(signUpRequest);
 
         validateUserInformation(signUpRequestDto);
 
-        String profileImgURL = mediaService.getBasicProfileDir();
+        String originalProfileImgURL = null;
+        String compressedProfileImgURL = null;
+
 
         if (profileImg != null) {
-            profileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+            originalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+            compressedProfileImgURL = mediaService.compressImage(originalProfileImgURL);
         }
 
         User user = new User();
         user.setRequestFields(
-                profileImgURL,
+                originalProfileImgURL,
+                compressedProfileImgURL,
                 signUpRequestDto.getNickname(),
                 signUpRequestDto.getPhoneNumber(),
                 signUpRequestDto.getEmail(),
@@ -84,7 +88,7 @@ public class UserService {
         return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.CREATED);
     }
 
-    public void updateProfile(String username, String updateRequestDto, List<MultipartFile> profileImg) {
+    public void updateProfile(String username, String updateRequestDto, List<MultipartFile> profileImg) throws Exception {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
 
@@ -94,32 +98,43 @@ public class UserService {
 
         // 5. update profile
 
-        String profileImgFileName = mediaService.getBasicProfileDir();
-        String originalProfileUrl = user.getOriginalProfileImgURL();
+        String toSetOriginalProfileImgURL = null;
+        String toSetCompressedProfileImgURL = null;
+
+        String currentOriginalProfileImgUrl = user.getOriginalProfileImgURL();
+        String currentCompressedProfileImgURL = user.getCompressedProfileImgURL();
 
         // case 1: 기본 이미지 -> 기본 이미지 : 변경 없음
 
         // case 2: 유저 본인 선택 이미지 -> 기본 이미지
-        if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg == null) {
-            File file = new File(mediaService.getMAIN_DIR_NAME() + File.separator + originalProfileUrl);
-            file.delete();
+        if (currentOriginalProfileImgUrl != mediaService.getBasicProfileDir() && profileImg == null) {
+            File file1 = new File(mediaService.getMAIN_DIR_NAME() + currentOriginalProfileImgUrl);
+            File file2 = new File(mediaService.getMAIN_DIR_NAME() + currentCompressedProfileImgURL);
+            file1.delete();
+            file2.delete();
         }
 
         // case 3: 기본 이미지 -> 유저 본인 선택 이미지
-        else if (originalProfileUrl == mediaService.getBasicProfileDir() && profileImg != null) {
-            profileImgFileName = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+        else if (currentOriginalProfileImgUrl == mediaService.getBasicProfileDir() && profileImg != null) {
+            toSetOriginalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+            toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
         }
 
         // case 4: 유저 본인 선택 이미지 -> 유저 본인 선택 이미지
-        else if (originalProfileUrl != mediaService.getBasicProfileDir() && profileImg != null) {
-            File file = new File(mediaService.getMAIN_DIR_NAME() + File.separator + originalProfileUrl);
-            file.delete();
-            profileImgFileName = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+        else if (currentOriginalProfileImgUrl != mediaService.getBasicProfileDir() && profileImg != null) {
+            File file1 = new File(mediaService.getMAIN_DIR_NAME() + currentOriginalProfileImgUrl);
+            File file2 = new File(mediaService.getMAIN_DIR_NAME() + currentCompressedProfileImgURL);
+            file1.delete();
+            file2.delete();
+
+            toSetOriginalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+            toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
         }
 
         // 6. update the user information
         user.setRequestFields(
-                profileImgFileName,
+                toSetOriginalProfileImgURL,
+                toSetCompressedProfileImgURL,
                 updateUserRequestDto.getNickname(),
                 updateUserRequestDto.getPhoneNumber(),
                 updateUserRequestDto.getEmail(),
@@ -136,7 +151,7 @@ public class UserService {
     public UserBriefInformationResponseDto userBriefInformation(String username) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
-        return new UserBriefInformationResponseDto(user.getOriginalProfileImgURL(), user.getNickname(), user.getId(), user.getBalance());
+        return new UserBriefInformationResponseDto(user.getCompressedProfileImgURL(), user.getNickname(), user.getId(), user.getBalance());
     }
 
     private SignUpRequestDto transformUserInformationToObject(String signUpRequest) {
@@ -294,7 +309,7 @@ public class UserService {
 
         return ProfileInformationResponseDto.builder()
                 .userId(user.getId())
-                .profileImgURL(user.getOriginalProfileImgURL())
+                .profileImgURL(user.getCompressedProfileImgURL())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .statusMsg(user.getStatusMsg())

@@ -109,4 +109,7 @@ public class Post extends BaseTimeEntity {
         this.thumbnailImgURL = thumbnailURL;
     }
 
+    public void updateViewCount() {
+        this.viewCount = this.getViewCount() + 1;
+    }
 }

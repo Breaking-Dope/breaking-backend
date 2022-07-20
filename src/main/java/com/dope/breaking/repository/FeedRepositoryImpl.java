@@ -91,6 +91,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
             default:
                 return null;
         }
+
     }
 
     private Predicate period(LocalDateTime dateFrom, LocalDateTime dateTo) {
@@ -117,6 +118,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         }
 
         return new OrderSpecifier<>(Order.DESC, post.id);
+
     }
 
 }

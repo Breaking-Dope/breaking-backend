@@ -1,16 +1,22 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.domain.post.Location;
+import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.PostRequestDto;
+import com.dope.breaking.repository.PostLikeRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.PostService;
+import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import org.assertj.core.api.Assertions;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +72,18 @@ class PostAPITest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    PostLikeRepository postLikeRepository;
+
+    @Autowired
+    UserService userService;
+
+    static Long postId;
+
     @Order(1)
     @Test
     public void createUserInfo() {
-      User  user = User.builder()
+        User user = User.builder()
                 .username("12345g")
                 .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                 .role(Role.PRESS) // 최초 가입시 USER 로 설정
@@ -82,7 +96,7 @@ class PostAPITest {
     @Order(2)
     @WithMockCustomUser
     @Test
-    public void testpost() throws Exception{
+    public void testpost() throws Exception {
         MockMultipartFile multipartFile1 = new MockMultipartFile("file", "test1.png", "image/png", new FileInputStream(System.getProperty("user.dir") + "/src/test/java/com/dope/breaking/files/test1.png"));
         Location location = Location.builder()
                 .longitude(1.2)
@@ -119,6 +133,12 @@ class PostAPITest {
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
+        System.out.println(jsonObject.toJSONString());
+        postId = Long.parseLong(jsonObject.get("postId").toString());
+        System.out.println(postId);
+
     }
 
 
@@ -126,7 +146,7 @@ class PostAPITest {
     @Order(3)
     @WithMockCustomUser
     @Test
-    public void testmodify() throws Exception{
+    public void testmodify() throws Exception {
         MockMultipartFile multipartFile1 = new MockMultipartFile("file", "test2.png", "image/png", new FileInputStream(System.getProperty("user.dir") + "/src/test/java/com/dope/breaking/files/test2.png"));
         Location location = Location.builder()
                 .longitude(1.2)
@@ -152,7 +172,7 @@ class PostAPITest {
                 "\"thumbnailIndex\" : 0" +
                 "}";
         MockMultipartHttpServletRequestBuilder builder =
-                MockMvcRequestBuilders.multipart("/post/2");
+                MockMvcRequestBuilders.multipart("/post/" + postId);
         builder.with(new RequestPostProcessor() {
             @Override
             public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
@@ -170,9 +190,28 @@ class PostAPITest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
 
-
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
     }
+
+
+    @DisplayName("POST 조회 기능")
+    @WithMockCustomUser
+    @Order(4)
+    @Test
+    public void readPostWithAnonymous() throws Exception {
+        //When
+
+        MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/post/" + postId))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.hasLiked").value(false))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+
+        MockHttpServletResponse response = resultActions.getResponse();
+        String content = response.getContentAsString();
+        System.out.println(content);
+    }
+
+
 
 }

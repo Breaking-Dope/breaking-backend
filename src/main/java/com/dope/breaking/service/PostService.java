@@ -5,11 +5,17 @@ import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.post.DetailPostResponseDto;
+import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
+import com.dope.breaking.dto.post.Writer;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
+import com.dope.breaking.repository.MediaRepository;
+import com.dope.breaking.repository.PostLikeRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +33,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +42,11 @@ public class PostService {
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
+
+    private final PostLikeRepository postLikeRepository;
+
+
+    private final MediaRepository mediaRepository;
 
     private final MediaService mediaService;
 
@@ -50,6 +62,7 @@ public class PostService {
         PostType postType = confirmPostType(postRequestDto.getPostType());
         Post post = new Post();
         Long postid = null;
+
         try {
             post = Post.builder()
                     .title(postRequestDto.getTitle())
@@ -127,6 +140,60 @@ public class PostService {
             }
             modifyPost.setThumbnailImgURL(null);
         }
+    }
+
+
+    public DetailPostResponseDto read(Long postId, String crntUsername){
+        //1. 없다면 예외반환.
+        if(!postRepository.findById(postId).isPresent()){
+            throw new NoSuchPostException();
+        }
+
+        //2. 현재 사용자 게시글 좋아요 했는지 판별
+        boolean hasLiked = false;
+        if(crntUsername != null) {
+            hasLiked = postLikeRepository.existsPostLikesByUserAndPost(userRepository.findByUsername(crntUsername).get(), postRepository.findById(postId).get()) ? true : false;
+        }
+
+        //Post 가져오기
+        Post post = postRepository.getById(postId);
+
+        //조회수 증가.
+        post.updateViewCount();
+
+        Writer writer = Writer.builder()
+                .nickname(post.getUser().getNickname())
+                .phoneNumber(post.getUser().getPhoneNumber())
+                .profileImgURL(post.getUser().getProfileImgURL())
+                .userId(post.getUser().getId()).build();
+
+        LocationDto locationDto = LocationDto.builder()
+                .region(post.getLocation().getRegion())
+                .latitude(post.getLocation().getLatitude())
+                .longitude(post.getLocation().getLongitude()).build();
+
+        DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
+                .hasLiked(hasLiked)
+                .writer(writer)
+                .title(post.getTitle())
+                .content(post.getContent())
+                .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
+                .location(locationDto)
+                .price(post.getPrice())
+                .postType(post.getPostType().getTitle())
+                .isAnonymous(post.isAnonymous())
+                .eventTime(post.getEventTime())
+                .createdDate(post.getCreatedDate())
+                .modifiedDate(post.getModifiedDate())
+                .viewCount(post.getViewCount())
+                .shareCount(post.getBookmarkList().size())
+                .isSold(post.isSold())
+                .soldCount(post.getBuyerList().size())
+                .isHidden(post.isHidden())
+                .build();
+
+        return detailPostResponseDto;
+
     }
 
 

@@ -162,7 +162,7 @@ class UserServiceTest {
         //Then
         assertEquals(foundUserInfo.getUserId(), user.getId());
         assertEquals(foundUserInfo.getNickname(), user.getNickname());
-        assertEquals(foundUserInfo.getProfileImgURL(), user.getProfileImgURL());
+        assertEquals(foundUserInfo.getProfileImgURL(), user.getOriginalProfileImgURL());
     }
 
     @Test

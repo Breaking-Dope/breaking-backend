@@ -78,7 +78,7 @@ public class PostLikeService {
         List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
         for (PostLike postLike : postLikeList) {
             User user = postLike.getUser();
-            forListInfoResponseDtoList.add(new ForListInfoResponseDto(user.getId(),user.getNickname(),user.getStatusMsg(),user.getProfileImgURL()));
+            forListInfoResponseDtoList.add(new ForListInfoResponseDto(user.getId(),user.getNickname(),user.getStatusMsg(),user.getOriginalProfileImgURL()));
         }
         return forListInfoResponseDtoList;
     }

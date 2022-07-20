@@ -3,7 +3,6 @@ package com.dope.breaking.domain.user;
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.post.Post;
-import com.dope.breaking.domain.post.PostLike;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -77,16 +76,19 @@ public class User {
 
     private int balance;
 
-    private String profileImgURL;
+    private String originalProfileImgURL;
+
+    private String compressedProfileImgURL;
 
     @Column(length = 1000)
     private String refreshToken;
 
 
-    public void setRequestFields (String generatedImgURL, String nickname, String phoneNumber, String email,
+    public void setRequestFields (String originalProfileImgURL, String compressedProfileImgURL, String nickname, String phoneNumber, String email,
              String realName, String statusMsg, String username, Role role) {
 
-        this.profileImgURL = generatedImgURL;
+        this.originalProfileImgURL = originalProfileImgURL;
+        this.compressedProfileImgURL = compressedProfileImgURL;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.email = email;

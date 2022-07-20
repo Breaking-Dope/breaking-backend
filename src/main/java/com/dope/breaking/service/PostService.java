@@ -164,7 +164,7 @@ public class PostService {
         WriterDto writerDto = WriterDto.builder()
                 .nickname(post.getUser().getNickname())
                 .phoneNumber(post.getUser().getPhoneNumber())
-                .profileImgURL(post.getUser().getProfileImgURL())
+                .profileImgURL(post.getUser().getOriginalProfileImgURL())
                 .userId(post.getUser().getId()).build();
 
         LocationDto locationDto = LocationDto.builder()

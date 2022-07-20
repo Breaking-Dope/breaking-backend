@@ -26,7 +26,7 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> postCreate(Principal principal,
+    public ResponseEntity<Map<String, Long>> postCreate(Principal principal,
                                         @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
         Long postId = postService.create(principal.getName(), contentData, files);
         Map<String, Long> result = new LinkedHashMap<>();
@@ -37,7 +37,7 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/post/{postId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> postModify(@PathVariable("postId") long postId, Principal principal,
+    public ResponseEntity<Map<String, Long>> postModify(@PathVariable("postId") long postId, Principal principal,
                                         @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
         postService.modify(postId, principal.getName(), contentData, files);
         Map<String, Long> result = new LinkedHashMap<>();
@@ -47,7 +47,7 @@ public class PostAPI {
 
 
     @GetMapping(value = "/post/{postId}")
-    public ResponseEntity<?> postRead(@PathVariable("postId") long postId, Principal principal){
+    public ResponseEntity<DetailPostResponseDto> postRead(@PathVariable("postId") long postId, Principal principal){
         String crntUsername = null;
         if(principal != null){
             crntUsername = principal.getName();

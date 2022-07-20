@@ -40,6 +40,9 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy="post")
     private List<Media> mediaList = new ArrayList<Media>();
 
+    @OneToMany(mappedBy="post")
+    private List<PostLike> postLikeList = new ArrayList<PostLike>();
+
     @OneToMany(mappedBy = "post")
     private List<Purchase> buyerList = new ArrayList<Purchase>();
 

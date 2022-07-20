@@ -39,9 +39,14 @@ class PostLikeServiceTest {
         postLikeService.likePost(user,post1);
         postLikeService.likePost(user,post2);
 
+        entityManager.flush();
+        entityManager.clear();
+
         //Then
         Assertions.assertThat(postLikeRepository.existsPostLikesByUserAndPost(user,post1)).isTrue();
         Assertions.assertThat(postLikeRepository.existsPostLikesByUserAndPost(user,post2)).isTrue();
+        Assertions.assertThat(postRepository.findById(post1.getId()).get().getPostLikeList().size()).isEqualTo(1);
+
 
     }
 
@@ -57,11 +62,18 @@ class PostLikeServiceTest {
 
         postLikeService.likePost(user,post);
 
+        entityManager.flush();
+        entityManager.clear();
+
         //When
         postLikeService.unlikePost(user,post);
 
+        entityManager.flush();
+        entityManager.clear();
+
         //Then
         Assertions.assertThat(postLikeRepository.existsPostLikesByUserAndPost(user,post)).isFalse();
+        Assertions.assertThat(postRepository.findById(post.getId()).get().getPostLikeList().size()).isEqualTo(0);
 
     }
 
@@ -82,10 +94,13 @@ class PostLikeServiceTest {
 
         //When
         userRepository.delete(user);
+
         entityManager.flush();
+        entityManager.clear();
 
         //Then
         Assertions.assertThat(postLikeRepository.countPostLikesByUser(user)).isEqualTo(0);
+        Assertions.assertThat(postRepository.findById(post1.getId()).get().getPostLikeList().size()).isEqualTo(0);
 
     }
 

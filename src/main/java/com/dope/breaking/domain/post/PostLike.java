@@ -3,6 +3,7 @@ package com.dope.breaking.domain.post;
 import com.dope.breaking.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -10,6 +11,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class PostLike {
 
     @Id

@@ -84,7 +84,7 @@ class RelationshipAPITest {
 
         //Then
         Assertions.assertThat(followedUser.getFollowerList().size()).isEqualTo(1);
-        Assertions.assertThat(userRepository.findById(1L).get().getFollowingList().size()).isEqualTo(1);
+        Assertions.assertThat(userRepository.findByUsername("12345g").get().getFollowingList().size()).isEqualTo(1);
 
     }
 

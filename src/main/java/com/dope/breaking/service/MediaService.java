@@ -181,6 +181,37 @@ public class MediaService {
         return preMediaURL;
     }
 
+    public String compressImage(String originalProfileImgURL, double compressScale) throws Exception {
+
+        String fullPath = MAIN_DIR_NAME + originalProfileImgURL;
+        File originalMediaPath = new File(fullPath);
+        String compressedProfileImgFolderName = SUB_DIR_NAME + UploadType.COMPRESSED_PROFILE_IMG.getDirName();
+        File compressedProfileImgFolder = new File(MAIN_DIR_NAME + compressedProfileImgFolderName);
+
+        if(!compressedProfileImgFolder.exists()){compressedProfileImgFolder.mkdirs();}
+
+        String extension = originalProfileImgURL.substring(originalProfileImgURL.lastIndexOf(".") + 1);
+        MediaType mediaType = findMediaType(extension);
+
+        String compressedImageURL = compressedProfileImgFolderName + File.separator + UUID.randomUUID().toString() + "." + extension;
+        File destination = new File(MAIN_DIR_NAME + compressedImageURL);
+
+        BufferedImage oImage = ImageIO.read(originalMediaPath);
+
+        int compressedWidth = (int)Math.round(oImage.getWidth() * compressScale);
+        int compressedHeight = (int)Math.round(oImage.getHeight() * compressScale);
+
+        BufferedImage tImage = new BufferedImage(compressedWidth,compressedHeight, BufferedImage.TYPE_3BYTE_BGR);
+
+        Graphics2D graphic = tImage.createGraphics();
+        Image image = oImage.getScaledInstance(compressedWidth,compressedHeight,Image.SCALE_SMOOTH);
+        graphic.drawImage(image,0,0,compressedWidth,compressedHeight,null);
+        graphic.dispose();
+        ImageIO.write(tImage,extension,destination);
+
+        return compressedImageURL;
+    }
+
     public String makeThumbnail(String mediaUrl) throws IOException, JCodecException { //파일 주소를 받는다.
         String FullPath = MAIN_DIR_NAME + mediaUrl;
         File originalMediaPath = new File(FullPath); //전체 주소 경로를 받음

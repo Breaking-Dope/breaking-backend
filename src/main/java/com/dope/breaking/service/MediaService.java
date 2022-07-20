@@ -41,7 +41,6 @@ import java.util.List;
 public class MediaService {
 
     private final MediaRepository mediaRepository;
-
     private final PostRepository postRepository;
 
     private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/resources";
@@ -181,7 +180,7 @@ public class MediaService {
         return preMediaURL;
     }
 
-    public String compressImage(String originalProfileImgURL, double compressScale) throws Exception {
+    public String compressImage(String originalProfileImgURL) throws Exception {
 
         String fullPath = MAIN_DIR_NAME + originalProfileImgURL;
         File originalMediaPath = new File(fullPath);
@@ -198,14 +197,25 @@ public class MediaService {
 
         BufferedImage oImage = ImageIO.read(originalMediaPath);
 
-        int compressedWidth = (int)Math.round(oImage.getWidth() * compressScale);
-        int compressedHeight = (int)Math.round(oImage.getHeight() * compressScale);
+        int width = oImage.getWidth();
+        int height = oImage.getHeight();
 
-        BufferedImage tImage = new BufferedImage(compressedWidth,compressedHeight, BufferedImage.TYPE_3BYTE_BGR);
+        if (Math.min(width,height)>=500){
+            if(width<height){
+                width = 500;
+                height = Math.round(height*500/width);
+            }
+            else{
+                width = Math.round(width*500/height);
+                height = 500;
+            }
+        }
+        
+        BufferedImage tImage = new BufferedImage(width,height, BufferedImage.TYPE_3BYTE_BGR);
 
         Graphics2D graphic = tImage.createGraphics();
-        Image image = oImage.getScaledInstance(compressedWidth,compressedHeight,Image.SCALE_SMOOTH);
-        graphic.drawImage(image,0,0,compressedWidth,compressedHeight,null);
+        Image image = oImage.getScaledInstance(width,height,Image.SCALE_SMOOTH);
+        graphic.drawImage(image,0,0,width,height,null);
         graphic.dispose();
         ImageIO.write(tImage,extension,destination);
 

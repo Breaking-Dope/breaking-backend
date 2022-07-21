@@ -43,7 +43,7 @@ public class UserService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) throws Exception {
+    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) {
 
         SignUpRequestDto signUpRequestDto = transformUserInformationToObject(signUpRequest);
 
@@ -88,7 +88,7 @@ public class UserService {
         return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.CREATED);
     }
 
-    public void updateProfile(String username, String updateRequestDto, List<MultipartFile> profileImg) throws Exception {
+    public void updateProfile(String username, String updateRequestDto, List<MultipartFile> profileImg) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
 

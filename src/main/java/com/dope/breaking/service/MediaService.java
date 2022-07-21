@@ -180,7 +180,7 @@ public class MediaService {
         return preMediaURL;
     }
 
-    public String compressImage(String originalProfileImgURL) throws Exception {
+    public String compressImage(String originalProfileImgURL) {
 
         String fullPath = MAIN_DIR_NAME + originalProfileImgURL;
         File originalMediaPath = new File(fullPath);
@@ -195,7 +195,12 @@ public class MediaService {
         String compressedImageURL = compressedProfileImgFolderName + File.separator + UUID.randomUUID().toString() + "." + extension;
         File destination = new File(MAIN_DIR_NAME + compressedImageURL);
 
-        BufferedImage oImage = ImageIO.read(originalMediaPath);
+        BufferedImage oImage = null;
+        try {
+            oImage = ImageIO.read(originalMediaPath);
+        } catch (IOException e) {
+            throw new CustomInternalErrorException(e.getMessage());
+        }
 
         int width = oImage.getWidth();
         int height = oImage.getHeight();
@@ -217,7 +222,11 @@ public class MediaService {
         Image image = oImage.getScaledInstance(width,height,Image.SCALE_SMOOTH);
         graphic.drawImage(image,0,0,width,height,null);
         graphic.dispose();
-        ImageIO.write(tImage,extension,destination);
+        try {
+            ImageIO.write(tImage,extension,destination);
+        } catch (IOException e) {
+            throw new CustomInternalErrorException(e.getMessage());
+        }
 
         return compressedImageURL;
     }

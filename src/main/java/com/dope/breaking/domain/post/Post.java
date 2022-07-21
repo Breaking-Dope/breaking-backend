@@ -5,6 +5,7 @@ package com.dope.breaking.domain.post;
 import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.financial.Purchase;
+import com.dope.breaking.domain.hashtag.PostHashtag;
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.User;
@@ -41,10 +42,14 @@ public class Post extends BaseTimeEntity {
     private List<PostLike> postLikeList = new ArrayList<PostLike>();
 
     @OneToMany(mappedBy = "post")
+    private List<PostHashtag> postHashtags = new ArrayList<PostHashtag>();
+
+    @OneToMany(mappedBy = "post")
     private List<Purchase> buyerList = new ArrayList<Purchase>();
 
     @OneToMany(mappedBy = "post")
     private List<Bookmark> bookmarkList = new ArrayList<Bookmark>();
+
 
     @CreatedDate
     private LocalDateTime createdDate;
@@ -107,6 +112,6 @@ public class Post extends BaseTimeEntity {
     }
 
     public void updateViewCount() {
-        this.viewCount = this.getViewCount() + 1;
+        this.viewCount += 1;
     }
 }

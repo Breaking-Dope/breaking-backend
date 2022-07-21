@@ -14,18 +14,11 @@ spring:
         format_sql: true
   profiles:
     include: jwt
+
   h2:
     console:
       enabled: true
       path: /console
-
-  mvc:
-    static-path-pattern: /static/**
-
-  resources:
-    static-locations: classpath:/static/
-    add-mappings: true
-
 
   servlet:
     multipart:

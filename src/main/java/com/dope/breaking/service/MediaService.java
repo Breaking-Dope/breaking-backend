@@ -43,7 +43,7 @@ public class MediaService {
     private final MediaRepository mediaRepository;
     private final PostRepository postRepository;
 
-    private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/resources";
+    private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/webapp/WEB-INF";
     private final String SUB_DIR_NAME = "/static";
 
 

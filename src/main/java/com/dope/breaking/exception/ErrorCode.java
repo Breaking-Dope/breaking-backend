@@ -17,7 +17,6 @@ public enum ErrorCode {
     NO_PERMISSION("BSE005", "해당 기능에 대한 권한이 없습니다."),
     BAD_REQUEST("BSE400", "클라이언트 요청오류."),
     NO_SUCH_USER("BSE401", "해당 유저를 찾을 수 없습니다."),
-    NO_SUCH_POST("BSE402","해당 제보를 찾을 수 없습니다"),
 
     INVALID_NICKNAME_FORMAT("BSE410", "닉네임 형식이 잘못되었습니다."),
     INVALID_PHONE_NUMBER_FORMAT("BSE411", "전화번호 형식이 잘못되었습니다."),
@@ -28,6 +27,8 @@ public enum ErrorCode {
     DUPLICATED_EMAIL("BSE415", "사용중인 이메일입니다."),
     ALREADY_FOLLOWING("BSE420","이미 팔로우 중인 유저입니다."),
     ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
+    NO_SUCH_POST("BSE450","해당 제보를 찾을 수 없습니다"),
+    NO_SUCH_COMMENT("BSE451","해당 댓글을 찾을 수 없습니다"),
     ALREADY_LIKED("BSE458","이미 좋아요를 선택했습니다."),
     ALREADY_UNLIKED("BSE459","이미 좋아요를 선택하지 않았습니다."),
 

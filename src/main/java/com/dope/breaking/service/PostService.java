@@ -14,10 +14,7 @@ import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
-import com.dope.breaking.repository.MediaRepository;
-import com.dope.breaking.repository.PostLikeRepository;
-import com.dope.breaking.repository.PostRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,8 +42,14 @@ public class PostService {
 
     private final PostLikeRepository postLikeRepository;
 
+    private final PostHashtagRepository postHashtagRepository;
+    private final PostHashtagService postHashtagService;
 
     private final MediaRepository mediaRepository;
+
+    private final HashtagRepository hashtagRepository;
+
+    private final HashtagService hashtagService;
 
     private final MediaService mediaService;
 
@@ -61,7 +64,7 @@ public class PostService {
 
         PostType postType = confirmPostType(postRequestDto.getPostType());
         Post post = new Post();
-        Long postid = null;
+        Long postId = null;
 
         try {
             post = Post.builder()
@@ -78,11 +81,14 @@ public class PostService {
                     .build();
 
             post.setUser(user);
-            postid = postRepository.save(post).getId();
+            postId = postRepository.save(post).getId();
+            postHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId);
 
         } catch (Exception e) {
             throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
         }
+
+        log.info(post.toString());
 
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
         if (files != null && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
@@ -93,7 +99,7 @@ public class PostService {
         } else {
             post.setThumbnailImgURL(null); //default는 null => 기본 썸네일 지정.
         }
-        return postid;
+        return postId;
     }
 
     @Transactional
@@ -116,17 +122,24 @@ public class PostService {
                     .longitude(postRequestDto.getLocationDto().getLongitude()).build();
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
+            List<String> hashtags = postHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
+            postHashtagService.modifyPostHashtag(postRequestDto.getHashtagList(), modifyPost);
+            hashtagService.deleteOrphanHashtag(hashtags);
+
         } catch (Exception e) {
             log.info("게시글 수정 실패");
+            e.printStackTrace();
             throw new CustomInternalErrorException("게시글을 수정할 수 없습니다.");
         }
+
+        log.info(modifyPost.toString());
 
         List<String> preMediaURL = mediaService.preMediaURL(postId); //기존 URL
         List<String> mediaURL = new LinkedList<>();
         if (files != null && files.get(0).getSize() != 0) {
             mediaURL = mediaService.uploadMedias(files, UploadType.ORIGINAL_POST_MEDIA);
             mediaService.modifyMediaEntities(preMediaURL, mediaURL, postId);
-            if(modifyPost.getThumbnailImgURL() != null){
+            if (modifyPost.getThumbnailImgURL() != null) {
                 mediaService.deleteThumbnailImg(modifyPost.getThumbnailImgURL());
             }
             mediaService.deleteMedias(preMediaURL);
@@ -135,7 +148,7 @@ public class PostService {
         } else {
             mediaService.modifyMediaEntities(preMediaURL, mediaURL, postId);
             mediaService.deleteMedias(preMediaURL);
-            if(modifyPost.getThumbnailImgURL() != null){
+            if (modifyPost.getThumbnailImgURL() != null) {
                 mediaService.deleteThumbnailImg(modifyPost.getThumbnailImgURL());
             }
             modifyPost.setThumbnailImgURL(null);
@@ -143,15 +156,16 @@ public class PostService {
     }
 
 
-    public DetailPostResponseDto read(Long postId, String crntUsername){
+    @Transactional
+    public DetailPostResponseDto read(Long postId, String crntUsername) {
         //1. 없다면 예외반환.
-        if(!postRepository.findById(postId).isPresent()){
+        if (!postRepository.findById(postId).isPresent()) {
             throw new NoSuchPostException();
         }
 
         //2. 현재 사용자 게시글 좋아요 했는지 판별
         boolean hasLiked = false;
-        if(crntUsername != null) {
+        if (crntUsername != null) {
             hasLiked = postLikeRepository.existsPostLikesByUserAndPost(userRepository.findByUsername(crntUsername).get(), postRepository.findById(postId).get()) ? true : false;
         }
 
@@ -178,6 +192,7 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
+                .hashtagList(postHashtagRepository.findAllByPost(post).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList()))
                 .location(locationDto)
                 .price(post.getPrice())
                 .postType(post.getPostType().getTitle())

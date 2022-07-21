@@ -1,0 +1,45 @@
+package com.dope.breaking.service;
+
+
+import com.dope.breaking.domain.hashtag.Hashtag;
+import com.dope.breaking.repository.CommentHashtagRepository;
+import com.dope.breaking.repository.HashtagRepository;
+import com.dope.breaking.repository.PostHashtagRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class HashtagService {
+
+    private final HashtagRepository hashtagRepository;
+
+    private final CommentHashtagRepository commentHashtagRepository;
+    private final PostHashtagRepository postHashtagRepository;
+
+
+    public boolean existRelatedHashtag(Hashtag hashtag){
+        log.info(Boolean.toString(postHashtagRepository.existsByHashtag(hashtag)));
+        if(postHashtagRepository.existsByHashtag(hashtag) == true || commentHashtagRepository.existsByHashtag(hashtag) == true) {
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    @Transactional
+    public void deleteOrphanHashtag(List<String> hashtags){
+        for(String hashtag : hashtags) {
+            Hashtag hashtagEntity = hashtagRepository.findByHashtag(hashtag);
+            if (!existRelatedHashtag(hashtagEntity)) {
+                hashtagRepository.delete(hashtagEntity);
+            }
+        }
+    }
+}

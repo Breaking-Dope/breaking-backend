@@ -95,7 +95,7 @@ public class Oauth2LoginService {
             UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
                     .nickname(user.getNickname())
-                    .profileImgURL(user.getProfileImgURL())
+                    .profileImgURL(user.getOriginalProfileImgURL())
                     .balance(user.getBalance())
                     .build();
             return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
@@ -169,7 +169,7 @@ public class Oauth2LoginService {
                     .userId(user.getId())
                     .balance(user.getBalance())
                     .nickname(user.getNickname())
-                    .profileImgURL(user.getProfileImgURL())
+                    .profileImgURL(user.getOriginalProfileImgURL())
                     .build();
             return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
         }

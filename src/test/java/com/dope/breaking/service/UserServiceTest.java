@@ -76,6 +76,7 @@ class UserServiceTest {
         User user = new User();
         user.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
@@ -146,6 +147,7 @@ class UserServiceTest {
                 ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","testUsername", "press");
         user.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
@@ -162,7 +164,7 @@ class UserServiceTest {
         //Then
         assertEquals(foundUserInfo.getUserId(), user.getId());
         assertEquals(foundUserInfo.getNickname(), user.getNickname());
-        assertEquals(foundUserInfo.getProfileImgURL(), user.getProfileImgURL());
+        assertEquals(foundUserInfo.getProfileImgURL(), user.getOriginalProfileImgURL());
     }
 
     @Test
@@ -173,6 +175,7 @@ class UserServiceTest {
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
                 ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","testUsername", "press");
         user.setRequestFields(
+                "anyURL",
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
@@ -200,6 +203,7 @@ class UserServiceTest {
                 ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","testUsername", "press");
         user.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
@@ -214,6 +218,7 @@ class UserServiceTest {
         SignUpRequestDto anotherSignUpRequest =  new SignUpRequestDto
                 ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","anotherTestUsername", "press");
         anotherUser.setRequestFields(
+                "anyURL",
                 "anyURL",
                 anotherSignUpRequest.getNickname(),
                 anotherSignUpRequest.getPhoneNumber(),
@@ -240,6 +245,7 @@ class UserServiceTest {
                 ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
         user.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
@@ -264,6 +270,7 @@ class UserServiceTest {
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
                 ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
         user.setRequestFields(
+                "anyURL",
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),

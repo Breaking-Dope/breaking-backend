@@ -41,7 +41,6 @@ import java.util.List;
 public class MediaService {
 
     private final MediaRepository mediaRepository;
-
     private final PostRepository postRepository;
 
     private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/resources";
@@ -179,6 +178,57 @@ public class MediaService {
             preMediaURL.add(m.getMediaURL());
         }
         return preMediaURL;
+    }
+
+    public String compressImage(String originalProfileImgURL) {
+
+        String fullPath = MAIN_DIR_NAME + originalProfileImgURL;
+        File originalMediaPath = new File(fullPath);
+        String compressedProfileImgFolderName = SUB_DIR_NAME + UploadType.COMPRESSED_PROFILE_IMG.getDirName();
+        File compressedProfileImgFolder = new File(MAIN_DIR_NAME + compressedProfileImgFolderName);
+
+        if(!compressedProfileImgFolder.exists()){compressedProfileImgFolder.mkdirs();}
+
+        String extension = originalProfileImgURL.substring(originalProfileImgURL.lastIndexOf(".") + 1);
+        MediaType mediaType = findMediaType(extension);
+
+        String compressedImageURL = compressedProfileImgFolderName + File.separator + UUID.randomUUID().toString() + "." + extension;
+        File destination = new File(MAIN_DIR_NAME + compressedImageURL);
+
+        BufferedImage oImage = null;
+        try {
+            oImage = ImageIO.read(originalMediaPath);
+        } catch (IOException e) {
+            throw new CustomInternalErrorException(e.getMessage());
+        }
+
+        int width = oImage.getWidth();
+        int height = oImage.getHeight();
+
+        if (Math.min(width,height)>=500){
+            if(width<height){
+                width = 500;
+                height = Math.round(height*500/width);
+            }
+            else{
+                width = Math.round(width*500/height);
+                height = 500;
+            }
+        }
+        
+        BufferedImage tImage = new BufferedImage(width,height, BufferedImage.TYPE_3BYTE_BGR);
+
+        Graphics2D graphic = tImage.createGraphics();
+        Image image = oImage.getScaledInstance(width,height,Image.SCALE_SMOOTH);
+        graphic.drawImage(image,0,0,width,height,null);
+        graphic.dispose();
+        try {
+            ImageIO.write(tImage,extension,destination);
+        } catch (IOException e) {
+            throw new CustomInternalErrorException(e.getMessage());
+        }
+
+        return compressedImageURL;
     }
 
     public String makeThumbnail(String mediaUrl) throws IOException, JCodecException { //파일 주소를 받는다.

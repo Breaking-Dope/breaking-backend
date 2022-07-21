@@ -33,6 +33,7 @@ class FollowRepositoryTest {
                 ("statusMsg","hero","phoneNumber","test@email.com","realname","testUsername", "press");
         hero.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
                 signUpRequest.getEmail(),
@@ -48,6 +49,7 @@ class FollowRepositoryTest {
                 ("statusMsg","follower1","phoneNumber","test@email.com","realname","testUsername", "press");
         follower1.setRequestFields(
                 "anyURL",
+                "anyURL",
                 signUpRequest2.getNickname(),
                 signUpRequest2.getPhoneNumber(),
                 signUpRequest2.getEmail(),
@@ -62,6 +64,7 @@ class FollowRepositoryTest {
         SignUpRequestDto signUpRequest3 =  new SignUpRequestDto
                 ("statusMsg","follower2","phoneNumber","test@email.com","realname","testUsername", "press");
         follower2.setRequestFields(
+                "anyURL",
                 "anyURL",
                 signUpRequest3.getNickname(),
                 signUpRequest3.getPhoneNumber(),

@@ -1,7 +1,6 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.user.*;
-import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -62,7 +61,7 @@ public class UserAPI {
     public ResponseEntity<?> profileUpdateConfirm(
             Principal principal,
             @RequestPart String updateRequest,
-            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
+            @RequestPart (required = false) List<MultipartFile> profileImg) {
 
         userService.updateProfile(principal.getName(), updateRequest, profileImg);
         return ResponseEntity.status(HttpStatus.CREATED).build();

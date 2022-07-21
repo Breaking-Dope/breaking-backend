@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
 
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class UserAPITest {
 
     @Autowired private MockMvc mockMvc;
@@ -33,6 +35,7 @@ class UserAPITest {
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
                 ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
         user.setRequestFields(
+                "anyURL",
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),
@@ -57,6 +60,7 @@ class UserAPITest {
         SignUpRequestDto signUpRequest =  new SignUpRequestDto
                 ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
         user.setRequestFields(
+                "anyURL",
                 "anyURL",
                 signUpRequest.getNickname(),
                 signUpRequest.getPhoneNumber(),

@@ -45,7 +45,7 @@ public class UserAPI {
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> signUp(
             @RequestPart String signUpRequest,
-            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
+            @RequestPart (required = false) List<MultipartFile> profileImg) {
         return userService.signUp(signUpRequest, profileImg);
     }
 
@@ -61,7 +61,7 @@ public class UserAPI {
     public ResponseEntity<?> profileUpdateConfirm(
             Principal principal,
             @RequestPart String updateRequest,
-            @RequestPart (required = false) List<MultipartFile> profileImg) throws Exception {
+            @RequestPart (required = false) List<MultipartFile> profileImg) {
 
         userService.updateProfile(principal.getName(), updateRequest, profileImg);
         return ResponseEntity.status(HttpStatus.CREATED).build();

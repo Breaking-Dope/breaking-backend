@@ -57,7 +57,6 @@ public class PostHashtagService {
         for(String hashtag : postHashtags){
             Hashtag hashtagEntity = new Hashtag();
             if(hashtagRepository.existsByHashtag(hashtag)){
-                log.info("기존의 해시태그가 존재함.");
                 hashtagEntity = hashtagRepository.findByHashtag(hashtag);
             }
             else{

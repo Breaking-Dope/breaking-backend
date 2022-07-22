@@ -67,4 +67,18 @@ public class CommentService {
 
     }
 
+    @Transactional
+    public void deleteCommentOrReply(String username, Long commentId) {
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(NoSuchCommentException::new);
+
+        if (comment.getUser()!=user) {
+            throw new NoPermissionException();
+        }
+
+        commentRepository.delete(comment);
+
+    }
+
 }

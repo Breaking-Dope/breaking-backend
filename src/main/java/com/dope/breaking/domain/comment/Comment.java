@@ -33,6 +33,7 @@ public class Comment {
     private Post post;
 
     //댓글, 대댓글 self-referencing
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name="PARENT_ID")
     private Comment parent;

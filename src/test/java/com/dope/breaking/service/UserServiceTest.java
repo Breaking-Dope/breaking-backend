@@ -7,7 +7,11 @@ import com.dope.breaking.dto.user.ProfileInformationResponseDto;
 import com.dope.breaking.dto.user.SignUpRequestDto;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.user.DuplicatedUserInformationException;
+import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
 import com.dope.breaking.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,44 +30,11 @@ class UserServiceTest {
     @Autowired UserRepository userRepository;
     @Autowired EntityManager em;
 
-//    @Test
-//    void isValidEmailFormat() {
-//
-//        String email1 = "hello@naver.com";
-//        String email2 = "hello@naver";
-//        String email3 = "hello";
-//
-//        assertTrue(userService.isValidEmailFormat(email1));
-//        assertFalse(userService.isValidEmailFormat(email2));
-//        assertFalse(userService.isValidEmailFormat(email3));
-//
-//    }
-//
-//    @Test
-//    void isValidPhoneNumberFormat() {
-//
-//        String number1 = "01012345678";
-//        String number2 = "0212345678";
-//        String number3 = "010102312";
-//
-//        assertTrue(userService.isValidPhoneNumberFormat(number1));
-//        assertTrue(userService.isValidPhoneNumberFormat(number2));
-//        assertFalse(userService.isValidPhoneNumberFormat(number3));
-//
-//    }
-//
-//    @Test
-//    void isValidRole() {
-//
-//        String role1 = "PRESS";
-//        String role2 = "PreSs";
-//        String role3 = "Pre";
-//
-//        assertTrue(userService.isValidRole(role1));
-//        assertTrue(userService.isValidRole(role2));
-//        assertFalse(userService.isValidRole(role3));
-//
-//    }
+
+    @Test
+    void validateNickname() {
+
+    }
 
     @Test
     void signUpConfirm() {
@@ -286,6 +257,128 @@ class UserServiceTest {
 
         assertEquals(fullUserInformationResponse.getPhoneNumber(), user.getPhoneNumber());
         assertEquals(fullUserInformationResponse.getRealName(), user.getRealName());
+    }
+
+    @DisplayName("휴대폰 번호 형식이 잘못되었을 경우, 예외가 발생한다.")
+    @Test()
+    void validateUserPhoneNumber() {
+
+        userService.validatePhoneNumber("01026695282", null);
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validatePhoneNumber("0102669528", null));
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validatePhoneNumber("010-2669-5282", null));
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validatePhoneNumber("aaaaaaaaaaa", null));
+    }
+
+    @DisplayName("휴대폰 번호 중복이 있을 경우, 예외가 발생한다.")
+    @Test
+    void duplicatedUserPhoneNumberFailure() {
+
+        User oldUser = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","01026695282","test@email.com","realname","testUsername", "press");
+        oldUser.setRequestFields(
+                "anyURL",
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userRepository.save(oldUser);
+        Assertions.assertThrows(DuplicatedUserInformationException.class, () -> userService.validatePhoneNumber(oldUser.getPhoneNumber(), null));
+    }
+
+    @DisplayName("이메일 형식이 잘못되었을 경우, 예외가 발생한다.")
+    @Test
+    void validateUserEmail() {
+
+        userService.validateEmail("woojin8787@gmail.com", null);
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validateEmail("woojin8787", null));
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validateEmail("woojin8787gmail.com", null));
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validateEmail("woojin8787@gmail", null));
+    }
+
+    @DisplayName("이메일 중복이 있을 경우, 예외가 발생한다.")
+    @Test
+    void duplicatedUserEmailFailure() {
+
+        User oldUser = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","01026695282","test@email.com","realname","testUsername", "press");
+        oldUser.setRequestFields(
+                "anyURL",
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userRepository.save(oldUser);
+        Assertions.assertThrows(DuplicatedUserInformationException.class, () -> userService.validateEmail(oldUser.getEmail(), null));
+    }
+
+    @DisplayName("닉네임 형식이 잘못되었을 경우, 예외가 발생한다.")
+    @Test
+    void validateUserNicknameFormat() {
+
+        userService.validateNickname("AbCdEf", null);
+        userService.validateNickname("abc123", null);
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validateNickname("@ABC", null));
+        Assertions.assertThrows(InvalidUserInformationFormatException.class, () -> userService.validateNickname("b", null));
+    }
+
+    @DisplayName("휴대폰 번호 중복이 있을 경우, 예외가 발생한다.")
+    @Test
+    void duplicatedUserNicknameFailure() {
+
+        User oldUser = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","phoneNumber","test@email.com","realname","testUsername", "press");
+        oldUser.setRequestFields(
+                "anyURL",
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+        userRepository.save(oldUser);
+        Assertions.assertThrows(DuplicatedUserInformationException.class, () -> userService.validateNickname(oldUser.getNickname(), null));
+    }
+
+    @DisplayName("회원 수정에서, 기존 회원이 같은 정보를 입력하면 중복 예외가 발생하지 않는다.")
+    @Test
+    void validateWhenCurrentUserUpdateProfileWithSameInformation() {
+
+        User currentUser = new User();
+        SignUpRequestDto signUpRequest =  new SignUpRequestDto
+                ("statusMsg","nickname","01026695282","test@email.com","realname","testUsername", "press");
+        currentUser.setRequestFields(
+                "anyURL",
+                "anyURL",
+                signUpRequest.getNickname(),
+                signUpRequest.getPhoneNumber(),
+                signUpRequest.getEmail(),
+                signUpRequest.getRealName(),
+                signUpRequest.getStatusMsg(),
+                signUpRequest.getUsername(),
+                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
+        );
+
+        userRepository.save(currentUser);
+
+        userService.validatePhoneNumber(currentUser.getPhoneNumber(), currentUser.getUsername());
+        userService.validateEmail(currentUser.getEmail(), currentUser.getUsername());
+        userService.validateNickname(currentUser.getNickname(), currentUser.getUsername());
     }
 
 }

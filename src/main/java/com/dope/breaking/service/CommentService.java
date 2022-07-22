@@ -6,6 +6,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.exception.post.NoSuchPostException;
+import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.CommentRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -22,7 +23,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public Long addCommentToPost (Long postId, String username, String content){
+    public Long addComment(Long postId, String username, String content) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
@@ -38,12 +39,12 @@ public class CommentService {
     }
 
     @Transactional
-    public Long addReplyToComment(Long commentId, String username, String content){
+    public Long addReply(Long commentId, String username, String content) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Comment comment = commentRepository.findById(commentId).orElseThrow(NoSuchCommentException::new);
 
-        Comment reply = new Comment (user, comment.getPost(), comment, content);
+        Comment reply = new Comment(user, comment.getPost(), comment, content);
         userRepository.save(user);
         commentRepository.save(comment);
         commentRepository.save(reply);
@@ -52,6 +53,18 @@ public class CommentService {
 
     }
 
+    @Transactional
+    public void updateCommentOrReply(String username, Long commentId, String content) {
 
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Comment comment = commentRepository.findById(commentId).orElseThrow(NoSuchCommentException::new);
+
+        if (comment.getUser()!=user) {
+            throw new NoPermissionException();
+        }
+
+        comment.updateComment(content);
+
+    }
 
 }

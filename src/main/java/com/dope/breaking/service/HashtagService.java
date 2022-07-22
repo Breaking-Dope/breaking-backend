@@ -2,9 +2,8 @@ package com.dope.breaking.service;
 
 
 import com.dope.breaking.domain.hashtag.Hashtag;
-import com.dope.breaking.repository.CommentHashtagRepository;
 import com.dope.breaking.repository.HashtagRepository;
-import com.dope.breaking.repository.PostHashtagRepository;
+import com.dope.breaking.repository.PostCommentHashtagRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,13 +18,12 @@ public class HashtagService {
 
     private final HashtagRepository hashtagRepository;
 
-    private final CommentHashtagRepository commentHashtagRepository;
-    private final PostHashtagRepository postHashtagRepository;
+    private final PostCommentHashtagRepository postCommentHashtagRepository;
 
 
     public boolean existRelatedHashtag(Hashtag hashtag){
-        log.info(Boolean.toString(postHashtagRepository.existsByHashtag(hashtag)));
-        if(postHashtagRepository.existsByHashtag(hashtag) == true || commentHashtagRepository.existsByHashtag(hashtag) == true) {
+        log.info(Boolean.toString(postCommentHashtagRepository.existsByHashtag(hashtag)));
+        if(postCommentHashtagRepository.existsByHashtag(hashtag) == true) {
             return true;
         }
         else{

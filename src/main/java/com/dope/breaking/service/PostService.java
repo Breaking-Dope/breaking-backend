@@ -1,5 +1,6 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -42,8 +43,8 @@ public class PostService {
 
     private final PostLikeRepository postLikeRepository;
 
-    private final PostHashtagRepository postHashtagRepository;
-    private final PostHashtagService postHashtagService;
+    private final PostCommentHashtagRepository postCommentHashtagRepository;
+    private final PostCommentHashtagService postCommentHashtagService;
 
     private final MediaRepository mediaRepository;
 
@@ -82,7 +83,7 @@ public class PostService {
 
             post.setUser(user);
             postId = postRepository.save(post).getId();
-            postHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId);
+            postCommentHashtagService.savePostCommentHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
 
         } catch (Exception e) {
             throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
@@ -122,8 +123,8 @@ public class PostService {
                     .longitude(postRequestDto.getLocationDto().getLongitude()).build();
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
-            List<String> hashtags = postHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
-            postHashtagService.modifyPostHashtag(postRequestDto.getHashtagList(), modifyPost);
+            List<String> hashtags = postCommentHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
+            postCommentHashtagService.modifyPostCommentHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
             hashtagService.deleteOrphanHashtag(hashtags);
 
         } catch (Exception e) {
@@ -192,7 +193,7 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
-                .hashtagList(postHashtagRepository.findAllByPost(post).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList()))
+                .hashtagList(postCommentHashtagRepository.findAllByPost(post).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList()))
                 .location(locationDto)
                 .price(post.getPrice())
                 .postType(post.getPostType().getTitle())

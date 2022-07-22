@@ -21,23 +21,35 @@ public class UserAPI {
 
 
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
-    public ResponseEntity<Void> validatePhoneNumber(@PathVariable String phoneNumber){
+    public ResponseEntity<Void> validatePhoneNumber(@PathVariable String phoneNumber, Principal principal){
 
-        userService.validatePhoneNumber(phoneNumber);
+        String username = null;
+        if(principal != null)  {
+            username = principal.getName();
+        }
+        userService.validatePhoneNumber(phoneNumber, username);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/oauth2/sign-up/validate-email/{email}")
-    public ResponseEntity<Void> validateEmail(@PathVariable String email){
+    public ResponseEntity<Void> validateEmail(@PathVariable String email, Principal principal){
 
-        userService.validateEmail(email);
+        String username = null;
+        if(principal != null)  {
+            username = principal.getName();
+        }
+        userService.validateEmail(email, username);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/oauth2/sign-up/validate-nickname/{nickname}")
-    public ResponseEntity<Void> validateNickname(@PathVariable String nickname){
+    public ResponseEntity<Void> validateNickname(@PathVariable String nickname, Principal principal){
 
-        userService.validateNickname(nickname);
+        String username = null;
+        if(principal != null)  {
+            username = principal.getName();
+        }
+        userService.validateNickname(nickname, username);
         return ResponseEntity.ok().build();
     }
 

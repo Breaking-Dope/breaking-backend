@@ -6,6 +6,6 @@ import org.springframework.http.HttpStatus;
 
 public class NoSuchCommentException extends BreakingException {
 
-    public NoSuchCommentException() { super (ErrorCode.NO_SUCH_COMMENT, HttpStatus.BAD_REQUEST);}
+    public NoSuchCommentException() { super (ErrorCode.NO_SUCH_COMMENT, HttpStatus.NOT_FOUND);}
 
 }

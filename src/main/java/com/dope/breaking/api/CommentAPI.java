@@ -1,9 +1,6 @@
 package com.dope.breaking.api;
 
-import com.dope.breaking.domain.comment.Comment;
-import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.repository.CommentRepository;
-import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,4 +43,13 @@ public class CommentAPI {
 
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping ("/post/comment/{commentId}")
+    public ResponseEntity deleteCommentAndReply(@PathVariable Long commentId, Principal principal){
+
+        commentService.deleteCommentOrReply(principal.getName(), commentId);
+        return ResponseEntity.ok().build();
+
+    }
+    
 }

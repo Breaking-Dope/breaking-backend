@@ -1,8 +1,8 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.post.Post;
-import com.dope.breaking.domain.user.User;
-import com.dope.breaking.repository.PostHashtagRepository;
+import com.dope.breaking.repository.PostCommentHashtagRepository;
 import com.dope.breaking.repository.PostRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,17 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @Transactional
-class PostHashtagServiceTest {
+class PostCommentHashtagServiceTest {
 
     @Autowired
-    PostHashtagService postHashtagService;
+    PostCommentHashtagService postCommentHashtagService;
 
     @Autowired
-    PostHashtagRepository postHashtagRepository;
+    PostCommentHashtagRepository postCommentHashtagRepository;
 
     @Autowired
     PostRepository postRepository;
@@ -37,13 +35,13 @@ class PostHashtagServiceTest {
         hashtag.add("hello1");
         hashtag.add("hello2");
         //When
-        postHashtagService.savePostHashtag(hashtag, postId);
+        postCommentHashtagService.savePostCommentHashtag(hashtag, postId, HashtagType.POST);
 
         //Then
 
-        Assertions.assertSame(postHashtagRepository.findAllByPost(post).size(), 2);
-        Assertions.assertSame(postHashtagRepository.findAllByPost(post).get(0).getHashtag().getHashtag(), "hello1");
-        Assertions.assertSame(postHashtagRepository.findAllByPost(post).get(1).getHashtag().getHashtag(), "hello2");
+        Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).size(), 2);
+        Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).get(0).getHashtag().getHashtag(), "hello1");
+        Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).get(1).getHashtag().getHashtag(), "hello2");
     }
 
     @Test
@@ -54,18 +52,18 @@ class PostHashtagServiceTest {
         List<String> hashtag = new ArrayList<>();
         hashtag.add("hello1");
         hashtag.add("hello2");
-        postHashtagService.savePostHashtag(hashtag, postId);
+        postCommentHashtagService.savePostCommentHashtag(hashtag, postId, HashtagType.POST);
 
         //When
         hashtag.clear();
         hashtag.add("hello1");
         hashtag.add("hello3");
-        postHashtagService.modifyPostHashtag(hashtag, post);
+        postCommentHashtagService.modifyPostCommentHashtag(hashtag, post, HashtagType.POST);
 
         //Then
-        Assertions.assertSame(postHashtagRepository.findAllByPost(post).size(), 2);
-        Assertions.assertSame(postHashtagRepository.findAllByPost(post).get(0).getHashtag().getHashtag(), "hello1");
-        Assertions.assertSame(postHashtagRepository.findAllByPost(post).get(1).getHashtag().getHashtag(), "hello3");
+        Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).size(), 2);
+        Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).get(0).getHashtag().getHashtag(), "hello1");
+        Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).get(1).getHashtag().getHashtag(), "hello3");
 
     }
 }

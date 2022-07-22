@@ -1,7 +1,7 @@
 package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.hashtag.Hashtag;
-import com.dope.breaking.domain.hashtag.PostHashtag;
+import com.dope.breaking.domain.hashtag.PostCommentHashtag;
 import com.dope.breaking.domain.post.Post;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,17 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @Transactional
-class PostHashtagRepositoryTest {
+class PostCommentHashtagRepositoryTest {
 
     @Autowired
-    PostHashtagRepository postHashtagRepository;
+    PostCommentHashtagRepository postCommentHashtagRepository;
 
     @Autowired
     PostRepository postRepository;
@@ -36,13 +31,13 @@ class PostHashtagRepositoryTest {
         Hashtag hashtag = Hashtag.builder()
                 .hashtag("hello1").build();
         hashtagRepository.save(hashtag);
-        PostHashtag postHashtag = PostHashtag.builder()
+        PostCommentHashtag postCommentHashtag = PostCommentHashtag.builder()
                 .post(post)
                 .hashtag(hashtag).build();
-        postHashtagRepository.save(postHashtag);
+        postCommentHashtagRepository.save(postCommentHashtag);
 
         //When
-        boolean exist = postHashtagRepository.existsByPostAndHashtag(post, hashtag);
+        boolean exist = postCommentHashtagRepository.existsByPostAndHashtag(post, hashtag);
 
         //then
         Assertions.assertTrue(exist);
@@ -59,21 +54,21 @@ class PostHashtagRepositoryTest {
         Hashtag hashtag2 = Hashtag.builder()
                 .hashtag("hello2").build();
         hashtagRepository.save(hashtag2);
-        PostHashtag postHashtag1 = PostHashtag.builder()
+        PostCommentHashtag postCommentHashtag1 = PostCommentHashtag.builder()
                 .post(post)
                 .hashtag(hashtag1).build();
 
-        PostHashtag postHashtag2 = PostHashtag.builder()
+        PostCommentHashtag postCommentHashtag2 = PostCommentHashtag.builder()
                 .post(post)
                 .hashtag(hashtag2).build();
-        postHashtagRepository.save(postHashtag1);
-        postHashtagRepository.save(postHashtag2);
+        postCommentHashtagRepository.save(postCommentHashtag1);
+        postCommentHashtagRepository.save(postCommentHashtag2);
 
         //When
-        postHashtagRepository.deleteAllByPost(post);
+        postCommentHashtagRepository.deleteAllByPost(post);
 
         //then
-        Assertions.assertEquals(postHashtagRepository.findAllByPost(post).size(), 0);
+        Assertions.assertEquals(postCommentHashtagRepository.findAllByPost(post).size(), 0);
     }
 
     @Test
@@ -87,18 +82,18 @@ class PostHashtagRepositoryTest {
         Hashtag hashtag2 = Hashtag.builder()
                 .hashtag("hello2").build();
         hashtagRepository.save(hashtag2);
-        PostHashtag postHashtag1 = PostHashtag.builder()
+        PostCommentHashtag postCommentHashtag1 = PostCommentHashtag.builder()
                 .post(post)
                 .hashtag(hashtag1).build();
 
-        PostHashtag postHashtag2 = PostHashtag.builder()
+        PostCommentHashtag postCommentHashtag2 = PostCommentHashtag.builder()
                 .post(post)
                 .hashtag(hashtag2).build();
-        postHashtagRepository.save(postHashtag1);
-        postHashtagRepository.save(postHashtag2);
+        postCommentHashtagRepository.save(postCommentHashtag1);
+        postCommentHashtagRepository.save(postCommentHashtag2);
 
         //When
-        int size = postHashtagRepository.findAllByPost(post).size();
+        int size = postCommentHashtagRepository.findAllByPost(post).size();
 
         //Then
         Assertions.assertEquals(size, 2);

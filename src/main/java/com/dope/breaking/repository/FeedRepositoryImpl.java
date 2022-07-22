@@ -64,7 +64,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         post.isSold,
                         post.viewCount,
                         user.id,
-                        user.profileImgURL,
+                        user.compressedProfileImgURL,
                         user.realName,
                         post.price,
                         Expressions.asBoolean(false),

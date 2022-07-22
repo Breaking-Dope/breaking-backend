@@ -197,9 +197,9 @@ public class UserService {
             throw new MissingFormatArgumentException(String.valueOf(violation.getPropertyPath()));
         }
 
-        validatePhoneNumber(signUpRequestDto.getPhoneNumber());
-        validateEmail(signUpRequestDto.getEmail());
-        validateNickname(signUpRequestDto.getNickname());
+        validatePhoneNumber(signUpRequestDto.getPhoneNumber(), null);
+        validateEmail(signUpRequestDto.getEmail(), null);
+        validateNickname(signUpRequestDto.getNickname(), null);
         validateRole(signUpRequestDto.getRole());
 
     }
@@ -225,20 +225,21 @@ public class UserService {
             throw new NotValidRequestBodyException(result.toString());
         }
 
-        if (!updateUserRequestDto.getPhoneNumber().equals(preUserInformation.getPhoneNumber())) {
-            validatePhoneNumber(updateUserRequestDto.getPhoneNumber());
-        }
-        if (!updateUserRequestDto.getEmail().equals(preUserInformation.getEmail())) {
-            validateEmail(updateUserRequestDto.getEmail());
-        }
-        if (!updateUserRequestDto.getNickname().equals(preUserInformation.getNickname())) {
-            validateNickname(updateUserRequestDto.getNickname());
-        }
+        validatePhoneNumber(updateUserRequestDto.getPhoneNumber(), preUserInformation.getUsername());
+        validateEmail(updateUserRequestDto.getEmail(), preUserInformation.getUsername());
+        validateNickname(updateUserRequestDto.getNickname(), preUserInformation.getUsername());
         validateRole(updateUserRequestDto.getRole());
 
     }
 
-    public void validatePhoneNumber(String phoneNumber) {
+    public void validatePhoneNumber(String phoneNumber, String username) {
+
+        if(username != null) {
+            String currentUserPhoneNumber = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new).getPhoneNumber();
+            if(currentUserPhoneNumber.equals(phoneNumber)) {
+                return;
+            }
+        }
 
         if (!Pattern.matches("^(\\d{11}|\\d{3}\\d{4}\\d{4})$", phoneNumber)) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.PHONENUMBER);
@@ -250,7 +251,14 @@ public class UserService {
         }
     }
 
-    public void validateEmail(String email) {
+    public void validateEmail(String email, String username) {
+
+        if(username != null) {
+            String currentUserEmail = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new).getEmail();
+            if(currentUserEmail.equals(email)) {
+                return;
+            }
+        }
 
         if (!Pattern.matches("^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$", email)) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.EMAIL);
@@ -262,9 +270,16 @@ public class UserService {
         }
     }
 
-    public void validateNickname(String nickname) {
+    public void validateNickname(String nickname, String username) {
 
-        if (!Pattern.matches("^(?=.*[a-z0-9가-힣])[a-z0-9가-힣]{2,16}$", nickname)) {
+        if(username != null) {
+            String currentUserNickname = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new).getNickname();
+            if(currentUserNickname.equals(nickname)) {
+                return;
+            }
+        }
+
+        if (!Pattern.matches("^(?=.*[a-zA-Z0-9가-힣])[a-zA-Z0-9가-힣]{2,16}$", nickname)) {
             throw new InvalidUserInformationFormatException(FailableUserInformation.NICKNAME);
         }
 

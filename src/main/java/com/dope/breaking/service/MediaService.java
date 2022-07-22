@@ -207,8 +207,8 @@ public class MediaService {
 
         if (Math.min(width,height)>=500){
             if(width<height){
-                width = 500;
                 height = Math.round(height*500/width);
+                width = 500;
             }
             else{
                 width = Math.round(width*500/height);

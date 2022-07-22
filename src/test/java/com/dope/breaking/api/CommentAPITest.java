@@ -3,7 +3,6 @@ package com.dope.breaking.api;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.CommentRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -26,8 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -192,6 +190,29 @@ class CommentAPITest {
                         .content(content)
                         .contentType(MediaType.TEXT_PLAIN))
                 .andExpect(status().isNotAcceptable()); //Then
+
+    }
+
+    @DisplayName("유저네임이 일치할 경우, 댓글이 삭제된다")
+    @WithMockCustomUser
+    @Test
+    @Transactional
+    void deleteComment() throws Exception {
+
+        //Given
+        Post post = new Post();
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), "12345g","hi");
+
+        //When
+        this.mockMvc.perform(delete("/post/comment/{commentId}", commentId))
+                .andExpect(status().isOk()); //Then
+
+        //Then
+        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+
+
     }
 
 }

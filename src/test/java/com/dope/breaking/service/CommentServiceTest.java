@@ -194,7 +194,65 @@ class CommentServiceTest {
         Assertions.assertThat(commentRepository.findAll().size()).isEqualTo(0);
         Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
         Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+
     }
 
+    @DisplayName("유저 정보가 일치한 경우, 댓글이 지워진다.")
+    @Test
+    @Transactional
+    void deleteCommentOrReply() {
+
+        //Given
+        User user = new User();
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        Post post = new Post();
+
+        userRepository.save(user);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "comment");
+
+        //When
+        commentService.deleteCommentOrReply("username",commentId);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+
+    }
+
+    @DisplayName("댓글을 지울 경우, 대댓글도 지워진다")
+    @Test
+    @Transactional
+    void checkReplyDeletedWhenCommentDeleted() {
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment");
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply");
+
+        //When
+        commentService.deleteCommentOrReply(user1.getUsername(),commentId);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+        Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+
+    }
 
 }

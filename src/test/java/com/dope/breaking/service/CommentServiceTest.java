@@ -7,6 +7,7 @@ import com.dope.breaking.repository.CommentRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,7 @@ class CommentServiceTest {
     @Autowired
     private EntityManager entityManager;
 
+    @DisplayName("제보가 존재할 경우, 댓글이 작성됩니다.")
     @Test
     @Transactional
     void addCommentToPost() {
@@ -55,6 +57,7 @@ class CommentServiceTest {
 
     }
 
+    @DisplayName("댓글이 존재할 경우, 대댓글이 작성됩니다.")
     @Test
     @Transactional
     void addReplyToComment() {
@@ -65,11 +68,11 @@ class CommentServiceTest {
         Post post = new Post();
         userRepository.save(user);
         postRepository.save(post);
-        commentService.addCommentToPost(post.getId(), user.getUsername(), "hi there");
+        Long commentId = commentService.addCommentToPost(post.getId(), user.getUsername(), "hi there");
 
         //When
-        commentService.addCommentToPost(post.getId(), "username", "reply1");
-        commentService.addCommentToPost(post.getId(), "username", "reply2");
+        commentService.addCommentToPost(commentId, "username", "reply1");
+        commentService.addCommentToPost(commentId, "username", "reply2");
 
         entityManager.flush();
         entityManager.clear();

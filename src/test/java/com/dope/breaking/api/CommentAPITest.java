@@ -1,9 +1,9 @@
 package com.dope.breaking.api;
 
-import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.CommentRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -26,9 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -118,7 +117,7 @@ class CommentAPITest {
         //Given
         Post post = new Post();
         postRepository.save(post);
-        Long commentId = commentService.addCommentToPost(post.getId(),"12345g","hi");
+        Long commentId = commentService.addComment(post.getId(),"12345g","hi");
 
         String content = "reply";
 
@@ -146,6 +145,53 @@ class CommentAPITest {
                         .content(content)
                         .contentType(MediaType.TEXT_PLAIN))
                 .andExpect(status().isNotFound()); //Then
+    }
+
+    @DisplayName("유저네임이 일치할 경우, 댓글이 수정된다.")
+    @WithMockCustomUser
+    @Test
+    @Transactional
+    void updateComment() throws Exception {
+
+        //Given
+        Post post = new Post();
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), "12345g","original");
+        String content = "updated";
+
+        //When
+        this.mockMvc.perform(put("/post/comment/{commentId}", commentId)
+                        .content(content)
+                        .contentType(MediaType.TEXT_PLAIN))
+                .andExpect(status().isCreated()); //Then
+
+        //Then
+        Assertions.assertThat(commentRepository.getById(commentId).getContent()).isEqualTo("updated");
+    }
+
+    @DisplayName("유저네임이 불일치할 경우, 예외가 발생한다")
+    @WithMockCustomUser
+    @Test
+    @Transactional
+    void updateCommentByAnotherUser() throws Exception {
+
+        //Given
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        Post post = new Post();
+
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), "username","original");
+        String content = "updated";
+
+        //When
+        this.mockMvc.perform(put("/post/comment/{commentId}", commentId)
+                        .content(content)
+                        .contentType(MediaType.TEXT_PLAIN))
+                .andExpect(status().isNotAcceptable()); //Then
     }
 
 }

@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 class CommentServiceTest {
 
@@ -34,7 +32,7 @@ class CommentServiceTest {
     @DisplayName("제보가 존재할 경우, 댓글이 작성됩니다.")
     @Test
     @Transactional
-    void addCommentToPost() {
+    void addComment() {
 
         //Given
         User user = new User();
@@ -45,7 +43,7 @@ class CommentServiceTest {
         postRepository.save(post);
 
         //When
-        commentService.addCommentToPost(post.getId(), user.getUsername(), "comment");
+        commentService.addComment(post.getId(), user.getUsername(), "comment");
 
         entityManager.flush();
         entityManager.clear();
@@ -60,7 +58,7 @@ class CommentServiceTest {
     @DisplayName("댓글이 존재할 경우, 대댓글이 작성됩니다.")
     @Test
     @Transactional
-    void addReplyToComment() {
+    void addReply() {
 
         //Given
         User user = new User();
@@ -68,18 +66,135 @@ class CommentServiceTest {
         Post post = new Post();
         userRepository.save(user);
         postRepository.save(post);
-        Long commentId = commentService.addCommentToPost(post.getId(), user.getUsername(), "hi there");
+        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "hi there");
 
         //When
-        commentService.addCommentToPost(commentId, "username", "reply1");
-        commentService.addCommentToPost(commentId, "username", "reply2");
+        commentService.addReply(commentId, "username", "reply1");
+        commentService.addReply(commentId, "username", "reply2");
 
         entityManager.flush();
         entityManager.clear();
 
         //Then
         Assertions.assertThat(commentRepository.count()).isEqualTo(3);
-        Assertions.assertThat(commentRepository.findAll().get(1).getContent()).isEqualTo("reply1");
+        Assertions.assertThat(commentRepository.findById(commentId+1L).get().getContent()).isEqualTo("reply1");
 
     }
+
+    @DisplayName("유저네임과 commentId가 유효할 경우, 댓글이 수정된다.")
+    @Test
+    @Transactional
+    void updateComment() {
+
+        //Given
+        User user = new User();
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        Post post = new Post();
+
+        userRepository.save(user);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), "username","original");
+
+        //When
+        commentService.updateCommentOrReply("username",commentId,"updated");
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(commentRepository.findById(commentId).get().getContent()).isEqualTo("updated");
+
+    }
+
+    @DisplayName("유저가 삭제 될 경우 해당되는 댓글 역시 삭제 된다.")
+    @Test
+    @Transactional
+    void commentDeletedWhenUserDeleted(){
+
+        //Given
+        User user = new User();
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        Post post = new Post();
+
+        userRepository.save(user);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "comment");
+
+        //When
+        userRepository.delete(user);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(commentRepository.findAllByPost(postRepository.getById(post.getId())).size()).isEqualTo(0);
+        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+    }
+
+    @DisplayName("유저가 삭제 될 경우, 해당하는 대댓글 역시 삭제 된다.")
+    @Test
+    @Transactional
+    void replyDeletedWhenUserDeleted(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment");
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply");
+
+        //When
+        userRepository.delete(user2);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(commentRepository.findAllByPost(postRepository.getById(post.getId())).size()).isEqualTo(1);
+        Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+    }
+
+    @DisplayName("제보가 삭제 될 경우, 해당하는 댓글과 대댓글 역시 삭제 된다.")
+    @Test
+    @Transactional
+    void commentAndReplyDeletedWhenPostDeleted(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment");
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply");
+
+        //When
+        postRepository.delete(post);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(commentRepository.findAll().size()).isEqualTo(0);
+        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+        Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+    }
+
+
 }

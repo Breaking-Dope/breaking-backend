@@ -6,7 +6,6 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.exception.post.NoSuchPostException;
-import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.CommentRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -23,7 +22,7 @@ public class CommentService {
     private final PostRepository postRepository;
 
     @Transactional
-    public void addCommentToPost (Long postId, String username, String content){
+    public Long addCommentToPost (Long postId, String username, String content){
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
@@ -34,10 +33,12 @@ public class CommentService {
         userRepository.save(user);
         postRepository.save(post);
 
+        return comment.getId();
+
     }
 
     @Transactional
-    public void addReplyToComment(Long commentId, String username, String content){
+    public Long addReplyToComment(Long commentId, String username, String content){
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Comment comment = commentRepository.findById(commentId).orElseThrow(NoSuchCommentException::new);
@@ -46,6 +47,8 @@ public class CommentService {
         userRepository.save(user);
         commentRepository.save(comment);
         commentRepository.save(reply);
+
+        return reply.getId();
 
     }
 

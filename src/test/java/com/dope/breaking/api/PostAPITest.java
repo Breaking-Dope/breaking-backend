@@ -204,7 +204,7 @@ class PostAPITest {
 
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/post/" + postId))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.hasLiked").value(false))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.isLiked").value(false))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();

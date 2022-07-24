@@ -1,6 +1,8 @@
 package com.dope.breaking.dto.post;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,12 +16,12 @@ import java.util.List;
 @Getter
 @Setter
 public class DetailPostResponseDto {
-    private boolean hasLiked; //현재 접속한 유저는 좋아요를 눌렀는가에 대한 판별
+	private boolean hasLiked; //현재 접속한 유저는 좋아요를 눌렀는가에 대한 판별
 
 	private WriterDto user;
 
 	private String title;
-    private String content;
+	private String content;
 	private List<String> hashtagList = new LinkedList<>();
 
 	private List<String> mediaList = new LinkedList<>();
@@ -30,6 +32,7 @@ public class DetailPostResponseDto {
 
 	private String postType;//exclusive, public, free
 
+	@JsonProperty(value = "isAnonymous")
 	private boolean isAnonymous;
 
 	private LocalDateTime eventTime;
@@ -42,10 +45,12 @@ public class DetailPostResponseDto {
 
 	private int shareCount;
 
+	@JsonProperty(value = "isSold")
 	private boolean isSold;
 
 	private int soldCount;
 
+	@JsonProperty(value = "isHidden")
 	private boolean isHidden;
 
 	@Builder
@@ -66,3 +71,4 @@ public class DetailPostResponseDto {
 		this.viewCount = viewCount;
 	}
 }
+

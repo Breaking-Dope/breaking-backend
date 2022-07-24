@@ -16,7 +16,12 @@ import java.util.List;
 @Getter
 @Setter
 public class DetailPostResponseDto {
-	private boolean hasLiked; //현재 접속한 유저는 좋아요를 눌렀는가에 대한 판별
+
+	@JsonProperty(value = "isLiked")
+    private boolean isLiked;
+
+	@JsonProperty(value = "isBookmarked")
+	private boolean isBookmarked;
 
 	private WriterDto user;
 
@@ -37,9 +42,9 @@ public class DetailPostResponseDto {
 
 	private LocalDateTime eventTime;
 
-	private LocalDateTime createdDate;
+	private LocalDateTime createdTime;
 
-	private LocalDateTime modifiedDate;
+	private LocalDateTime modifiedTime;
 
 	private int viewCount;
 
@@ -50,13 +55,19 @@ public class DetailPostResponseDto {
 
 	private int soldCount;
 
+
+	private int bookmarkedCount;
+
 	@JsonProperty(value = "isHidden")
 	private boolean isHidden;
 
+	private int likeCount;
+
 	@Builder
-	public DetailPostResponseDto(boolean hasLiked, WriterDto writerDto, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdDate, LocalDateTime modifiedDate, int viewCount, int shareCount, boolean isSold, int soldCount, boolean isHidden){
-		this.hasLiked = hasLiked;
-		this.user = writerDto;
+	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked, WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdTime, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount) {
+		this.isLiked = isLiked;
+		this.isBookmarked = isBookmarked;
+		this.user = user;
 		this.title = title;
 		this.content = content;
 		this.hashtagList = hashtagList;
@@ -66,9 +77,14 @@ public class DetailPostResponseDto {
 		this.postType = postType;
 		this.isAnonymous = isAnonymous;
 		this.eventTime = eventTime;
-		this.createdDate = createdDate;
-		this.modifiedDate = modifiedDate;
+		this.createdTime = createdTime;
+		this.modifiedTime = modifiedTime;
 		this.viewCount = viewCount;
+		this.isSold = isSold;
+		this.soldCount = soldCount;
+		this.bookmarkedCount = bookmarkedCount;
+		this.isHidden = isHidden;
+		this.likeCount = likeCount;
 	}
 }
 

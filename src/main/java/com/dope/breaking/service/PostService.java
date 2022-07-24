@@ -1,5 +1,6 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,7 +50,9 @@ public class PostService {
 
     private final MediaRepository mediaRepository;
 
-    private final HashtagRepository hashtagRepository;
+    private final BookmarkRepository bookmarkRepository;
+
+    private final PurchaseRepository purchaseRepository;
 
     private final HashtagService hashtagService;
 
@@ -164,14 +168,17 @@ public class PostService {
             throw new NoSuchPostException();
         }
 
+        Post post = postRepository.getById(postId);
+        User user = userRepository.findByUsername(crntUsername).get();
+
         //2. 현재 사용자 게시글 좋아요 했는지 판별
-        boolean hasLiked = false;
+        boolean isLiked = false;
+        boolean isBookmarked = false;
         if (crntUsername != null) {
-            hasLiked = postLikeRepository.existsPostLikesByUserAndPost(userRepository.findByUsername(crntUsername).get(), postRepository.findById(postId).get()) ? true : false;
+            isLiked = postLikeRepository.existsPostLikesByUserAndPost(user, post);
+            isBookmarked = bookmarkRepository.existsByUserAndPost(user, post);
         }
 
-        //Post 가져오기
-        Post post = postRepository.getById(postId);
 
         //조회수 증가.
         post.updateViewCount();
@@ -188,8 +195,9 @@ public class PostService {
                 .longitude(post.getLocation().getLongitude()).build();
 
         DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
-                .hasLiked(hasLiked)
-                .writerDto(writerDto)
+                .isLiked(isLiked)
+                .isBookmarked(isBookmarked)
+                .user(writerDto)
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
@@ -199,12 +207,13 @@ public class PostService {
                 .postType(post.getPostType().getTitle())
                 .isAnonymous(post.isAnonymous())
                 .eventTime(post.getEventTime())
-                .createdDate(post.getCreatedDate())
-                .modifiedDate(post.getModifiedDate())
+                .createdTime(post.getCreatedDate())
+                .modifiedTime(post.getModifiedDate())
                 .viewCount(post.getViewCount())
-                .shareCount(post.getBookmarkList().size())
+                .bookmarkedCount(bookmarkRepository.countByPost(post))
+                .likeCount(postLikeRepository.countPostLikesByPost(post))
                 .isSold(post.isSold())
-                .soldCount(post.getBuyerList().size())
+                .soldCount(purchaseRepository.countByPost(post))
                 .isHidden(post.isHidden())
                 .build();
 

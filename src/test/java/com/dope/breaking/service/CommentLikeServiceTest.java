@@ -45,7 +45,7 @@ class CommentLikeServiceTest {
     @Autowired
     private EntityManager entityManager;
 
-    @DisplayName("유저가 좋아요를 이미 댓글을 좋아하지 않은 경우, 좋아요가 실행 된다.")
+    @DisplayName("유저가 좋아하지 않은 댓글을 좋아요를 시도할 경우, 좋아요가 정상 실행 된다.")
     @Test
     @Transactional
     void likeComment() {
@@ -192,7 +192,7 @@ class CommentLikeServiceTest {
 
     }
 
-    @DisplayName("댓글이 삭제될 경우 해당되는 댓글/대댓글 좋아요도 삭제된다.")
+    @DisplayName("댓글이 삭제 된 경우, 해당되는 댓글/대댓글 좋아요도 삭제된다.")
     @Transactional
     @Test
     void replyLikesDeletedWhenCommentDeleted() {

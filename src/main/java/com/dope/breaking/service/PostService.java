@@ -1,6 +1,5 @@
 package com.dope.breaking.service;
 
-import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.UploadType;
@@ -16,6 +15,7 @@ import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
+import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,10 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,6 +111,10 @@ public class PostService {
 
     @Transactional
     public void modify(long postId, String username, String contentData, List<MultipartFile> files) throws Exception {
+        if (!postRepository.findById(postId).isPresent()) {
+            throw new NoSuchPostException();
+        }
+
         if (!postRepository.existsByIdAndUserId(postId, userRepository.findByUsername(username).get().getId())) {
             throw new NoPermissionException();
         }
@@ -228,26 +230,32 @@ public class PostService {
 
     @Transactional
     public ResponseEntity delete(long postId, String username){
-        //허용되지 않음
+        if (!postRepository.findById(postId).isPresent()) {
+            throw new NoSuchPostException();
+        }
+
         if (!postRepository.existsByIdAndUserId(postId, userRepository.findByUsername(username).get().getId())) {
             throw new NoPermissionException();
         }
-        Post post = postRepository.getById(postId);
 
-        //기존의 사진 및 영상, 썸네일 파일삭제.
+
+        Post post = postRepository.getById(postId);
+        if(purchaseRepository.existsByPost(post)){
+            throw new PurchasedPostException();
+        }
+
         List<String> preMediaURLs = post.getMediaList().stream().map(postEntity -> postEntity.getMediaURL()).collect(Collectors.toList());
         List<String> preHashtags =  post.getPostCommentHashtags().stream().map(hashtags -> hashtags.getHashtag().getHashtag()).collect(Collectors.toList());
         mediaService.deleteMedias(preMediaURLs);
         mediaService.deleteThumbnailImg(post.getThumbnailImgURL());
 
-        //DB 삭제
         List<Media> mediaList = mediaRepository.findAllByPostId(postId);
         for(Media mediaEntity : mediaList){
             mediaRepository.delete(mediaEntity);
         }
-        //게시글 삭제
+
         postRepository.delete(post);
-        //해시태그가 고아라면 삭제함.
+
         hashtagService.deleteOrphanHashtag(preHashtags);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -269,7 +277,6 @@ public class PostService {
         }
         return postRequestDto;
     }
-
 
     private void validatePostRequest(PostRequestDto postRequestDto) {
         log.info(postRequestDto.toString());

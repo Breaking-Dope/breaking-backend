@@ -131,7 +131,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
             case LIKE:
                 return ExpressionUtils.or(post.postLikeList.size().ne(cursorPost.getPostLikeList().size()), post.id.lt(cursorPost.getId()));
             case VIEW:
-                return post.viewCount.loe(cursorPost.getViewCount());
+                return ExpressionUtils.or(post.viewCount.ne(cursorPost.getViewCount()), post.id.lt(cursorPost.getId()));
             case CHRONOLOGICAL:
             default:
                 return null;

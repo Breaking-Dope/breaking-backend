@@ -49,6 +49,68 @@ class FeedSearchServiceTest {
         assertEquals(0, result.size());
     }
 
+
+    @DisplayName("좋아요 정렬 옵션은 좋아요가 많은 포스트를 먼저 조회한다.")
+    @Test
+    void likeSortStrategy() {
+        User user = new User();
+        userRepository.save(user);
+
+        //좋아요 받은 포스트 생성
+        Post firstPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .build();
+        postRepository.save(firstPost);
+        postLikeRepository.save(new PostLike(user, firstPost));
+
+        //좋아요 없는 포스트 생성
+        Post secondPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .build();
+        postRepository.save(secondPost);
+
+        //좋아요 없는 포스트 생성
+        Post thirdPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .build();
+        postRepository.save(thirdPost);
+        postLikeRepository.save(new PostLike(user, thirdPost));
+
+        em.flush();
+        em.clear();
+
+        //첫번째 게시글 조회
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .cursorId(null)
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .sortStrategy(SortStrategy.LIKE)
+                .build();
+        List<FeedResultPostDto> content1 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //두번째 게시글 조회
+        searchFeedConditionDto.setCursorId(content1.get(0).getPostId());
+        List<FeedResultPostDto> content2 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //세번째 게시글 조회
+        searchFeedConditionDto.setCursorId(content2.get(0).getPostId());
+        List<FeedResultPostDto> content3 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //then 3 1 2 순서
+        assertEquals(thirdPost.getId(), content1.get(0).getPostId(), ()->"좋아요가 1인 게시글이 조회된다.");
+        assertEquals(firstPost.getId(), content2.get(0).getPostId(), ()->"좋아요가 1인 게시글이 조회된다.");
+        assertEquals(secondPost.getId(), content3.get(0).getPostId(), ()->"좋아요가 0인 게시글이 조회된다.");
+
+    }
+
+
     @DisplayName("일반 포스트 90개와, 숨김 처리된 포스트 10개를 생성하고, 15개씩 조회한다.")
     @Test
     void get15postsWithoutFilterFrom100Dummy() {

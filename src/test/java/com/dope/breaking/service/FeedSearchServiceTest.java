@@ -110,6 +110,76 @@ class FeedSearchServiceTest {
 
     }
 
+    @DisplayName("좋아요 정렬 옵션은 좋아요가 많은 포스트를 먼저 조회한다.")
+    @Test
+    void viewSortStrategy() {
+        User user = new User();
+        userRepository.save(user);
+
+        Post firstPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .viewCount(2)
+                .build();
+        postRepository.save(firstPost);
+
+        Post secondPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .viewCount(3)
+                .build();
+        postRepository.save(secondPost);
+
+        Post thirdPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .viewCount(1)
+                .build();
+        postRepository.save(thirdPost);
+
+        Post fourthPost = Post.builder()
+                .postType(PostType.CHARGED)
+                .isHidden(false)
+                .isAnonymous(false)
+                .viewCount(2)
+                .build();
+        postRepository.save(fourthPost);
+
+        em.flush();
+        em.clear();
+
+        //첫번째 게시글 조회
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .cursorId(null)
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .sortStrategy(SortStrategy.VIEW)
+                .build();
+        List<FeedResultPostDto> content1 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //두번째 게시글 조회
+        searchFeedConditionDto.setCursorId(content1.get(0).getPostId());
+        List<FeedResultPostDto> content2 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //세번째 게시글 조회
+        searchFeedConditionDto.setCursorId(content2.get(0).getPostId());
+        List<FeedResultPostDto> content3 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //네번째 게시글 조회
+        searchFeedConditionDto.setCursorId(content3.get(0).getPostId());
+        List<FeedResultPostDto> content4 = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        //then 3 1 2 순서
+        assertEquals(secondPost.getId(), content1.get(0).getPostId(), ()->content1.get(0).getViewCount() + " :조회수가 3인 게시글이 조회된다.");
+        assertEquals(fourthPost.getId(), content2.get(0).getPostId(), ()->content2.get(0).getViewCount() + " :조회수가 2인 게시글이 조회된다. id가 높은게 우선 조회된다.");
+        assertEquals(firstPost.getId(), content3.get(0).getPostId(), ()-> content3.get(0).getViewCount() + " :조회수가 2인 게시글이 조회된다.");
+        assertEquals(thirdPost.getId(), content4.get(0).getPostId(), ()->content4.get(0).getViewCount() + " :조회수가 0인 게시글이 조회된다.");
+
+    }
 
     @DisplayName("일반 포스트 90개와, 숨김 처리된 포스트 10개를 생성하고, 15개씩 조회한다.")
     @Test

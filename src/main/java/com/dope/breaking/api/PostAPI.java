@@ -2,11 +2,9 @@ package com.dope.breaking.api;
 
 
 import com.dope.breaking.dto.post.DetailPostResponseDto;
-import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +19,6 @@ import java.util.*;
 @RestController
 public class PostAPI {
 
-
     private final PostService postService;
 
     @PreAuthorize("isAuthenticated()")
@@ -33,7 +30,6 @@ public class PostAPI {
         result.put("postId", postId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/post/{postId}", consumes = {"multipart/form-data"})

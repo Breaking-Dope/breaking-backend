@@ -100,7 +100,7 @@ public class MediaService {
     public MediaType findMediaType(String fileName) {
 
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-        List<String> videoExtension = Arrays.asList("mp4", "mov", "mpg", "mpeg", "gif", "rm", "vob");
+        List<String> videoExtension = Arrays.asList("mp4", "mov", "mpg", "mpeg", "rm", "vob");
 
         if (videoExtension.contains(extension)) {
 

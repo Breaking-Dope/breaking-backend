@@ -1,5 +1,7 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.financial.Purchase;
+import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -14,16 +16,14 @@ import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
-import com.dope.breaking.repository.MediaRepository;
-import com.dope.breaking.repository.PostLikeRepository;
-import com.dope.breaking.repository.PostRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,8 +45,16 @@ public class PostService {
 
     private final PostLikeRepository postLikeRepository;
 
+    private final PostCommentHashtagRepository postCommentHashtagRepository;
+    private final PostCommentHashtagService postCommentHashtagService;
 
     private final MediaRepository mediaRepository;
+
+    private final BookmarkRepository bookmarkRepository;
+
+    private final PurchaseRepository purchaseRepository;
+
+    private final HashtagService hashtagService;
 
     private final MediaService mediaService;
 
@@ -61,7 +69,7 @@ public class PostService {
 
         PostType postType = confirmPostType(postRequestDto.getPostType());
         Post post = new Post();
-        Long postid = null;
+        Long postId = null;
 
         try {
             post = Post.builder()
@@ -78,11 +86,14 @@ public class PostService {
                     .build();
 
             post.setUser(user);
-            postid = postRepository.save(post).getId();
+            postId = postRepository.save(post).getId();
+            postCommentHashtagService.savePostCommentHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
 
         } catch (Exception e) {
             throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
         }
+
+        log.info(post.toString());
 
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
         if (files != null && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
@@ -93,7 +104,7 @@ public class PostService {
         } else {
             post.setThumbnailImgURL(null); //default는 null => 기본 썸네일 지정.
         }
-        return postid;
+        return postId;
     }
 
     @Transactional
@@ -116,17 +127,24 @@ public class PostService {
                     .longitude(postRequestDto.getLocationDto().getLongitude()).build();
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
+            List<String> hashtags = postCommentHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
+            postCommentHashtagService.modifyPostCommentHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
+            hashtagService.deleteOrphanHashtag(hashtags);
+
         } catch (Exception e) {
             log.info("게시글 수정 실패");
+            e.printStackTrace();
             throw new CustomInternalErrorException("게시글을 수정할 수 없습니다.");
         }
+
+        log.info(modifyPost.toString());
 
         List<String> preMediaURL = mediaService.preMediaURL(postId); //기존 URL
         List<String> mediaURL = new LinkedList<>();
         if (files != null && files.get(0).getSize() != 0) {
             mediaURL = mediaService.uploadMedias(files, UploadType.ORIGINAL_POST_MEDIA);
             mediaService.modifyMediaEntities(preMediaURL, mediaURL, postId);
-            if(modifyPost.getThumbnailImgURL() != null){
+            if (modifyPost.getThumbnailImgURL() != null) {
                 mediaService.deleteThumbnailImg(modifyPost.getThumbnailImgURL());
             }
             mediaService.deleteMedias(preMediaURL);
@@ -135,7 +153,7 @@ public class PostService {
         } else {
             mediaService.modifyMediaEntities(preMediaURL, mediaURL, postId);
             mediaService.deleteMedias(preMediaURL);
-            if(modifyPost.getThumbnailImgURL() != null){
+            if (modifyPost.getThumbnailImgURL() != null) {
                 mediaService.deleteThumbnailImg(modifyPost.getThumbnailImgURL());
             }
             modifyPost.setThumbnailImgURL(null);
@@ -143,20 +161,24 @@ public class PostService {
     }
 
 
-    public DetailPostResponseDto read(Long postId, String crntUsername){
+    @Transactional
+    public DetailPostResponseDto read(Long postId, String crntUsername) {
         //1. 없다면 예외반환.
-        if(!postRepository.findById(postId).isPresent()){
+        if (!postRepository.findById(postId).isPresent()) {
             throw new NoSuchPostException();
         }
 
+        Post post = postRepository.getById(postId);
+        User user = userRepository.findByUsername(crntUsername).get();
+
         //2. 현재 사용자 게시글 좋아요 했는지 판별
-        boolean hasLiked = false;
-        if(crntUsername != null) {
-            hasLiked = postLikeRepository.existsPostLikesByUserAndPost(userRepository.findByUsername(crntUsername).get(), postRepository.findById(postId).get()) ? true : false;
+        boolean isLiked = false;
+        boolean isBookmarked = false;
+        if (crntUsername != null) {
+            isLiked = postLikeRepository.existsPostLikesByUserAndPost(user, post);
+            isBookmarked = bookmarkRepository.existsByUserAndPost(user, post);
         }
 
-        //Post 가져오기
-        Post post = postRepository.getById(postId);
 
         //조회수 증가.
         post.updateViewCount();
@@ -173,22 +195,25 @@ public class PostService {
                 .longitude(post.getLocation().getLongitude()).build();
 
         DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
-                .hasLiked(hasLiked)
-                .writerDto(writerDto)
+                .isLiked(isLiked)
+                .isBookmarked(isBookmarked)
+                .user(writerDto)
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
+                .hashtagList(postCommentHashtagRepository.findAllByPost(post).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList()))
                 .location(locationDto)
                 .price(post.getPrice())
                 .postType(post.getPostType().getTitle())
                 .isAnonymous(post.isAnonymous())
                 .eventTime(post.getEventTime())
-                .createdDate(post.getCreatedDate())
-                .modifiedDate(post.getModifiedDate())
+                .createdTime(post.getCreatedDate())
+                .modifiedTime(post.getModifiedDate())
                 .viewCount(post.getViewCount())
-                .shareCount(post.getBookmarkList().size())
+                .bookmarkedCount(bookmarkRepository.countByPost(post))
+                .likeCount(postLikeRepository.countPostLikesByPost(post))
                 .isSold(post.isSold())
-                .soldCount(post.getBuyerList().size())
+                .soldCount(purchaseRepository.countByPost(post))
                 .isHidden(post.isHidden())
                 .build();
 

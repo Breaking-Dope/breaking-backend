@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,9 +27,9 @@ public class FeedAPI {
     private final SearchFeedService searchFeedService;
 
     @GetMapping("/feed")
-    public ResponseEntity<Page<FeedResultPostDto>> searchFeed(
-            @RequestParam(value="page") int page,
-            @RequestParam(value="size") int size,
+    public ResponseEntity<List<FeedResultPostDto>> searchFeed(
+            @RequestParam(value="cursor") Long cursor,
+            @RequestParam(value="size") Long size,
             @RequestParam(value="search", required = false) String searchKeyword,
             @RequestParam(value="sort", required = false) String sortStrategy,
             @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption,
@@ -38,6 +39,8 @@ public class FeedAPI {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .searchKeyword(searchKeyword)
+                .cursorId(cursor)
+                .size(size)
                 .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
                 .dateFrom(dateFrom)
@@ -46,8 +49,7 @@ public class FeedAPI {
                 .forLastMin(forLastMin)
                 .build();
 
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, pageable));
+        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto));
 
     }
 

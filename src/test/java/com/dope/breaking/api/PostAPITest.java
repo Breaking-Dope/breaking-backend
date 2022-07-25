@@ -5,6 +5,7 @@ import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.repository.PostLikeRepository;
 import com.dope.breaking.repository.PostRepository;
@@ -14,6 +15,8 @@ import com.dope.breaking.service.MediaService;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,6 +45,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -148,30 +152,29 @@ class PostAPITest {
     @WithMockCustomUser
     @Test
     public void testmodify() throws Exception {
-        MockMultipartFile multipartFile1 = new MockMultipartFile("file", "test2.png", "image/png", new FileInputStream(System.getProperty("user.dir") + "/src/test/java/com/dope/breaking/files/test2.png"));
-        Location location = Location.builder()
+        LocationDto location = LocationDto.builder()
                 .longitude(1.2)
                 .region("andong")
                 .latitude(1.3).build();
         List<String> hashTags = new LinkedList<>();
         hashTags.add("tag2");
 
-        String json = "{" +
-                "\"title\" : \"수정\"," +
-                "\"content\" : \"content\"," +
-                "\"price\" : 123," +
-                "\"isAnonymous\" : \"false\"," +
-                "\"postType\" : \"free\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
-                "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
-                "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
-                "}," +
-                "\"hashtagList\" : [" +
-                "\"hello\", \"hello2\"]," +
-                "\"thumbnailIndex\" : 0" +
-                "}";
+
+        PostRequestDto postRequestDto = PostRequestDto.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(false)
+                .postType("free")
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .locationDto(location)
+                .hashtagList(hashTags).build();
+
+        System.out.println(postRequestDto.toString());
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(postRequestDto);
+
         MockMultipartHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.multipart("/post/" + postId);
         builder.with(new RequestPostProcessor() {
@@ -184,15 +187,15 @@ class PostAPITest {
 
 
         MvcResult resultActions = this.mockMvc.perform(builder
-                        .file(multipartFile1)
-                        .part(new MockPart("data", json.getBytes(StandardCharsets.UTF_8)))
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        .characterEncoding("UTF-8"))
+                        .content(content)
+                        .characterEncoding("UTF-8")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
-        String content = response.getContentAsString();
+        String contentBody = response.getContentAsString();
     }
 
     @DisplayName("게시글을 조회힌다.")
@@ -214,7 +217,7 @@ class PostAPITest {
     @WithMockCustomUser
     @Order(5)
     @Test
-    public void deletePost() throws Exception{
+    public void deletePost() throws Exception {
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/" + postId))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();

@@ -29,7 +29,7 @@ class CommentServiceTest {
     @Autowired
     private EntityManager entityManager;
 
-    @DisplayName("제보가 존재할 경우, 댓글이 작성됩니다.")
+    @DisplayName("제보가 존재할 경우, 댓글이 작성된다.")
     @Test
     @Transactional
     void addComment() {

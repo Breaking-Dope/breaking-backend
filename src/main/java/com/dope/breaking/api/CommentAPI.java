@@ -15,7 +15,7 @@ import java.security.Principal;
 public class CommentAPI {
 
     private final CommentService commentService;
-    private final CommentRepository commentRepository;
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/comment")
     public ResponseEntity addComment(@PathVariable Long postId, @RequestBody String content, Principal principal){

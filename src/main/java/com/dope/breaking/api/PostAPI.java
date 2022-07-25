@@ -50,4 +50,12 @@ public class PostAPI {
         }
         return new ResponseEntity<DetailPostResponseDto>(postService.read(postId, crntUsername), HttpStatus.OK);
     }
+
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/post/{postId}")
+    public ResponseEntity postDelete(@PathVariable("postId") long postId, Principal principal){
+        return postService.delete(postId, principal.getName());
+    }
+
 }

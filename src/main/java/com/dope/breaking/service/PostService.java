@@ -2,6 +2,7 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.hashtag.HashtagType;
+import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -23,6 +24,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +91,7 @@ public class PostService {
 
             post.setUser(user);
             postId = postRepository.save(post).getId();
-            postCommentHashtagService.savePostCommentHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
+            postCommentHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
 
         } catch (Exception e) {
             throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
@@ -128,7 +132,7 @@ public class PostService {
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
             List<String> hashtags = postCommentHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
-            postCommentHashtagService.modifyPostCommentHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
+            postCommentHashtagService.modifyPostHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
             hashtagService.deleteOrphanHashtag(hashtags);
 
         } catch (Exception e) {
@@ -219,6 +223,33 @@ public class PostService {
 
         return detailPostResponseDto;
 
+    }
+
+
+    @Transactional
+    public ResponseEntity delete(long postId, String username){
+        //허용되지 않음
+        if (!postRepository.existsByIdAndUserId(postId, userRepository.findByUsername(username).get().getId())) {
+            throw new NoPermissionException();
+        }
+        Post post = postRepository.getById(postId);
+
+        //기존의 사진 및 영상, 썸네일 파일삭제.
+        List<String> preMediaURLs = post.getMediaList().stream().map(postEntity -> postEntity.getMediaURL()).collect(Collectors.toList());
+        List<String> preHashtags =  post.getPostCommentHashtags().stream().map(hashtags -> hashtags.getHashtag().getHashtag()).collect(Collectors.toList());
+        mediaService.deleteMedias(preMediaURLs);
+        mediaService.deleteThumbnailImg(post.getThumbnailImgURL());
+
+        //DB 삭제
+        List<Media> mediaList = mediaRepository.findAllByPostId(postId);
+        for(Media mediaEntity : mediaList){
+            mediaRepository.delete(mediaEntity);
+        }
+        //게시글 삭제
+        postRepository.delete(post);
+        //해시태그가 고아라면 삭제함.
+        hashtagService.deleteOrphanHashtag(preHashtags);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 

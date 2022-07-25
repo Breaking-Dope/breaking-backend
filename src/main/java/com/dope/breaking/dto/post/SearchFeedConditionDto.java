@@ -12,9 +12,13 @@ import java.time.LocalDateTime;
 @Setter
 public class SearchFeedConditionDto {
 
-    String searchKeyword;
+    private String searchKeyword;
 
-    SortStrategy sortStrategy;
+    private Long cursorId;
+
+    private Long size;
+
+    private SortStrategy sortStrategy;
 
     private SoldOption soldOption;
 
@@ -25,8 +29,11 @@ public class SearchFeedConditionDto {
     private Integer forLastMin;
 
     @Builder
-    public SearchFeedConditionDto(String searchKeyword, SortStrategy sortStrategy, SoldOption soldOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
+
+    public SearchFeedConditionDto(String searchKeyword, Long cursorId, Long size, SortStrategy sortStrategy, SoldOption soldOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
         this.searchKeyword = searchKeyword;
+        this.cursorId = cursorId;
+        this.size = size;
         this.sortStrategy = sortStrategy;
         this.soldOption = soldOption;
         this.dateFrom = dateFrom;

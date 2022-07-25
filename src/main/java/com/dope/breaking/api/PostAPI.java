@@ -2,6 +2,7 @@ package com.dope.breaking.api;
 
 
 import com.dope.breaking.dto.post.DetailPostResponseDto;
+import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +33,9 @@ public class PostAPI {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PutMapping(value = "/post/{postId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<Map<String, Long>> postModify(@PathVariable("postId") long postId, Principal principal,
-                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
-        postService.modify(postId, principal.getName(), contentData, files);
+    @PutMapping(value = "/post/{postId}")
+    public ResponseEntity<Map<String, Long>> postModify(@PathVariable("postId") long postId, Principal principal, @RequestBody PostRequestDto postRequestDto) throws Exception {
+        postService.modify(postId , principal.getName(), postRequestDto);
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("Modified postId", postId);
         return ResponseEntity.status(HttpStatus.OK).body(result);

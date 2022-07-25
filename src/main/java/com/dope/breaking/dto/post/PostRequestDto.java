@@ -1,5 +1,6 @@
 package com.dope.breaking.dto.post;
 
+import com.dope.breaking.domain.post.Post;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @ToString
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 public class PostRequestDto {
     @NotNull
@@ -40,4 +40,18 @@ public class PostRequestDto {
     private List<String> hashtagList;
 
     private int thumbnailIndex;
+
+
+    @Builder
+    public PostRequestDto(String title, String content, int price, Boolean isAnonymous, String postType, LocalDateTime eventTime, LocationDto locationDto, List<String> hashtagList, int thumbnailIndex) {
+        this.title = title;
+        this.content = content;
+        this.price = price;
+        this.isAnonymous = isAnonymous;
+        this.postType = postType;
+        this.eventTime = eventTime;
+        this.locationDto = locationDto;
+        this.hashtagList = hashtagList;
+        this.thumbnailIndex = thumbnailIndex;
+    }
 }

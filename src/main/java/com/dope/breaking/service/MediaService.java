@@ -125,22 +125,6 @@ public class MediaService {
     }
 
 
-    @Transactional
-    public void modifyMediaEntities(List<String> preFileNameList, List<String> newFileNameList, Long postId) {
-        Post post = postRepository.findById(postId).get();
-
-        for (String m : preFileNameList) {
-            Media media = mediaRepository.findByPostIdAndMediaURL(postId, m);
-            mediaRepository.delete(media);
-        }
-
-        for (String fileName : newFileNameList) {
-            MediaType mediaType = findMediaType(fileName);
-            Media media = new Media(post, mediaType, fileName);
-            mediaRepository.save(media);
-        }
-    }
-
     public void deleteMedias(List<String> fileNames) {
         for (String fileName : fileNames) {
             File savedFile = new File(MAIN_DIR_NAME + fileName);
@@ -171,14 +155,6 @@ public class MediaService {
         }
     }
 
-    public List<String> preMediaURL(Long postId) {
-        List<Media> list = mediaRepository.findAllByPostId(postId);
-        List<String> preMediaURL = new LinkedList<>();
-        for (Media m : list) {
-            preMediaURL.add(m.getMediaURL());
-        }
-        return preMediaURL;
-    }
 
     public String compressImage(String originalProfileImgURL) {
 

@@ -28,7 +28,7 @@ public class PostCommentHashtagService {
 
 
     @Transactional
-    public void savePostCommentHashtag(List<String> postHashtags, Long postId, HashtagType hashtagType){
+    public void savePostHashtag(List<String> postHashtags, Long postId, HashtagType hashtagType){
         Post post = postRepository.findById(postId).get();
 
         for(String hashtag : postHashtags){
@@ -50,7 +50,7 @@ public class PostCommentHashtagService {
     }
 
     @Transactional
-    public void modifyPostCommentHashtag(List<String> postHashtags, Post post, HashtagType hashtagType){
+    public void modifyPostHashtag(List<String> postHashtags, Post post, HashtagType hashtagType){
         postCommentHashtagRepository.deleteAllByPost(post);
         for(String hashtag : postHashtags){
             Hashtag hashtagEntity = new Hashtag();

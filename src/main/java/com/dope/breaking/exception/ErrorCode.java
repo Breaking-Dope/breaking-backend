@@ -29,6 +29,8 @@ public enum ErrorCode {
     ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
     NO_SUCH_POST("BSE450","해당 제보를 찾을 수 없습니다"),
     NO_SUCH_COMMENT("BSE451","해당 댓글을 찾을 수 없습니다"),
+
+    PURCHASED_POST("BSE452", "판매된 게시글은 삭제할 수 없습니다."),
     ALREADY_LIKED("BSE458","이미 좋아요를 선택했습니다."),
     ALREADY_UNLIKED("BSE459","이미 좋아요를 선택하지 않았습니다."),
 

@@ -1,7 +1,7 @@
 package com.dope.breaking.service;
 
-import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.hashtag.HashtagType;
+import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -15,6 +15,7 @@ import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
+import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,7 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.parameters.P;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -87,7 +89,7 @@ public class PostService {
 
             post.setUser(user);
             postId = postRepository.save(post).getId();
-            postCommentHashtagService.savePostCommentHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
+            postCommentHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
 
         } catch (Exception e) {
             throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
@@ -109,6 +111,10 @@ public class PostService {
 
     @Transactional
     public void modify(long postId, String username, String contentData, List<MultipartFile> files) throws Exception {
+        if (!postRepository.findById(postId).isPresent()) {
+            throw new NoSuchPostException();
+        }
+
         if (!postRepository.existsByIdAndUserId(postId, userRepository.findByUsername(username).get().getId())) {
             throw new NoPermissionException();
         }
@@ -128,7 +134,7 @@ public class PostService {
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
             List<String> hashtags = postCommentHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
-            postCommentHashtagService.modifyPostCommentHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
+            postCommentHashtagService.modifyPostHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
             hashtagService.deleteOrphanHashtag(hashtags);
 
         } catch (Exception e) {
@@ -222,6 +228,39 @@ public class PostService {
     }
 
 
+    @Transactional
+    public ResponseEntity delete(long postId, String username){
+        if (!postRepository.findById(postId).isPresent()) {
+            throw new NoSuchPostException();
+        }
+
+        if (!postRepository.existsByIdAndUserId(postId, userRepository.findByUsername(username).get().getId())) {
+            throw new NoPermissionException();
+        }
+
+
+        Post post = postRepository.getById(postId);
+        if(purchaseRepository.existsByPost(post)){
+            throw new PurchasedPostException();
+        }
+
+        List<String> preMediaURLs = post.getMediaList().stream().map(postEntity -> postEntity.getMediaURL()).collect(Collectors.toList());
+        List<String> preHashtags =  post.getPostCommentHashtags().stream().map(hashtags -> hashtags.getHashtag().getHashtag()).collect(Collectors.toList());
+        mediaService.deleteMedias(preMediaURLs);
+        mediaService.deleteThumbnailImg(post.getThumbnailImgURL());
+
+        List<Media> mediaList = mediaRepository.findAllByPostId(postId);
+        for(Media mediaEntity : mediaList){
+            mediaRepository.delete(mediaEntity);
+        }
+
+        postRepository.delete(post);
+
+        hashtagService.deleteOrphanHashtag(preHashtags);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
     public boolean existByPostIdAndUserId(long postid, long userid) {
         return postRepository.existsByIdAndUserId(postid, userid);
     }
@@ -238,7 +277,6 @@ public class PostService {
         }
         return postRequestDto;
     }
-
 
     private void validatePostRequest(PostRequestDto postRequestDto) {
         log.info(postRequestDto.toString());

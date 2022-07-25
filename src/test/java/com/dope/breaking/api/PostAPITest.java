@@ -80,6 +80,7 @@ class PostAPITest {
 
     static Long postId;
 
+    @DisplayName("게시글을 저장하기위해, 유저를 등록한다.")
     @Order(1)
     @Test
     public void createUserInfo() {
@@ -92,7 +93,7 @@ class PostAPITest {
         userRepository.save(user);
     }
 
-    @DisplayName("POST 등록 테스트")
+    @DisplayName("게시글을 저장한다.")
     @Order(2)
     @WithMockCustomUser
     @Test
@@ -142,7 +143,7 @@ class PostAPITest {
     }
 
 
-    @DisplayName("POST 수정 테스트")
+    @DisplayName("게시글을 수정한다.")
     @Order(3)
     @WithMockCustomUser
     @Test
@@ -194,14 +195,11 @@ class PostAPITest {
         String content = response.getContentAsString();
     }
 
-
-    @DisplayName("POST 조회 기능")
+    @DisplayName("게시글을 조회힌다.")
     @WithMockCustomUser
     @Order(4)
     @Test
     public void readPostWithAnonymous() throws Exception {
-        //When
-
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/post/" + postId))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.isLiked").value(false))
@@ -212,6 +210,21 @@ class PostAPITest {
         System.out.println(content);
     }
 
+    @DisplayName("게시글을 삭제한다.")
+    @WithMockCustomUser
+    @Order(5)
+    @Test
+    public void deletePost() throws Exception{
+        MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/" + postId))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+
+        MockHttpServletResponse response = resultActions.getResponse();
+        String content = response.getContentAsString();
+        System.out.println(content);
 
 
+        User user = userRepository.findByUsername("12345g").get();
+        userRepository.delete(user);
+    }
 }

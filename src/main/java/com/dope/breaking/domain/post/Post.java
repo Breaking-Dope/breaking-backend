@@ -47,10 +47,10 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<PostCommentHashtag> postCommentHashtags = new ArrayList<PostCommentHashtag>();
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Purchase> buyerList = new ArrayList<Purchase>();
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Bookmark> bookmarkList = new ArrayList<Bookmark>();
 
 

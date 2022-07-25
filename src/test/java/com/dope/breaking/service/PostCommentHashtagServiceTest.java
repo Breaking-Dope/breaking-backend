@@ -35,7 +35,7 @@ class PostCommentHashtagServiceTest {
         hashtag.add("hello1");
         hashtag.add("hello2");
         //When
-        postCommentHashtagService.savePostCommentHashtag(hashtag, postId, HashtagType.POST);
+        postCommentHashtagService.savePostHashtag(hashtag, postId, HashtagType.POST);
 
         //Then
 
@@ -52,13 +52,13 @@ class PostCommentHashtagServiceTest {
         List<String> hashtag = new ArrayList<>();
         hashtag.add("hello1");
         hashtag.add("hello2");
-        postCommentHashtagService.savePostCommentHashtag(hashtag, postId, HashtagType.POST);
+        postCommentHashtagService.savePostHashtag(hashtag, postId, HashtagType.POST);
 
         //When
         hashtag.clear();
         hashtag.add("hello1");
         hashtag.add("hello3");
-        postCommentHashtagService.modifyPostCommentHashtag(hashtag, post, HashtagType.POST);
+        postCommentHashtagService.modifyPostHashtag(hashtag, post, HashtagType.POST);
 
         //Then
         Assertions.assertSame(postCommentHashtagRepository.findAllByPost(post).size(), 2);

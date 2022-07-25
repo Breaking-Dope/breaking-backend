@@ -34,9 +34,6 @@ public class Post extends BaseTimeEntity {
     @JoinColumn (name="USER_ID")
     private User user;
 
-    @OneToMany(mappedBy = "post")
-    private List<Comment> commentList = new ArrayList<Comment>();
-
     @OneToMany(mappedBy="post")
     private List<Media> mediaList = new ArrayList<Media>();
 

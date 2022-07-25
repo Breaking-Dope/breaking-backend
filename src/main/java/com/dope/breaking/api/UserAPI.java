@@ -95,5 +95,4 @@ public class UserAPI {
         return ResponseEntity.ok().body(userService.getFullUserInformation(principal.getName()));
     }
 
-
 }

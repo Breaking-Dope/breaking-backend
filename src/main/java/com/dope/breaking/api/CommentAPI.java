@@ -26,7 +26,7 @@ public class CommentAPI {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/post/reply/{commentId}")
+    @PostMapping("/post/comment/{commentId}/reply")
     public ResponseEntity addReply(@PathVariable Long commentId, @RequestBody String content, Principal principal){
 
         commentService.addReply(commentId, principal.getName(), content);

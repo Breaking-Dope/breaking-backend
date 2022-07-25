@@ -120,7 +120,7 @@ class CommentAPITest {
         String content = "reply";
 
         //When
-        this.mockMvc.perform(post("/post/reply/{commentId}", commentId)
+        this.mockMvc.perform(post("/post/comment/{commentId}/reply", commentId)
                     .content(content)
                     .contentType(MediaType.TEXT_PLAIN))
                 .andExpect(status().isCreated());
@@ -139,7 +139,7 @@ class CommentAPITest {
         String content = "reply";
 
         //When
-        this.mockMvc.perform(post("/post/reply/{commentId}", 100L)
+        this.mockMvc.perform(post("/post/comment/{commentId}/reply", 100L)
                         .content(content)
                         .contentType(MediaType.TEXT_PLAIN))
                 .andExpect(status().isNotFound()); //Then

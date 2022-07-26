@@ -1,16 +1,15 @@
 package com.dope.breaking.api;
 
+import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.service.CommentLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +32,13 @@ public class CommentLikeAPI {
 
         commentLikeService.unlikeComment(principal.getName(), commentId);
         return ResponseEntity.ok().build();
+
+    }
+
+    @GetMapping("/post/comment/{commentId}/like-list")
+    public ResponseEntity<List<ForListInfoResponseDto>> commentLikedUserList (@PathVariable Long commentId){
+
+        return ResponseEntity.ok().body(commentLikeService.commentLikeList(commentId));
 
     }
 

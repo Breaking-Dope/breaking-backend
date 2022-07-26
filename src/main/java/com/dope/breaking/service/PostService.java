@@ -60,10 +60,12 @@ public class PostService {
 
     private final MediaService mediaService;
 
+    private final CommentRepository commentRepository;
+
 
     @Transactional
     public Long create(String username, String contentData, List<MultipartFile> files) throws Exception {
-        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        User user = userRepository.findByUsername(username).get();
 
         PostRequestDto postRequestDto = transferPostRequestToObject(contentData);
 
@@ -89,20 +91,21 @@ public class PostService {
 
             post.setUser(user);
             postId = postRepository.save(post).getId();
-            postCommentHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
+            if(postRequestDto.getHashtagList() != null) {
+                postCommentHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
+            }
 
         } catch (Exception e) {
             throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
         }
 
-        log.info(post.toString());
-
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
-        if (files != null && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
+        if (files != null && files.size() != 0 &&files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
             mediaURL = mediaService.uploadMedias(files, UploadType.ORIGINAL_POST_MEDIA);
             mediaService.createMediaEntities(mediaURL, post); //저장.
             String thumbImgURL = mediaService.makeThumbnail(mediaURL.get(postRequestDto.getThumbnailIndex()));
             post.setThumbnailImgURL(thumbImgURL);
+            log.info(mediaRepository.findAllByPostId(postId).toString());
         } else {
             post.setThumbnailImgURL(null); //default는 null => 기본 썸네일 지정.
         }
@@ -156,14 +159,16 @@ public class PostService {
         }
 
         Post post = postRepository.getById(postId);
-        User user = userRepository.findByUsername(crntUsername).get();
 
         //2. 현재 사용자 게시글 좋아요 했는지 판별
         boolean isLiked = false;
         boolean isBookmarked = false;
+        boolean isPurchased = false;
         if (crntUsername != null) {
+            User user = userRepository.findByUsername(crntUsername).get();
             isLiked = postLikeRepository.existsPostLikesByUserAndPost(user, post);
             isBookmarked = bookmarkRepository.existsByUserAndPost(user, post);
+            isPurchased = purchaseRepository.existsByPostAndUser(post, user);
         }
 
 
@@ -202,6 +207,7 @@ public class PostService {
                 .isSold(post.isSold())
                 .soldCount(purchaseRepository.countByPost(post))
                 .isHidden(post.isHidden())
+                .totalCommentCount(commentRepository.countByPost(post))
                 .build();
 
         return detailPostResponseDto;
@@ -229,11 +235,6 @@ public class PostService {
         List<String> preHashtags =  post.getPostCommentHashtags().stream().map(hashtags -> hashtags.getHashtag().getHashtag()).collect(Collectors.toList());
         mediaService.deleteMedias(preMediaURLs);
         mediaService.deleteThumbnailImg(post.getThumbnailImgURL());
-
-        List<Media> mediaList = mediaRepository.findAllByPostId(postId);
-        for(Media mediaEntity : mediaList){
-            mediaRepository.delete(mediaEntity);
-        }
 
         postRepository.delete(post);
 

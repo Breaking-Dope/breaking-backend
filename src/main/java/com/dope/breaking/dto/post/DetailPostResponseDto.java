@@ -23,6 +23,10 @@ public class DetailPostResponseDto {
 	@JsonProperty(value = "isBookmarked")
 	private boolean isBookmarked;
 
+
+	@JsonProperty(value = "isPurchased")
+	private boolean isPurchased;
+
 	private WriterDto user;
 
 	private String title;
@@ -63,10 +67,13 @@ public class DetailPostResponseDto {
 
 	private int likeCount;
 
+	private int totalCommentCount;
+
 	@Builder
-	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked, WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdTime, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount) {
+	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdTime, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount) {
 		this.isLiked = isLiked;
 		this.isBookmarked = isBookmarked;
+		this.isPurchased = isPurchased;
 		this.user = user;
 		this.title = title;
 		this.content = content;
@@ -85,6 +92,7 @@ public class DetailPostResponseDto {
 		this.bookmarkedCount = bookmarkedCount;
 		this.isHidden = isHidden;
 		this.likeCount = likeCount;
+		this.totalCommentCount = totalCommentCount;
 	}
 }
 

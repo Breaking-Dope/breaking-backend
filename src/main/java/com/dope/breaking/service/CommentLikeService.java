@@ -65,7 +65,7 @@ public class CommentLikeService {
 
         for (CommentLike commentLike : commentLikeList) {
             User user = commentLike.getUser();
-            forListInfoResponseDtoList.add(new ForListInfoResponseDto(user.getId(),user.getNickname(),user.getStatusMsg(),user.getOriginalProfileImgURL()));
+            forListInfoResponseDtoList.add(new ForListInfoResponseDto(user.getId(),user.getNickname(),user.getStatusMsg(),user.getCompressedProfileImgURL()));
         }
 
         return forListInfoResponseDtoList;

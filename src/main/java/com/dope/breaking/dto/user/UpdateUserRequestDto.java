@@ -24,7 +24,9 @@ public class UpdateUserRequestDto {
     private String realName;
     @NotNull
     private String role;
-    private String Username;
+    private String username;
+    @NotNull
+    private Boolean isProfileImgChanged;
 
 }
 

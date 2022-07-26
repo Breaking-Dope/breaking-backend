@@ -96,39 +96,46 @@ public class UserService {
 
         validateUserInformation(updateUserRequestDto, user);
 
-        // 5. update profile
-
         String toSetOriginalProfileImgURL = null;
         String toSetCompressedProfileImgURL = null;
 
         String currentOriginalProfileImgUrl = user.getOriginalProfileImgURL();
         String currentCompressedProfileImgURL = user.getCompressedProfileImgURL();
 
-        // case 1: 기본 이미지 -> 기본 이미지 : 변경 없음
 
-        // case 2: 유저 본인 선택 이미지 -> 기본 이미지
-        if (currentOriginalProfileImgUrl != mediaService.getBasicProfileDir() && profileImg == null) {
-            File file1 = new File(mediaService.getMAIN_DIR_NAME() + currentOriginalProfileImgUrl);
-            File file2 = new File(mediaService.getMAIN_DIR_NAME() + currentCompressedProfileImgURL);
-            file1.delete();
-            file2.delete();
+        if(updateUserRequestDto.getIsProfileImgChanged()) {
+
+            // case 1: 유저 본인 선택 이미지 -> 기본 이미지
+            if (currentOriginalProfileImgUrl != null && profileImg == null) {
+                File file1 = new File(mediaService.getMAIN_DIR_NAME() + currentOriginalProfileImgUrl);
+                File file2 = new File(mediaService.getMAIN_DIR_NAME() + currentCompressedProfileImgURL);
+                file1.delete();
+                file2.delete();
+            }
+
+            // case 2: 기본 이미지 -> 유저 본인 선택 이미지
+            else if (currentOriginalProfileImgUrl == null && profileImg != null) {
+                toSetOriginalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+                toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
+            }
+
+            // case 3: 유저 본인 선택 이미지 -> 유저 본인 선택 이미지
+            else if (currentOriginalProfileImgUrl != null && profileImg != null) {
+                File file1 = new File(mediaService.getMAIN_DIR_NAME() + currentOriginalProfileImgUrl);
+                File file2 = new File(mediaService.getMAIN_DIR_NAME() + currentCompressedProfileImgURL);
+                file1.delete();
+                file2.delete();
+
+                toSetOriginalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
+                toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
+            }
+
         }
+        else{
 
-        // case 3: 기본 이미지 -> 유저 본인 선택 이미지
-        else if (currentOriginalProfileImgUrl == mediaService.getBasicProfileDir() && profileImg != null) {
-            toSetOriginalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
-            toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
-        }
+            toSetOriginalProfileImgURL = currentOriginalProfileImgUrl;
+            toSetCompressedProfileImgURL = currentCompressedProfileImgURL;
 
-        // case 4: 유저 본인 선택 이미지 -> 유저 본인 선택 이미지
-        else if (currentOriginalProfileImgUrl != mediaService.getBasicProfileDir() && profileImg != null) {
-            File file1 = new File(mediaService.getMAIN_DIR_NAME() + currentOriginalProfileImgUrl);
-            File file2 = new File(mediaService.getMAIN_DIR_NAME() + currentCompressedProfileImgURL);
-            file1.delete();
-            file2.delete();
-
-            toSetOriginalProfileImgURL = mediaService.uploadMedias(profileImg, UploadType.ORIGNAL_PROFILE_IMG).get(0);
-            toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
         }
 
         // 6. update the user information

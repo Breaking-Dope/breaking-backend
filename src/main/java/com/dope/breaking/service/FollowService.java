@@ -110,7 +110,7 @@ public class FollowService {
 
         for (Follow follow : followingList) {
             User followedUser = follow.getFollowed();
-            forListInfoResponseDtoList.add (new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getOriginalProfileImgURL()));
+            forListInfoResponseDtoList.add (new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getCompressedProfileImgURL()));
         }
 
         return forListInfoResponseDtoList;
@@ -126,7 +126,7 @@ public class FollowService {
 
         for (Follow follow : followerList) {
             User followedUser = follow.getFollowing();
-            forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getOriginalProfileImgURL()));
+            forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getCompressedProfileImgURL()));
         }
 
         return forListInfoResponseDtoList;

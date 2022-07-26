@@ -29,9 +29,10 @@ import javax.persistence.EntityManager;
 
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -168,6 +169,62 @@ class CommentLikeAPITest {
         //When
         this.mockMvc.perform(delete("/post/comment/{commentId}/like", commentId))
                 .andExpect(status().isBadRequest()); //Then
+
+    }
+
+    @DisplayName("세명의 유저가 댓글에 좋아요를 누른 경우, 리턴 된 리스트는 두명의 정보를 담는다.")
+    @Transactional
+    @Test
+    void commentLikeList() throws Exception {
+
+        //Given
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user3 = new User();
+        user3.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        Post post = new Post();
+
+        userRepository.save(user2);
+        userRepository.save(user3);
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+
+        CommentLike commentLike1 = new CommentLike(userRepository.findByUsername("12345g").get(),commentRepository.findById(commentId).get());
+        CommentLike commentLike2 = new CommentLike(userRepository.getById(user2.getId()),commentRepository.getById(commentId));
+        CommentLike commentLike3 = new CommentLike(userRepository.getById(user3.getId()),commentRepository.getById(commentId));
+
+        commentLikeRepository.save(commentLike1);
+        commentLikeRepository.save(commentLike2);
+        commentLikeRepository.save(commentLike3);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //When
+        this.mockMvc.perform(get("/post/comment/{commentId}/like-list",commentId))
+                .andExpect(status().isOk()) //Then
+                .andExpect(jsonPath("$", hasSize(3)));
+
+    }
+
+    @DisplayName("아무도 해당 댓글을 좋아하지 않는 경우, 리턴 된 리스트의 길이는 0이다.")
+    @Transactional
+    @Test
+    void commentLikeListWhenNobodyLiked() throws Exception{
+
+        //Given
+        Post post = new Post();
+        postRepository.save(post);
+
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        entityManager.flush();
+        entityManager.clear();
+
+        //When
+        this.mockMvc.perform(get("/post/comment/{commentId}/like-list",commentId))
+                .andExpect(status().isOk()) //Then
+                .andExpect(jsonPath("$", hasSize(0)));
 
     }
 

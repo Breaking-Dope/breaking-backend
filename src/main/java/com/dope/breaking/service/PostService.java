@@ -110,7 +110,7 @@ public class PostService {
     }
 
     @Transactional
-    public void modify(long postId, String username, String contentData, List<MultipartFile> files) throws Exception {
+    public void modify(long postId, String username, PostRequestDto postRequest) throws Exception {
         if (!postRepository.findById(postId).isPresent()) {
             throw new NoSuchPostException();
         }
@@ -118,6 +118,8 @@ public class PostService {
         if (!postRepository.existsByIdAndUserId(postId, userRepository.findByUsername(username).get().getId())) {
             throw new NoPermissionException();
         }
+        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        String contentData = objectMapper.writeValueAsString(postRequest);
 
         PostRequestDto postRequestDto = transferPostRequestToObject(contentData);
 
@@ -142,28 +144,7 @@ public class PostService {
             e.printStackTrace();
             throw new CustomInternalErrorException("게시글을 수정할 수 없습니다.");
         }
-
         log.info(modifyPost.toString());
-
-        List<String> preMediaURL = mediaService.preMediaURL(postId); //기존 URL
-        List<String> mediaURL = new LinkedList<>();
-        if (files != null && files.get(0).getSize() != 0) {
-            mediaURL = mediaService.uploadMedias(files, UploadType.ORIGINAL_POST_MEDIA);
-            mediaService.modifyMediaEntities(preMediaURL, mediaURL, postId);
-            if (modifyPost.getThumbnailImgURL() != null) {
-                mediaService.deleteThumbnailImg(modifyPost.getThumbnailImgURL());
-            }
-            mediaService.deleteMedias(preMediaURL);
-            String thumbImgURL = mediaService.makeThumbnail(mediaURL.get(postRequestDto.getThumbnailIndex()));
-            modifyPost.setThumbnailImgURL(thumbImgURL);
-        } else {
-            mediaService.modifyMediaEntities(preMediaURL, mediaURL, postId);
-            mediaService.deleteMedias(preMediaURL);
-            if (modifyPost.getThumbnailImgURL() != null) {
-                mediaService.deleteThumbnailImg(modifyPost.getThumbnailImgURL());
-            }
-            modifyPost.setThumbnailImgURL(null);
-        }
     }
 
 

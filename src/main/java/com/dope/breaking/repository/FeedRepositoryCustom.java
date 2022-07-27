@@ -1,12 +1,12 @@
 package com.dope.breaking.repository;
 
+import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface FeedRepositoryCustom {
 
-    Page<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Pageable pageable);
-
+    List<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost);
 }

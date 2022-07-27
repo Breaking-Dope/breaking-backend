@@ -257,7 +257,7 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("댓글에 해시태그가 존재할 경우, 해시태그가 정상적으로 작동된다")
+    @DisplayName("댓글에 해시태그가 존재할 경우, 해시태그가 정상적으로 등록된다")
     @Test
     @Transactional
     void checkHashtagsAdded(){
@@ -291,7 +291,7 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("댓글을 삭제할 경우, 해당하는 PostCommentHashtag 객체도 삭제된다.")
+    @DisplayName("댓글을 삭제할 경우, 해당하는 Hashtag 객체도 삭제된다.")
     @Test
     @Transactional
     void checkNoHashtagWhenNullList(){

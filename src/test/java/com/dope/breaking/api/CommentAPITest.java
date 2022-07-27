@@ -3,11 +3,16 @@ package com.dope.breaking.api;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.comment.CommentRequestDto;
 import com.dope.breaking.repository.CommentRepository;
+import com.dope.breaking.repository.HashtagRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.CommentService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -52,7 +59,13 @@ class CommentAPITest {
     private CommentService commentService;
 
     @Autowired
+    private HashtagRepository hashtagRepository;
+
+    @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void createUserInfo() {
@@ -76,33 +89,52 @@ class CommentAPITest {
         //Given
         Post post = new Post();
         postRepository.save(post);
-        String content = "comment";
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        CommentRequestDto commentRequestDto = new CommentRequestDto("comment1",hashtagList);
+
+
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(commentRequestDto);
 
         //When
         this.mockMvc.perform(post("/post/{postId}/comment",post.getId())
-                        .content(content)
-                        .contentType(MediaType.TEXT_PLAIN_VALUE))
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated()); //Then
 
         //Then
-        Assertions.assertThat(commentRepository.findAllByPost(postRepository.findById(post.getId()).get()).get(0).getContent()).isEqualTo("comment");
+        Assertions.assertThat(commentRepository.findAllByPost(postRepository.findById(post.getId()).get()).get(0).getContent()).isEqualTo("comment1");
+        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(2);
+
     }
 
-    @DisplayName("해당 제보가 존재하지 않 경우, 댓글 작성시 예외가 발생한다.")
+    @DisplayName("해당 제보가 존재하지 않을 경우, 댓글 작성시 예외가 발생한다.")
     @WithMockCustomUser
     @Test
     @Transactional
     void addCommentToNotExistingPost() throws Exception {
 
-        //Given: an invalid postId, say 100L
+        //Given: 존재하지 않는 postId 100L
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        CommentRequestDto commentRequestDto = new CommentRequestDto("comment1",hashtagList);
 
-        String content = "comment";
+
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(commentRequestDto);
 
         //When
         this.mockMvc.perform(post("/post/{postId}/comment",100L)
-                        .content(content)
-                        .contentType(MediaType.TEXT_PLAIN_VALUE))
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound()); //Then
+
 
     }
 
@@ -115,18 +147,27 @@ class CommentAPITest {
         //Given
         Post post = new Post();
         postRepository.save(post);
-        Long commentId = commentService.addComment(post.getId(),"12345g","hi");
+        Long commentId = commentService.addComment(post.getId(),"12345g","hi",null);
 
-        String content = "reply";
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        CommentRequestDto commentRequestDto = new CommentRequestDto("reply",hashtagList);
+
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(commentRequestDto);
 
         //When
-        this.mockMvc.perform(post("/post/comment/{commentId}/reply", commentId)
-                    .content(content)
-                    .contentType(MediaType.TEXT_PLAIN))
-                .andExpect(status().isCreated());
+        this.mockMvc.perform(post("/post/comment/{commentId}/reply",commentId)
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated()); //Then
 
         //Then
         Assertions.assertThat(commentRepository.findAllByPost(postRepository.findById(post.getId()).get()).get(1).getContent()).isEqualTo("reply");
+        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(2);
+
     }
 
     @DisplayName("해당 댓글이 존재하지 않을 경우, 예외가 발생한다.")
@@ -135,14 +176,22 @@ class CommentAPITest {
     @Transactional
     void addReplyToNotExistingComment() throws Exception {
 
-        //Given: and invalid commentId, say 100L
-        String content = "reply";
+        //Given: 존재하지 않는 commentId 100L
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        CommentRequestDto commentRequestDto = new CommentRequestDto("reply",hashtagList);
+
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(commentRequestDto);
 
         //When
-        this.mockMvc.perform(post("/post/comment/{commentId}/reply", 100L)
-                        .content(content)
-                        .contentType(MediaType.TEXT_PLAIN))
+        this.mockMvc.perform(post("/post/comment/{commentId}/reply",100L)
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound()); //Then
+
     }
 
     @DisplayName("유저네임이 일치할 경우, 댓글이 수정된다.")
@@ -155,17 +204,28 @@ class CommentAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g","original");
-        String content = "updated";
+        Long commentId = commentService.addComment(post.getId(), "12345g","original",null);
 
         //When
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        CommentRequestDto commentRequestDto = new CommentRequestDto("updated",hashtagList);
+
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(commentRequestDto);
+
         this.mockMvc.perform(put("/post/comment/{commentId}", commentId)
-                        .content(content)
-                        .contentType(MediaType.TEXT_PLAIN))
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated()); //Then
 
         //Then
         Assertions.assertThat(commentRepository.getById(commentId).getContent()).isEqualTo("updated");
+        Assertions.assertThat(commentRepository.findAll().size()).isEqualTo(1);
+        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(2);
+
     }
 
     @DisplayName("유저네임이 불일치할 경우, 예외가 발생한다")
@@ -182,13 +242,18 @@ class CommentAPITest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "username","original");
-        String content = "updated";
+        Long commentId = commentService.addComment(post.getId(), "username","original",null);
 
         //When
+        CommentRequestDto commentRequestDto = new CommentRequestDto("updated",null);
+
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(commentRequestDto);
+
         this.mockMvc.perform(put("/post/comment/{commentId}", commentId)
-                        .content(content)
-                        .contentType(MediaType.TEXT_PLAIN))
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotAcceptable()); //Then
 
     }
@@ -203,7 +268,7 @@ class CommentAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g","hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g","hi",null);
 
         //When
         this.mockMvc.perform(delete("/post/comment/{commentId}", commentId))
@@ -211,7 +276,6 @@ class CommentAPITest {
 
         //Then
         Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
-
 
     }
 

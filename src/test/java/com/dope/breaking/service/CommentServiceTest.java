@@ -3,9 +3,7 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.repository.CommentRepository;
-import com.dope.breaking.repository.PostRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.repository.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 class CommentServiceTest {
@@ -28,6 +28,8 @@ class CommentServiceTest {
     private PostRepository postRepository;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private HashtagRepository hashtagRepository;
 
     @DisplayName("제보가 존재할 경우, 댓글이 작성된다.")
     @Test
@@ -43,7 +45,7 @@ class CommentServiceTest {
         postRepository.save(post);
 
         //When
-        commentService.addComment(post.getId(), user.getUsername(), "comment");
+        commentService.addComment(post.getId(), user.getUsername(), "comment",null);
 
         entityManager.flush();
         entityManager.clear();
@@ -55,7 +57,7 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("댓글이 존재할 경우, 대댓글이 작성됩니다.")
+    @DisplayName("댓글이 존재할 경우, 대댓글이 작성된다.")
     @Test
     @Transactional
     void addReply() {
@@ -66,11 +68,11 @@ class CommentServiceTest {
         Post post = new Post();
         userRepository.save(user);
         postRepository.save(post);
-        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "hi there");
+        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "hi there",null);
 
         //When
-        commentService.addReply(commentId, "username", "reply1");
-        commentService.addReply(commentId, "username", "reply2");
+        commentService.addReply(commentId, "username", "reply1",null);
+        commentService.addReply(commentId, "username", "reply2",null);
 
         entityManager.flush();
         entityManager.clear();
@@ -94,10 +96,10 @@ class CommentServiceTest {
         userRepository.save(user);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "username","original");
+        Long commentId = commentService.addComment(post.getId(), "username","original",null);
 
         //When
-        commentService.updateCommentOrReply("username",commentId,"updated");
+        commentService.updateCommentOrReply("username",commentId,"updated",null);
 
         entityManager.flush();
         entityManager.clear();
@@ -120,7 +122,7 @@ class CommentServiceTest {
         userRepository.save(user);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "comment");
+        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "comment",null);
 
         //When
         userRepository.delete(user);
@@ -150,8 +152,8 @@ class CommentServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment");
-        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply");
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment",null);
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply",null);
 
         //When
         userRepository.delete(user2);
@@ -181,8 +183,8 @@ class CommentServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment");
-        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply");
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment",null);
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply",null);
 
         //When
         postRepository.delete(post);
@@ -210,7 +212,7 @@ class CommentServiceTest {
         userRepository.save(user);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "comment");
+        Long commentId = commentService.addComment(post.getId(), user.getUsername(), "comment",null);
 
         //When
         commentService.deleteCommentOrReply("username",commentId);
@@ -240,8 +242,8 @@ class CommentServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment");
-        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply");
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment",null);
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply",null);
 
         //When
         commentService.deleteCommentOrReply(user1.getUsername(),commentId);
@@ -252,6 +254,78 @@ class CommentServiceTest {
         //Then
         Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
         Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+
+    }
+
+    @DisplayName("댓글에 해시태그가 존재할 경우, 해시태그가 정상적으로 작동된다")
+    @Test
+    @Transactional
+    void checkHashtagsAdded(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        //When
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        hashtagList.add("hashtag2");
+
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment",null);
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply",hashtagList);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //Then
+        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(3);
+
+    }
+
+    @DisplayName("댓글을 삭제할 경우, 해당하는 PostCommentHashtag 객체도 삭제된다.")
+    @Test
+    @Transactional
+    void checkNoHashtagWhenNullList(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+
+        Post post = new Post();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+        postRepository.save(post);
+
+        //When
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("hashtag1");
+        hashtagList.add("hashtag2");
+        hashtagList.add("hashtag2");
+        hashtagList.add("hashtag2");
+
+        Long commentId = commentService.addComment(post.getId(), user1.getUsername(), "comment",null);
+        Long replyId = commentService.addReply(commentId,user2.getUsername(),"reply",hashtagList);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        commentService.deleteCommentOrReply(user2.getUsername(), replyId);
+
+        //Then
+        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(0);
+        Assertions.assertThat(commentRepository.findAll().size()).isEqualTo(1);
 
     }
 

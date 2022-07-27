@@ -87,7 +87,7 @@ class CommentLikeAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi",null);
 
         entityManager.flush();
         entityManager.clear();
@@ -113,7 +113,7 @@ class CommentLikeAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi",null);
         CommentLike commentLike = new CommentLike(userRepository.findByUsername("12345g").get(), commentRepository.findById(commentId).get());
         commentLikeRepository.save(commentLike);
 
@@ -136,7 +136,7 @@ class CommentLikeAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi",null);
         CommentLike commentLike = new CommentLike(userRepository.findByUsername("12345g").get(), commentRepository.findById(commentId).get());
         commentLikeRepository.save(commentLike);
 
@@ -161,7 +161,7 @@ class CommentLikeAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi",null);
 
         entityManager.flush();
         entityManager.clear();
@@ -188,7 +188,7 @@ class CommentLikeAPITest {
         userRepository.save(user3);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi",null);
 
         CommentLike commentLike1 = new CommentLike(userRepository.findByUsername("12345g").get(),commentRepository.findById(commentId).get());
         CommentLike commentLike2 = new CommentLike(userRepository.getById(user2.getId()),commentRepository.getById(commentId));
@@ -217,7 +217,7 @@ class CommentLikeAPITest {
         Post post = new Post();
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(), "12345g", "hi");
+        Long commentId = commentService.addComment(post.getId(), "12345g", "hi",null);
         entityManager.flush();
         entityManager.clear();
 

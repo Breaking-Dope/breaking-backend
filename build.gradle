@@ -42,6 +42,7 @@ dependencies {
 	implementation "com.querydsl:querydsl-core:${queryDslVersion}"
     implementation 'commons-fileupload:commons-fileupload:1.4'
 	implementation 'commons-io:commons-io:2.11.0'
+	runtimeOnly 'mysql:mysql-connector-java'
 
 	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.11'
 	implementation group: 'org.jcodec', name: 'jcodec', version: '0.2.5'

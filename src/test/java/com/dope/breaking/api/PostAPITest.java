@@ -2,26 +2,16 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
-import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
-import com.dope.breaking.repository.PostLikeRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
-import com.dope.breaking.security.jwt.JwtTokenProvider;
-import com.dope.breaking.service.MediaService;
-import com.dope.breaking.service.PostService;
-import com.dope.breaking.service.UserService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.aspectj.lang.annotation.Before;
-import org.assertj.core.api.Assertions;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +23,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -45,7 +33,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -66,31 +53,13 @@ class PostAPITest {
     private MockMvc mockMvc; //컨트롤러 테스트 하기위한 도구인 MockMvc를 사용. 위에서 자동으로 설정해주는 어노테이션 덕분에 의존성 주입이 필요없다.
 
     @Autowired
-    PostAPI postAPI;
-
-    @Autowired
     UserRepository userRepository;
 
     @Autowired
-    PostService postService;
-
-    @Autowired
-    MediaService mediaService;
-
-    @Autowired
     PostRepository postRepository;
+
     @Autowired
     PasswordEncoder passwordEncoder;
-
-    @Autowired
-    PostLikeRepository postLikeRepository;
-
-    @Autowired
-    EntityManager entityManager;
-
-    @Autowired
-    UserService userService;
-
 
 
     @DisplayName("로그인 없이 게시글을 생성할 시, 예외가 반환된다.")
@@ -127,6 +96,7 @@ class PostAPITest {
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
         System.out.println(content);
+
     }
 
 
@@ -134,6 +104,7 @@ class PostAPITest {
     @WithMockCustomUser
     @Test
     public void createPostWithLogin() throws Exception {
+
         User user = User.builder()
                 .username("12345g")
                 .password(passwordEncoder.encode(UUID.randomUUID().toString()))
@@ -141,10 +112,6 @@ class PostAPITest {
                 .build();
 
         userRepository.save(user);
-
-
-
-
 
         MockMultipartFile multipartFile1 = new MockMultipartFile("file", "test1.png", "image/png", new FileInputStream(System.getProperty("user.dir") + "/src/test/java/com/dope/breaking/files/test1.png"));
 
@@ -177,6 +144,7 @@ class PostAPITest {
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
         System.out.println(content);
+
     }
 
 

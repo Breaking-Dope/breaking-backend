@@ -1,6 +1,6 @@
 package com.dope.breaking.domain.comment;
 
-import com.dope.breaking.domain.hashtag.PostCommentHashtag;
+import com.dope.breaking.domain.hashtag.Hashtag;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import lombok.Builder;
@@ -43,7 +43,7 @@ public class Comment {
     private List<Comment> children = new ArrayList<Comment>();
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
-    private List<PostCommentHashtag> postCommentHashtags;
+    private List<Hashtag> hashtags;
 
     @OneToMany(mappedBy="comment")
     private List<CommentLike> commentLikeList = new ArrayList<CommentLike>();

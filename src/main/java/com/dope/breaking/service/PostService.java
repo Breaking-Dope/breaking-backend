@@ -1,7 +1,6 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.hashtag.HashtagType;
-import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -13,7 +12,6 @@ import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.dto.post.WriterDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
-import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -47,16 +45,14 @@ public class PostService {
 
     private final PostLikeRepository postLikeRepository;
 
-    private final PostCommentHashtagRepository postCommentHashtagRepository;
-    private final PostCommentHashtagService postCommentHashtagService;
+    private final HashtagRepository hashtagRepository;
+    private final HashtagService hashtagService;
 
     private final MediaRepository mediaRepository;
 
     private final BookmarkRepository bookmarkRepository;
 
     private final PurchaseRepository purchaseRepository;
-
-    private final HashtagService hashtagService;
 
     private final MediaService mediaService;
 
@@ -92,7 +88,7 @@ public class PostService {
             post.setUser(user);
             postId = postRepository.save(post).getId();
             if(postRequestDto.getHashtagList() != null) {
-                postCommentHashtagService.savePostHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
+                hashtagService.saveHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
             }
 
         } catch (Exception e) {
@@ -138,9 +134,7 @@ public class PostService {
                     .longitude(postRequestDto.getLocationDto().getLongitude()).build();
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
-            List<String> hashtags = postCommentHashtagRepository.findAllByPost(modifyPost).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList());
-            postCommentHashtagService.modifyPostHashtag(postRequestDto.getHashtagList(), modifyPost, HashtagType.POST);
-            hashtagService.deleteOrphanHashtag(hashtags);
+            hashtagService.updateHashtag(postRequestDto.getHashtagList(), modifyPost.getId(), HashtagType.POST);
 
         } catch (Exception e) {
             log.info("게시글 수정 실패");
@@ -193,7 +187,7 @@ public class PostService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
-                .hashtagList(postCommentHashtagRepository.findAllByPost(post).stream().map(postHashtag -> postHashtag.getHashtag().getHashtag()).collect(Collectors.toList()))
+                .hashtagList(post.getHashtags().stream().map(postHashtag -> postHashtag.getContent()).collect(Collectors.toList()))
                 .location(locationDto)
                 .price(post.getPrice())
                 .postType(post.getPostType().getTitle())
@@ -232,20 +226,13 @@ public class PostService {
         }
 
         List<String> preMediaURLs = post.getMediaList().stream().map(postEntity -> postEntity.getMediaURL()).collect(Collectors.toList());
-        List<String> preHashtags =  post.getPostCommentHashtags().stream().map(hashtags -> hashtags.getHashtag().getHashtag()).collect(Collectors.toList());
         mediaService.deleteMedias(preMediaURLs);
         mediaService.deleteThumbnailImg(post.getThumbnailImgURL());
 
         postRepository.delete(post);
-
-        hashtagService.deleteOrphanHashtag(preHashtags);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-
-    public boolean existByPostIdAndUserId(long postid, long userid) {
-        return postRepository.existsByIdAndUserId(postid, userid);
-    }
 
     private PostRequestDto transferPostRequestToObject(String contentData) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -278,13 +265,13 @@ public class PostService {
     }
 
 
-    private PostType confirmPostType(String reqeustPostType) {
+    private PostType confirmPostType(String requestPostType) {
         PostType postType = null;
-        if (PostType.EXCLUSIVE.getTitle().equals(reqeustPostType)) {
+        if (PostType.EXCLUSIVE.getTitle().equals(requestPostType)) {
             postType = PostType.EXCLUSIVE;
-        } else if (PostType.CHARGED.getTitle().equals(reqeustPostType)) {
+        } else if (PostType.CHARGED.getTitle().equals(requestPostType)) {
             postType = PostType.CHARGED;
-        } else if (PostType.FREE.getTitle().equals(reqeustPostType)) {
+        } else if (PostType.FREE.getTitle().equals(requestPostType)) {
             postType = PostType.FREE;
         }
         return postType;

@@ -5,7 +5,7 @@ package com.dope.breaking.domain.post;
 import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.financial.Purchase;
-import com.dope.breaking.domain.hashtag.PostCommentHashtag;
+import com.dope.breaking.domain.hashtag.Hashtag;
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.User;
@@ -45,7 +45,7 @@ public class Post extends BaseTimeEntity {
     private List<PostLike> postLikeList = new ArrayList<PostLike>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<PostCommentHashtag> postCommentHashtags = new ArrayList<PostCommentHashtag>();
+    private List<Hashtag> hashtags = new ArrayList<Hashtag>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Purchase> buyerList = new ArrayList<Purchase>();

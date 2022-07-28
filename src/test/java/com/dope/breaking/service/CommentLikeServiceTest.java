@@ -62,7 +62,7 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello");
+        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello",null);
 
         //When
         commentLikeService.likeComment(user2.getUsername(),commentId);
@@ -89,7 +89,7 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello");
+        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello",null);
         CommentLike commentLike = new CommentLike(user2,commentRepository.findById(commentId).get());
         commentLikeRepository.save(commentLike);
 
@@ -119,7 +119,7 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello");
+        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello",null);
         CommentLike commentLike = new CommentLike(user2,commentRepository.findById(commentId).get());
         commentLikeRepository.save(commentLike);
 
@@ -151,7 +151,7 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello");
+        Long commentId = commentService.addComment(post.getId(),user1.getUsername(),"hello",null);
 
         Assertions.assertThrows(AlreadyUnlikedException.class, ()
                 ->  commentLikeService.unlikeComment(user2.getUsername(),commentId)); //When
@@ -175,8 +175,8 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),"username1","comment");
-        Long replyId = commentService.addReply(commentId,"username1","reply");
+        Long commentId = commentService.addComment(post.getId(),"username1","comment",null);
+        Long replyId = commentService.addReply(commentId,"username1","reply",null);
 
         commentLikeService.likeComment("username2", commentId);
         commentLikeService.likeComment("username2", replyId);
@@ -209,8 +209,8 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),"username1","comment");
-        Long replyId = commentService.addReply(commentId,"username1","reply");
+        Long commentId = commentService.addComment(post.getId(),"username1","comment",null);
+        Long replyId = commentService.addReply(commentId,"username1","reply",null);
 
         commentLikeService.likeComment("username2", commentId);
         commentLikeService.likeComment("username2", replyId);
@@ -241,8 +241,8 @@ class CommentLikeServiceTest {
         userRepository.save(user2);
         postRepository.save(post);
 
-        Long commentId = commentService.addComment(post.getId(),"username1","comment");
-        Long replyId = commentService.addReply(commentId,"username1","reply");
+        Long commentId = commentService.addComment(post.getId(),"username1","comment",null);
+        Long replyId = commentService.addReply(commentId,"username1","reply",null);
 
         commentLikeService.likeComment("username2", commentId);
         commentLikeService.likeComment("username2", replyId);

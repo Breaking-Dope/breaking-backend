@@ -100,6 +100,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
     }
 
     private Predicate soldOption(SoldOption soldOption) {
+
         switch (soldOption) {
             case SOLD:
                 return post.isSold.eq(true);

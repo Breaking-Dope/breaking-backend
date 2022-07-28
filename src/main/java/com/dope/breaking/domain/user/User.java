@@ -41,14 +41,9 @@ public class User {
     @OneToMany(mappedBy = "blocking")
     private List<Block> blockerList = new ArrayList<Block>();
 
-    //입출금 내역
-    @OneToMany(mappedBy = "user")
-    private List<Statement> statementList =  new ArrayList<Statement>();
-
     //거래 내역
     @OneToMany(mappedBy = "user")
     private List<Purchase> purchaseList = new ArrayList<Purchase>();
-
 
     @OneToMany(mappedBy = "user")
     private List<Bookmark> bookmarkList = new ArrayList<Bookmark>();
@@ -107,7 +102,6 @@ public class User {
         return this.role.getKey();
     }
 
-
     public void updateRefreshToken(String refreshToken){
         this.refreshToken = refreshToken;
     }
@@ -116,6 +110,6 @@ public class User {
         this.refreshToken = null;
     }
 
-
+    public void updateBalance(int amount) {this.balance += amount;}
 
 }

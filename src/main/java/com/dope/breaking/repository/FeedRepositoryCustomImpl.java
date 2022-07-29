@@ -26,11 +26,11 @@ import static com.dope.breaking.domain.post.QPost.post;
 import static com.dope.breaking.domain.user.QUser.user;
 
 @Repository
-public class FeedRepositoryImpl implements FeedRepositoryCustom {
+public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public FeedRepositoryImpl(EntityManager em) {
+    public FeedRepositoryCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
@@ -73,7 +73,6 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                         Expressions.asBoolean(false),
                         Expressions.asBoolean(false),
                         post.createdDate
-
                 ))
                 .from(post)
                 .leftJoin(post.user, user)

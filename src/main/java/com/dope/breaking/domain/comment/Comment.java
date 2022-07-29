@@ -52,6 +52,8 @@ public class Comment {
 
     private LocalDateTime eventTime;
 
+    private LocalDateTime createdTime;
+
     @Builder
     public Comment(User user, Post post, String content){
         this.user = user;

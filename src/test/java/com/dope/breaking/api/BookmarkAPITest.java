@@ -118,7 +118,8 @@ class BookmarkAPITest {
         this.mockMvc.perform(delete("/post/{postId}/bookmark", post.getId()))
                 .andExpect(status().isCreated()); //Then
 
-        //Then
+
+        Assertions.assertFalse(bookmarkRepository.existsByUserAndPost(userRepository.findByUsername("12345g").get(), post));
     }
 
 

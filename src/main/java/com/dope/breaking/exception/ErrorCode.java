@@ -35,7 +35,10 @@ public enum ErrorCode {
     ALREADY_UNLIKED("BSE459","이미 좋아요를 선택하지 않았습니다."),
 
 
-    INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패.")
+    INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패."),
+
+    NOT_ENOUGH_BALANCE("BSE601", "금액이 부족합니다.")
+
     ;
 
     private String code;

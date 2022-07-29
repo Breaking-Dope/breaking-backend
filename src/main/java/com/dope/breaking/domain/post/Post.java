@@ -123,5 +123,5 @@ public class Post extends BaseTimeEntity {
     public void updateIsSold (boolean isSold) { this.isSold = isSold; }
 
     public void updateIsPurchasable (boolean isPurchasable ) { this.isPurchasable = isPurchasable; }
-    
+
 }

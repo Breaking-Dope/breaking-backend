@@ -17,14 +17,14 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
-    public void depositOrWithdrawTransaction (User user, Statement statement){
+    public void depositOrWithdrawTransaction(User user, Statement statement){
 
         Transaction transaction = new Transaction(user, statement,null, statement.getAmount(), statement.getTransactionType());
         transactionRepository.save(transaction);
 
     }
 
-    public void purchasePostTransaction (User buyer, User seller, Purchase purchase){
+    public void purchasePostTransaction(User buyer, User seller, Purchase purchase){
 
         Transaction buyerTransaction = new Transaction(buyer, null, purchase, purchase.getPrice(), TransactionType.BUY_POST);
         Transaction sellerTransaction = new Transaction(seller, null, purchase, purchase.getPrice(), TransactionType.SELL_POST);

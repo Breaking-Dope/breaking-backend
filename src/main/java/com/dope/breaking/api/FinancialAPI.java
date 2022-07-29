@@ -24,7 +24,7 @@ public class FinancialAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/financial/deposit")
-    public ResponseEntity deposit (Principal principal,@RequestBody @Valid AmountRequestDto depositAmount) {
+    public ResponseEntity deposit(Principal principal,@RequestBody @Valid AmountRequestDto depositAmount) {
 
         statementService.depositOrWithdraw(principal.getName(), depositAmount.getAmount(), TransactionType.DEPOSIT);
         return ResponseEntity.ok().build();
@@ -33,7 +33,7 @@ public class FinancialAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/financial/withdraw")
-    public ResponseEntity withdraw (Principal principal, @RequestBody @Valid AmountRequestDto withdrawAmount) {
+    public ResponseEntity withdraw(Principal principal, @RequestBody @Valid AmountRequestDto withdrawAmount) {
 
         statementService.depositOrWithdraw(principal.getName(), withdrawAmount.getAmount(), TransactionType.WITHDRAW);
         return ResponseEntity.ok().build();
@@ -42,7 +42,7 @@ public class FinancialAPI {
 
     @PreAuthorize("isAuthenticated")
     @PostMapping("/post/{postId}/purchase")
-    public ResponseEntity purchase (Principal principal, @PathVariable Long postId) {
+    public ResponseEntity purchase(Principal principal, @PathVariable Long postId) {
 
         purchaseService.purchasePost(principal.getName(), postId);
         return ResponseEntity.ok().build();

@@ -26,7 +26,7 @@ public class PurchaseService {
     private final PostRepository postRepository;
     private final TransactionService transactionService;
 
-    public void purchasePost (String username, Long postId) {
+    public void purchasePost(String username, Long postId) {
 
         User buyer = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
@@ -82,7 +82,7 @@ public class PurchaseService {
 
     }
 
-    public void moneyTransfer (User buyer, User seller, int amount) {
+    public void moneyTransfer(User buyer, User seller, int amount) {
 
         buyer.updateBalance(amount*(-1));
         seller.updateBalance(amount);

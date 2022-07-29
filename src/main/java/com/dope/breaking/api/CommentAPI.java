@@ -1,7 +1,6 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.comment.CommentRequestDto;
-import com.dope.breaking.repository.CommentRepository;
 import com.dope.breaking.dto.comment.CommentResponseDto;
 import com.dope.breaking.dto.comment.SearchCommentConditionDto;
 import com.dope.breaking.service.CommentService;
@@ -42,7 +41,7 @@ public class CommentAPI {
                 .size(size)
                 .build();
 
-        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, postId, username);
+        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }

@@ -95,11 +95,18 @@ public class CommentService {
 
     }
 
-    public List<CommentResponseDto> getCommentList(SearchCommentConditionDto searchCommentConditionDto, Long targetId, String username) {
+    public List<CommentResponseDto> getCommentList(SearchCommentConditionDto searchCommentConditionDto, String username) {
 
         User me = null;
         if(username != null) {
             me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        switch (searchCommentConditionDto.getTargetType()) {
+            case POST:
+                if(!postRepository.existsById(searchCommentConditionDto.getTargetId())) {
+                    throw new NoSuchPostException();
+                }
         }
 
         return commentRepository.searchCommentList(me, searchCommentConditionDto);

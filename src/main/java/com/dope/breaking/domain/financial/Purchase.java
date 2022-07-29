@@ -25,14 +25,14 @@ public class Purchase {
     @JoinColumn (name = "POST_ID")
     private Post post;
 
-    private int amount;
+    private int price;
 
     @Builder
-    public Purchase(User user, Post post, int amount){
+    public Purchase(User user, Post post, int price){
 
         this.post = post;
         this.user = user;
-        this.amount = amount;
+        this.price = price;
 
     }
 

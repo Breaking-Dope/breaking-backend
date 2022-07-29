@@ -75,6 +75,8 @@ public class Post extends BaseTimeEntity {
 
     private boolean isHidden;
 
+    private boolean isPurchasable = true;
+
     private LocalDateTime eventTime;
 
     private String thumbnailImgURL;
@@ -117,4 +119,9 @@ public class Post extends BaseTimeEntity {
     public void updateViewCount() {
         this.viewCount += 1;
     }
+
+    public void updateIsSold (boolean isSold) { this.isSold = isSold; }
+
+    public void updateIsPurchasable (boolean isPurchasable ) { this.isPurchasable = isPurchasable; }
+    
 }

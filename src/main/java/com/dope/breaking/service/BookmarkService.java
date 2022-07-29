@@ -47,10 +47,7 @@ public class BookmarkService {
         User user = userRepository.findByUsername(username).get();
         Post post = postRepository.getById(postId);
         if(!bookmarkRepository.existsByUserAndPost(user, post)) throw new AlreadyUnbookmarkedException();
-        Bookmark bookmark = Bookmark.builder()
-                .post(post)
-                .user(user).build();
-        bookmarkRepository.save(bookmark);
+        bookmarkRepository.deleteByUserAndPost(user, post);
         return new ResponseEntity(HttpStatus.CREATED);
     }
 

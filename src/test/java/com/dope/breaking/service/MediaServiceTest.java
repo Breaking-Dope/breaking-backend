@@ -16,7 +16,6 @@ import java.util.List;
 
 @SpringBootTest
 @Transactional
-//@Rollback(false)
 class MediaServiceTest {
 
     @Autowired MediaService mediaService;

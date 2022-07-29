@@ -26,7 +26,6 @@ public class CommentResponseDto {
 
     private Boolean isLiked;
 
-    @CreatedDate
     private LocalDateTime createdTime;
 
     @QueryProjection

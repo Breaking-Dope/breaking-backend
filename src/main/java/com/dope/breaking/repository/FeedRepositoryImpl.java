@@ -6,6 +6,7 @@ import com.dope.breaking.dto.post.QFeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.service.SoldOption;
 import com.dope.breaking.service.SortStrategy;
+import com.dope.breaking.service.UserPageFeedOption;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
@@ -42,6 +43,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
                 .leftJoin(post.postLikeList, postLike)
                 .where(
                         post.isHidden.eq(false),
+                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), searchFeedConditionDto.getOwnerId()),
                         soldOption(searchFeedConditionDto.getSoldOption()),
                         period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
@@ -82,13 +84,29 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
         return content;
     }
 
+    private Predicate userPageFeedOption(UserPageFeedOption userPageFeedOption, Long ownerId) {
+
+        if(userPageFeedOption == null) {
+            return null;
+        }
+
+        switch (userPageFeedOption) {
+            case BUY:
+            case BOOKMARK:
+            case WRITE:
+            default:
+                return post.user.id.eq(ownerId);
+        }
+    }
 
     private Predicate soldOption(SoldOption soldOption) {
+
         switch (soldOption) {
             case SOLD:
                 return post.isSold.eq(true);
             case UNSOLD:
                 return post.isSold.eq(false);
+            case ALL:
             default:
                 return null;
         }
@@ -105,7 +123,7 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
 
     private Predicate cursorPagination(Post cursorPost, SortStrategy sortStrategy) {
 
-        if(cursorPost == null) {
+        if(cursorPost == null || sortStrategy == null) {
             return null;
         }
 
@@ -115,15 +133,14 @@ public class FeedRepositoryImpl implements FeedRepositoryCustom {
             case VIEW:
                 return post.viewCount.loe(cursorPost.getViewCount());
             case CHRONOLOGICAL:
-                return post.id.lt(cursorPost.getId());
             default:
-                return null;
+                return post.id.lt(cursorPost.getId());
         }
     }
 
     private Predicate sameLevelCursorFilter(Post cursorPost, SortStrategy sortStrategy) {
 
-        if(cursorPost == null) {
+        if(cursorPost == null || sortStrategy == null) {
             return null;
         }
 

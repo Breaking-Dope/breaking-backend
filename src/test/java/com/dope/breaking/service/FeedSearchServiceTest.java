@@ -21,6 +21,7 @@ import javax.persistence.EntityManager;
 
 import java.util.List;
 
+import static com.dope.breaking.domain.user.Role.PRESS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
@@ -41,7 +42,7 @@ class FeedSearchServiceTest {
                 .builder()
                 .cursorId(null)
                 .size(15L)
-                .soldOption(SoldOption.SOLD)
+                .soldOption(SoldOption.ALL)
                 .build();
 
         List<FeedResultPostDto> result = searchFeedService.searchFeed(searchFeedConditionDto);
@@ -269,6 +270,50 @@ class FeedSearchServiceTest {
         assertEquals(page, content2.size());
         assertEquals(page, content6.size());
         assertEquals(0, content7.size(), () -> "남은 포스트 10개는 숨김처리되어 조회되지 않는다.");
+    }
+
+    @DisplayName("유저페이지에서는 해당 유저가 작성한 게시글만 조회된다.")
+    @Test
+    void userPageFeed() {
+
+        User owner = User.builder()
+                .username("username")
+                .password("password")
+                .role(PRESS)
+                .build();
+        userRepository.save(owner);
+
+        //3 not owner's posts
+        for(int i=0;i<3;i++) {
+            Post post = Post.builder()
+                    .isHidden(false)
+                    .isAnonymous(false)
+                    .build();
+            postRepository.save(post);
+        }
+
+        //7 owner's posts
+        for(int i=0;i<7;i++) {
+            Post post = Post.builder()
+                    .isHidden(false)
+                    .isAnonymous(false)
+                    .build();
+            post.setUser(owner);
+            postRepository.save(post);
+        }
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .ownerId(owner.getId())
+                .cursorId(null)
+                .size(10L)
+                .userPageFeedOption(UserPageFeedOption.WRITE)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> content = searchFeedService.searchFeed(searchFeedConditionDto);
+
+        assertEquals(7, content.size());
     }
 
 }

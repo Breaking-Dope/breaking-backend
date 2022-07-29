@@ -4,8 +4,10 @@ import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-public class PurchasedPostException extends BreakingException {
+public class SoldExclusivePostException extends BreakingException {
 
-    public PurchasedPostException() { super(ErrorCode.PURCHASED_POST, HttpStatus.NOT_ACCEPTABLE); }
+    public SoldExclusivePostException() { super(ErrorCode.SOLD_EXCLUSIVE_POST, HttpStatus.BAD_REQUEST); }
 
 }
+
+

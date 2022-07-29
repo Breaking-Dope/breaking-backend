@@ -4,6 +4,8 @@ import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.comment.CommentResponseDto;
+import com.dope.breaking.dto.comment.SearchCommentConditionDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.exception.post.NoSuchPostException;
@@ -93,4 +95,13 @@ public class CommentService {
 
     }
 
+    public List<CommentResponseDto> getCommentList(SearchCommentConditionDto searchCommentConditionDto, Long targetId, String username) {
+
+        User me = null;
+        if(username != null) {
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        return commentRepository.searchCommentList(me, searchCommentConditionDto);
+    }
 }

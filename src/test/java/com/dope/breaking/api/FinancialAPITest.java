@@ -7,6 +7,8 @@ import com.dope.breaking.dto.financial.AmountRequestDto;
 import com.dope.breaking.repository.StatementRepository;
 import com.dope.breaking.repository.TransactionRepository;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.service.PostService;
+import com.dope.breaking.service.PurchaseService;
 import com.dope.breaking.service.StatementService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +27,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,6 +52,9 @@ class FinancialAPITest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    private PurchaseService purchaseService;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -57,6 +65,10 @@ class FinancialAPITest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private PostService postService;
+
 
     @BeforeEach
     public void createUserInfo() {
@@ -175,5 +187,136 @@ class FinancialAPITest {
                 .andExpect(status().isBadRequest()); //Then
 
     }
-    
+
+    @DisplayName("무료제보를 구매할 경우, 제보가 정상적으로 구매된다")
+    @Test
+    @WithMockCustomUser
+    @Transactional
+    void purchaseFreePost() throws Exception {
+
+        //Given
+        User buyer = new User();
+        buyer.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer", Role.USER);
+        buyer.updateBalance(2000);
+        userRepository.save(buyer);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 0," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"free\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        //When
+        this.mockMvc.perform(post("/post/{postId}/purchase", postId))
+                .andExpect(status().isOk()); //Then
+
+    }
+
+    @DisplayName("잔액이 제보 가격보다 적을 경우, 예외가 발생한다.")
+    @Test
+    @WithMockCustomUser
+    @Transactional
+    void purchaseWhenPrice() throws Exception {
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        user.updateBalance(2000);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(0);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 3000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"charged\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        //When
+        this.mockMvc.perform(post("/post/{postId}/purchase", postId))
+                .andExpect(status().isBadRequest()); //Then
+
+    }
+
+    @DisplayName("이미 판매 된 단독제보을 구매할 경우, 예외가 발생한다.")
+    @WithMockCustomUser
+    @Transactional
+    @Test
+    void purchaseSoldExclusivePost() throws Exception {
+
+        //Given
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.USER);
+        buyer1.updateBalance(2000);
+        userRepository.save(buyer1);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(0);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 1000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"exclusive\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        purchaseService.purchasePost("buyer1",postId);
+
+        //When
+        this.mockMvc.perform(post("/post/{postId}/purchase", postId))
+                .andExpect(status().isBadRequest()); //Then
+
+    }
+
 }

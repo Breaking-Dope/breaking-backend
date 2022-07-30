@@ -4,6 +4,7 @@ import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.comment.SearchCommentConditionDto;
+import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.repository.*;
 import org.junit.jupiter.api.DisplayName;
@@ -323,7 +324,7 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("존재하지 않은 post id가 들어오면, 예외가 발생한다.")
+    @DisplayName("존재하지 않은 post id가 입력되면, 예외가 발생한다.")
     @Test
     void getCommentListFailure() {
         User user = User.builder()
@@ -339,6 +340,26 @@ class CommentServiceTest {
                 .targetId(999L)
                 .build();
         assertThrows(NoSuchPostException.class,
+                () -> commentService.getCommentList(searchCommentConditionDto, "12345g"));
+
+    }
+
+    @DisplayName("존재하지 않은 parent comment id가 입력되면, 예외가 발생한다.")
+    @Test
+    void getReplyCommentListFailure() {
+        User user = User.builder()
+                .username("12345g")
+                .build();
+        userRepository.save(user);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetType(CommentTargetType.COMMENT)
+                .targetId(999L)
+                .build();
+        assertThrows(NoSuchCommentException.class,
                 () -> commentService.getCommentList(searchCommentConditionDto, "12345g"));
 
     }

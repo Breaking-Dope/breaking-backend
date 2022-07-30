@@ -93,4 +93,42 @@ class CommentRepositoryTest {
 
         assertTrue(content.get(0).getIsLiked());
     }
+
+    @DisplayName("대댓글에는 커서 페이지네이션이 적용된다.")
+    @Test
+    void replyCommentPagination() {
+
+        User me = new User();
+        userRepository.save(me);
+
+        Post post = new Post();
+        postRepository.save(post);
+
+        Comment parentComment = new Comment(me, post, "부모댓글");
+        commentRepository.save(parentComment);
+
+        for(int i=0;i<10;i++) {
+            Comment comment = new Comment(me, null, parentComment, "자식댓글"+i);
+            commentRepository.save(comment);
+        }
+
+        em.flush();
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetId(parentComment.getId())
+                .targetType(CommentTargetType.COMMENT)
+                .size(4L)
+                .cursorId(null)
+                .build();
+
+        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+        searchCommentConditionDto.setCursorId(content1.get(content1.size() - 1).getCommentId());
+        List<CommentResponseDto> content2 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+        searchCommentConditionDto.setCursorId(content2.get(content2.size() - 1).getCommentId());
+        List<CommentResponseDto> content3 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+
+        assertEquals(4, content1.size());
+        assertEquals(4, content2.size());
+        assertEquals(2, content3.size(), ()->"마지막 페지이는 2개가 나온다.");
+    }
 }

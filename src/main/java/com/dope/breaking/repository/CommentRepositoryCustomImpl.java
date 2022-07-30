@@ -83,6 +83,8 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
         switch (targetType) {
             case POST:
                 return comment.post.id.eq(targetId);
+            case COMMENT:
+                return comment.parent.id.eq(targetId);
         }
         return null;
     }

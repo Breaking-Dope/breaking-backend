@@ -29,7 +29,6 @@ public enum ErrorCode {
     ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
     NO_SUCH_POST("BSE450","해당 제보를 찾을 수 없습니다"),
     NO_SUCH_COMMENT("BSE451","해당 댓글을 찾을 수 없습니다"),
-
     PURCHASED_POST("BSE452", "판매된 게시글은 삭제할 수 없습니다."),
 
     ALREADY_BOOKMARKED("BSE456", "이미 북마크를 선택했습니다."),
@@ -37,7 +36,8 @@ public enum ErrorCode {
     ALREADY_UNBOOKMARKED("BSE457", "이미 북마크를 선택하지 않았습니다."),
     ALREADY_LIKED("BSE458","이미 좋아요를 선택했습니다."),
     ALREADY_UNLIKED("BSE459","이미 좋아요를 선택하지 않았습니다."),
-
+    NOT_PURCHASABLE_POST("BSE460","구매 제한이 된 포스트입니다."),
+    SOLD_EXCLUSIVE_POST("BSE461","이미 판매 된 단독제보입니다."),
 
     INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패."),
 

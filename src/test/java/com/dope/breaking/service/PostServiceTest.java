@@ -3,7 +3,6 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
-import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
@@ -15,12 +14,10 @@ import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.*;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,15 +25,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,28 +45,13 @@ class PostServiceTest {
     UserRepository userRepository;
 
     @Autowired
-    MediaService mediaService;
-
-    @Autowired
-    MediaRepository mediaRepository;
-
-    @Autowired
-    PostLikeRepository postLikeRepository;
-
-    @Autowired
     PurchaseRepository purchaseRepository;
 
     @Autowired
     PostRepository postRepository;
+
     @Autowired
     PasswordEncoder passwordEncoder;
-
-
-    @Autowired
-    EntityManager entityManager;
-
-    @Autowired
-    UserService userService;
 
 
     @BeforeEach

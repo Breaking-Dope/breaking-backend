@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -51,6 +52,9 @@ public class Comment {
     private String content;
 
     private LocalDateTime eventTime;
+
+    @CreatedDate
+    private LocalDateTime createdTime;
 
     @Builder
     public Comment(User user, Post post, String content){

@@ -1,8 +1,10 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.comment.CommentRequestDto;
-import com.dope.breaking.repository.CommentRepository;
+import com.dope.breaking.dto.comment.CommentResponseDto;
+import com.dope.breaking.dto.comment.SearchCommentConditionDto;
 import com.dope.breaking.service.CommentService;
+import com.dope.breaking.service.CommentTargetType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +13,38 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 public class CommentAPI {
 
     private final CommentService commentService;
+
+    @GetMapping("/post/{postId}/comment")
+    public ResponseEntity<List<CommentResponseDto>> getCommentListFromPost(
+            Principal principal,
+            @PathVariable Long postId,
+            @RequestParam(value="cursor") Long cursor,
+            @RequestParam(value="size") Long size
+    ) {
+
+        String username = null;
+        if(principal != null)  {
+            username = principal.getName();
+        }
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetType(CommentTargetType.POST)
+                .targetId(postId)
+                .cursorId(cursor)
+                .size(size)
+                .build();
+
+        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username);
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/comment")

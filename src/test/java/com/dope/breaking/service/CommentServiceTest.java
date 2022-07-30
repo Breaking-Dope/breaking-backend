@@ -3,8 +3,9 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.comment.SearchCommentConditionDto;
+import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.repository.*;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+@Transactional
 @SpringBootTest
 class CommentServiceTest {
 
@@ -33,7 +37,6 @@ class CommentServiceTest {
 
     @DisplayName("제보가 존재할 경우, 댓글이 작성된다.")
     @Test
-    @Transactional
     void addComment() {
 
         //Given
@@ -51,7 +54,7 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.count()).isEqualTo(1);
+        assertEquals(1, commentRepository.count());
 
         commentRepository.deleteAll();
 
@@ -59,7 +62,6 @@ class CommentServiceTest {
 
     @DisplayName("댓글이 존재할 경우, 대댓글이 작성된다.")
     @Test
-    @Transactional
     void addReply() {
 
         //Given
@@ -78,14 +80,13 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.count()).isEqualTo(3);
-        Assertions.assertThat(commentRepository.findById(commentId+1L).get().getContent()).isEqualTo("reply1");
+        assertEquals(3, commentRepository.count());
+        assertEquals("reply1", commentRepository.findById(commentId+1L).get().getContent());
 
     }
 
     @DisplayName("유저네임과 commentId가 유효할 경우, 댓글이 수정된다.")
     @Test
-    @Transactional
     void updateComment() {
 
         //Given
@@ -105,13 +106,12 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.findById(commentId).get().getContent()).isEqualTo("updated");
+        assertEquals("updated", commentRepository.findById(commentId).get().getContent());
 
     }
 
     @DisplayName("유저가 삭제 될 경우 해당되는 댓글 역시 삭제 된다.")
     @Test
-    @Transactional
     void commentDeletedWhenUserDeleted(){
 
         //Given
@@ -131,13 +131,12 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.findAllByPost(postRepository.getById(post.getId())).size()).isEqualTo(0);
-        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+        assertEquals(0, commentRepository.findAllByPost(postRepository.getById(post.getId())).size());
+        assertTrue(commentRepository.findById(commentId).isEmpty());
     }
 
     @DisplayName("유저가 삭제 될 경우, 해당하는 대댓글 역시 삭제 된다.")
     @Test
-    @Transactional
     void replyDeletedWhenUserDeleted(){
 
         //Given
@@ -162,13 +161,12 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.findAllByPost(postRepository.getById(post.getId())).size()).isEqualTo(1);
-        Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+        assertEquals(1, commentRepository.findAllByPost(postRepository.getById(post.getId())).size());
+        assertTrue(commentRepository.findById(replyId).isEmpty());
     }
 
     @DisplayName("제보가 삭제 될 경우, 해당하는 댓글과 대댓글 역시 삭제 된다.")
     @Test
-    @Transactional
     void commentAndReplyDeletedWhenPostDeleted(){
 
         //Given
@@ -193,15 +191,14 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.findAll().size()).isEqualTo(0);
-        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
-        Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+        assertEquals(0, commentRepository.findAll().size());
+        assertTrue(commentRepository.findById(commentId).isEmpty());
+        assertTrue(commentRepository.findById(replyId).isEmpty());
 
     }
 
     @DisplayName("유저 정보가 일치한 경우, 댓글이 지워진다.")
     @Test
-    @Transactional
     void deleteCommentOrReply() {
 
         //Given
@@ -221,13 +218,12 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
+        assertTrue(commentRepository.findById(commentId).isEmpty());
 
     }
 
     @DisplayName("댓글을 지울 경우, 대댓글도 지워진다")
     @Test
-    @Transactional
     void checkReplyDeletedWhenCommentDeleted() {
 
         //Given
@@ -252,14 +248,13 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(commentRepository.findById(commentId).isEmpty()).isTrue();
-        Assertions.assertThat(commentRepository.findById(replyId).isEmpty()).isTrue();
+        assertTrue(commentRepository.findById(commentId).isEmpty());
+        assertTrue(commentRepository.findById(replyId).isEmpty());
 
     }
 
     @DisplayName("댓글에 해시태그가 존재할 경우, 해시태그가 정상적으로 등록된다")
     @Test
-    @Transactional
     void checkHashtagsAdded(){
 
         //Given
@@ -287,13 +282,12 @@ class CommentServiceTest {
         entityManager.clear();
 
         //Then
-        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(3);
+        assertEquals(3, hashtagRepository.findAll().size());
 
     }
 
     @DisplayName("댓글을 삭제할 경우, 해당하는 Hashtag 객체도 삭제된다.")
     @Test
-    @Transactional
     void checkNoHashtagWhenNullList(){
 
         //Given
@@ -324,8 +318,28 @@ class CommentServiceTest {
         commentService.deleteCommentOrReply(user2.getUsername(), replyId);
 
         //Then
-        Assertions.assertThat(hashtagRepository.findAll().size()).isEqualTo(0);
-        Assertions.assertThat(commentRepository.findAll().size()).isEqualTo(1);
+        assertEquals(0, hashtagRepository.findAll().size());
+        assertEquals(1, commentRepository.findAll().size());
+
+    }
+
+    @DisplayName("존재하지 않은 post id가 들어오면, 예외가 발생한다.")
+    @Test
+    void getCommentListFailure() {
+        User user = User.builder()
+            .username("12345g")
+            .build();
+        userRepository.save(user);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetType(CommentTargetType.POST)
+                .targetId(999L)
+                .build();
+        assertThrows(NoSuchPostException.class,
+                () -> commentService.getCommentList(searchCommentConditionDto, "12345g"));
 
     }
 

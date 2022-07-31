@@ -3,6 +3,7 @@ package com.dope.breaking.service;
 import com.dope.breaking.exception.auth.InvalidRefreshTokenException;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class JwtAuthenticationService {
@@ -24,13 +26,16 @@ public class JwtAuthenticationService {
 
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
         String getRefreshToken = jwtTokenProvider.extractRefreshToken(refreshToken).orElse(null);
+        log.info(Boolean.toString(jwtTokenProvider.validateToken(getRefreshToken)));
 
         if (refreshToken != null && jwtTokenProvider.validateToken(getRefreshToken) == false) { //리플리쉬 토큰이 있고, 유효하지 않다면?
             throw new InvalidRefreshTokenException();
         }
         else if(getAccessToken != null && jwtTokenProvider.validateToken(getRefreshToken) == true){
             String username = jwtTokenProvider.getUsername(getRefreshToken);
+            log.info(username);
             String redisRefreshToken = redisService.getData(username);
+            log.info(redisRefreshToken);
             if(!getRefreshToken.equals(redisRefreshToken)){
                 throw new InvalidRefreshTokenException();
             }

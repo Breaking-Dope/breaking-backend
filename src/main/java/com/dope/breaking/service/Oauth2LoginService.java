@@ -92,7 +92,7 @@ public class Oauth2LoginService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", accessToken);
             httpHeaders.set("Authorization-Refresh", refreshToken);
-            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
+            redisService.setDataWithExpiration(dto.getUsername(), refreshToken,2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
@@ -165,7 +165,7 @@ public class Oauth2LoginService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", accessToken);
             httpHeaders.set("Authorization-Refresh", refreshToken);
-            redisService.setDataWithExpiration(refreshToken, dto.getUsername(), 2 * 604800L);
+            redisService.setDataWithExpiration(dto.getUsername(), refreshToken, 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())

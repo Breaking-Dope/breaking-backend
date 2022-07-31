@@ -1,4 +1,4 @@
-package com.dope.breaking.security.controller;
+package com.dope.breaking.api;
 
 
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/oauth2/sign-in")
 @RestController
-public class Oauth2LoginController {
+public class Oauth2LoginAPI {
 
     private final Oauth2LoginService oauth2LoginService;
 

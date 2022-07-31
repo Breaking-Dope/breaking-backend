@@ -75,9 +75,6 @@ public class User {
 
     private String compressedProfileImgURL;
 
-    @Column(length = 1000)
-    private String refreshToken;
-
 
     public void setRequestFields (String originalProfileImgURL, String compressedProfileImgURL, String nickname, String phoneNumber, String email,
              String realName, String statusMsg, String username, Role role) {
@@ -102,14 +99,8 @@ public class User {
         return this.role.getKey();
     }
 
-    public void updateRefreshToken(String refreshToken){
-        this.refreshToken = refreshToken;
-    }
-
-    public void destroyRefreshToken(){
-        this.refreshToken = null;
-    }
 
     public void updateBalance(int amount) {this.balance += amount;}
+
 
 }

@@ -21,8 +21,8 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private  String secret;
 
-    private final String accessheader = "Authorization";
-    private final String refreshheader = "Authorization-refresh";
+    private final String accessHeader = "Authorization";
+    private final String refreshHeader = "Authorization-Refresh";
 
     private static final String BEARER = "Bearer ";
 
@@ -49,30 +49,30 @@ public class JwtTokenProvider {
                 .compact(); //토큰생성
     }
 
-    public String createRefreshToken(){
+    public String createRefreshToken(String username){
+        Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
         return Jwts.builder().setSubject("RefreshToken")
+                .setClaims(claims) //유저이름 지정.
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshtokenValidityInMilliseconds))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact(); //리플리쉬 토큰 생성.
     }
 
-    public void destroyRefreshToken(String username) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            userRepository.findByUsername(username).get().destroyRefreshToken();
-        } else {
-            log.info("토큰 삭제에 실패함.");
-        }
-    }
-
 
     public Optional<String> extractAccessToken(HttpServletRequest request) throws IOException, ServletException {
-        return Optional.ofNullable(request.getHeader(accessheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
+        return Optional.ofNullable(request.getHeader(accessHeader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
     }
 
-    public Optional<String> extractRefreshToken(HttpServletRequest request) throws IOException, ServletException {
-        return Optional.ofNullable(request.getHeader(refreshheader)).filter(accessToken -> accessToken.startsWith(BEARER)).map(accessToken -> accessToken.replace(BEARER, ""));
+
+    public Optional<String> extractAccessToken(String request) throws IOException{
+        return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
+    }
+
+
+    public Optional<String> extractRefreshToken(String request) throws IOException{
+        return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
 

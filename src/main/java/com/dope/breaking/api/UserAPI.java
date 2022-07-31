@@ -5,11 +5,6 @@ import com.dope.breaking.dto.user.*;
 
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD
-=======
-import org.json.simple.JSONObject;
-import org.springframework.http.HttpHeaders;
->>>>>>> d858f22 (feat: add JwtAuthenticationAPI for refrsh token reissue)
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

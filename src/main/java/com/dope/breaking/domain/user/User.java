@@ -1,7 +1,6 @@
 package com.dope.breaking.domain.user;
 
 import com.dope.breaking.domain.financial.Purchase;
-import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.post.Post;
 import lombok.Builder;
 import lombok.Getter;

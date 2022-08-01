@@ -23,7 +23,6 @@ class FollowRepositoryTest {
 
     @Autowired UserRepository userRepository;
     @Autowired FollowRepository followRepository;
-    @Autowired EntityManager em;
 
     @BeforeEach //DB에 유저정보를 먼저 저장.
     public void createUserInfo() {

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,111 +25,85 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FollowService {
 
-    private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
 
-    public void deleteById(Long followId){
-        followRepository.deleteById(followId);
-    }
-
-    public Optional<Follow> findById(Long followId) {return followRepository.findById(followId);}
-    
-    public Boolean isFollowing (User followingUser, User followedUser) {
-
-        List<Follow> followingList = followingUser.getFollowingList();
-
-        for (Follow follow : followingList) {
-            if (follow.getFollowed() == followedUser) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void follow(User followingUser, User followedUser){
-
-        Follow follow = new Follow();
-
-        follow.updateFollowing(followingUser);
-        follow.updateFollowed(followedUser);
-
-        followingUser.getFollowingList().add(follow);
-        followedUser.getFollowerList().add(follow);
-
-    }
-
-    public void unfollow(User followingUser, User followedUser){
-
-        for (Follow follow : followingUser.getFollowingList()) {
-
-            if (follow.getFollowed() == followedUser){
-
-                followingUser.getFollowingList().remove(follow);
-                followedUser.getFollowerList().remove(follow);
-                break;
-
-            }
-        }
-    }
-
-    public void followUser(String username, Long userId) {
+    public void follow(String username, Long userId){
 
         User followingUser = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         User followedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
-        if (isFollowing(followingUser,followedUser)){
+        if(followRepository.existsFollowsByFollowedAndFollowing(followedUser,followingUser)){
             throw new AlreadyFollowingException();
         }
 
-        follow(followingUser,followedUser);
-        userRepository.save(followingUser);
-        userRepository.save(followedUser);
+        Follow follow = new Follow(followingUser,followedUser);
+        followRepository.save(follow);
+
 
     }
 
-    public void unfollowUser(String username, Long userId) {
+    public void unfollow(String username, Long userId){
 
         User followingUser = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         User followedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
-        if (!isFollowing(followingUser,followedUser)){
+        if(!followRepository.existsFollowsByFollowedAndFollowing(followedUser,followingUser)){
             throw new AlreadyUnfollowingException();
         }
-
-        unfollow(followingUser,followedUser);
-        userRepository.save(followingUser);
-        userRepository.save(followedUser);
-
+        followRepository.deleteByFollowedAndFollowing(followedUser,followingUser);
     }
 
-    public List<ForListInfoResponseDto> followingUsers (Long userId){
+    public List<ForListInfoResponseDto> followingUsers (Principal principal, Long userId){
 
-        User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
+        User selectedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
-        List<Follow> followingList = user.getFollowingList();
+        List<Follow> followingList = followRepository.findAllByFollowing(selectedUser);
         List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
 
-        for (Follow follow : followingList) {
-            User followedUser = follow.getFollowed();
-            forListInfoResponseDtoList.add (new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getCompressedProfileImgURL()));
+        if (principal == null) {
+            for (Follow follow : followingList) {
+                User followedUser = follow.getFollowed();
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(), followedUser.getNickname(), followedUser.getStatusMsg(), followedUser.getCompressedProfileImgURL(), false));
+            }
+        }
+        else{
+            User user = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
+            for (Follow follow : followingList) {
+                User followedUser = follow.getFollowed();
+                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(followedUser, user);
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(), followedUser.getNickname(), followedUser.getStatusMsg(), followedUser.getCompressedProfileImgURL(), isFollowing));
+            }
         }
 
         return forListInfoResponseDtoList;
 
     }
 
-    public List<ForListInfoResponseDto> followerUsers (Long userId){
+    public List<ForListInfoResponseDto> followerUsers (Principal principal, Long userId){
 
-        User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
+        User selectedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
-        List<Follow> followerList = user.getFollowerList();
+        List<Follow> followerList = followRepository.findAllByFollowed(selectedUser);
         List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
 
-        for (Follow follow : followerList) {
-            User followedUser = follow.getFollowing();
-            forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(),followedUser.getNickname(),followedUser.getStatusMsg(),followedUser.getCompressedProfileImgURL()));
+        if (principal == null) {
+            for (Follow follow : followerList) {
+                User followingUser = follow.getFollowing();
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followingUser.getId(), followingUser.getNickname(), followingUser.getStatusMsg(), followingUser.getCompressedProfileImgURL(), false));
+            }
+        }
+        else{
+            User user = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
+            for (Follow follow : followerList) {
+                User followingUser = follow.getFollowing();
+                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(followingUser, user);
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followingUser.getId(), followingUser.getNickname(), followingUser.getStatusMsg(), followingUser.getCompressedProfileImgURL(), isFollowing));
+            }
         }
 
         return forListInfoResponseDtoList;
+
     }
+
 }

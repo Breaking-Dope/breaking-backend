@@ -1,13 +1,17 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.comment.Comment;
+import com.dope.breaking.domain.comment.CommentLike;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.exception.like.AlreadyLikedException;
 import com.dope.breaking.exception.like.AlreadyUnlikedException;
 import com.dope.breaking.exception.post.NoSuchPostException;
+import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.PostLikeRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -15,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +30,7 @@ public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final FollowRepository followRepository;
 
     @Transactional
     public void likePost(User user, Post post){
@@ -70,17 +76,30 @@ public class PostLikeService {
     }
 
     @Transactional
-    public List<ForListInfoResponseDto> likedUserList (Long postId){
+    public List<ForListInfoResponseDto> likedUserList (Principal principal, Long postId){
 
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
         List<PostLike> postLikeList = postLikeRepository.findAllByPost(post);
         List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
-        for (PostLike postLike : postLikeList) {
-            User user = postLike.getUser();
-            forListInfoResponseDtoList.add(new ForListInfoResponseDto(user.getId(),user.getNickname(),user.getStatusMsg(),user.getOriginalProfileImgURL()));
+
+        if(principal == null){
+            for (PostLike postLike : postLikeList) {
+                User likedUser = postLike.getUser();
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),false ));
+            }
         }
+        else{
+            User user = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
+            for (PostLike postLike : postLikeList) {
+                User likedUser = postLike.getUser();
+                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(likedUser,user);
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),isFollowing));
+            }
+        }
+
         return forListInfoResponseDtoList;
     }
+
 }
 

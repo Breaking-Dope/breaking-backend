@@ -57,6 +57,31 @@ public class CommentAPI {
 
     }
 
+    @GetMapping("/post/comment/{commentId}/reply")
+    public ResponseEntity<List<CommentResponseDto>> getReplyFromComment(
+            Principal principal,
+            @PathVariable Long commentId,
+            @RequestParam(value="cursor") Long cursor,
+            @RequestParam(value="size") Long size
+    ) {
+
+        String username = null;
+        if(principal != null)  {
+            username = principal.getName();
+        }
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetType(CommentTargetType.COMMENT)
+                .targetId(commentId)
+                .cursorId(cursor)
+                .size(size)
+                .build();
+
+        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username);
+
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/comment/{commentId}/reply")
     public ResponseEntity addReply(@PathVariable Long commentId,

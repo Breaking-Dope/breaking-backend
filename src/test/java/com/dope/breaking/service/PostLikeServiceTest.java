@@ -145,7 +145,7 @@ class PostLikeServiceTest {
         postLikeService.likePost(user2,post);
 
         //Then
-        Assertions.assertThat(postLikeService.likedUserList(post.getId()).size()).isEqualTo(2);
+        Assertions.assertThat(postLikeService.likedUserList(null,post.getId()).size()).isEqualTo(2);
     }
 
 }

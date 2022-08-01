@@ -3,7 +3,10 @@ package com.dope.breaking.domain.user;
 
 
 
+import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -16,20 +19,20 @@ public class Follow {
     @Column(name="FOLLOW_ID")
     private Long id;
 
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "FOLLOWING_USER_ID")
     private User following;
 
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "FOLLOWED_USER_ID")
     private User followed;
 
-    public void updateFollowing(User user){
-        this.following = user;
-    }
-
-    public void updateFollowed(User following){
-        this.followed = following;
+    @Builder
+    public Follow(User following, User followed){
+        this.following = following;
+        this.followed = followed;
     }
 
 }

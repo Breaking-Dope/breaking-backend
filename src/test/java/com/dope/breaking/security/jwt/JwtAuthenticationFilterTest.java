@@ -71,6 +71,8 @@ class JwtAuthenticationFilterTest {
     private static String USERNAME = "";
     private static String PASSWORD = "123456789";
 
+    private static String accesstoken = "";
+
     static String accessjwt;
     static String refreshjwt;
 
@@ -83,7 +85,7 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
+
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -103,7 +105,7 @@ class JwtAuthenticationFilterTest {
         accessjwt = (String) response.getHeaderValue("Authorization");
         System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
         refreshjwt = (String) response.getHeaderValue("Authorization-refresh");
-        System.out.println("user refreshtoken : " + redisService.getData(refreshjwt));
+        System.out.println("user refreshtoken : " + redisService.getData(USERNAME));
 
         redisService.deleteValues(USERNAME);
     }
@@ -125,7 +127,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -165,7 +166,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -203,7 +203,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -247,7 +246,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -295,7 +293,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -336,7 +333,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -376,8 +372,6 @@ class JwtAuthenticationFilterTest {
 
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
-
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -426,8 +420,6 @@ class JwtAuthenticationFilterTest {
     void reissueWithValidTokens() throws Exception {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
-
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -476,7 +468,6 @@ class JwtAuthenticationFilterTest {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
 
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);
@@ -509,14 +500,12 @@ class JwtAuthenticationFilterTest {
 
     }
 
-    @DisplayName("유효하지 않은 엑세스 토큰과 유효한 리플리시 토큰으로 재발행을 요청하면 정상적으로 재발행된다. ")
+    @DisplayName("유효하지 않은 엑세스 토큰과 유효한 리플리시 토큰으로 재발행을 요청하면 정상적으로 재발행된다.")
     @Transactional
     @Test
     void reissueWithInvalidAccessButValidRefrsh() throws Exception {
         userRepository.save(User.builder().username(USERNAME).password(passwordEncoder.encode(PASSWORD)).role(Role.USER).build());
 
-
-        String accesstoken = "";
         Map<String, String> info = new LinkedHashMap<>();
 
         info.put("accessToken", accesstoken);

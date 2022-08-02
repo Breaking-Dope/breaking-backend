@@ -37,7 +37,7 @@ public class PostAPI {
     public ResponseEntity<Map<String, Long>> postModify(@PathVariable("postId") long postId, Principal principal, @RequestBody PostRequestDto postRequestDto) throws Exception {
         postService.modify(postId , principal.getName(), postRequestDto);
         Map<String, Long> result = new LinkedHashMap<>();
-        result.put("Modified postId", postId);
+        result.put("postId", postId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

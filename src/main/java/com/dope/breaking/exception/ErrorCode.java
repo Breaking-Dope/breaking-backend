@@ -27,8 +27,8 @@ public enum ErrorCode {
     DUPLICATED_EMAIL("BSE415", "사용중인 이메일입니다."),
     ALREADY_FOLLOWING("BSE420","이미 팔로우 중인 유저입니다."),
     ALREADY_UNFOLLOWING("BSE421","이미 언팔로우 중인 유저입니다."),
-    NO_SUCH_POST("BSE450","해당 제보를 찾을 수 없습니다"),
-    NO_SUCH_COMMENT("BSE451","해당 댓글을 찾을 수 없습니다"),
+    NO_SUCH_POST("BSE450","해당 제보를 찾을 수 없습니다."),
+    NO_SUCH_COMMENT("BSE451","해당 댓글을 찾을 수 없습니다."),
     PURCHASED_POST("BSE452", "판매된 게시글은 삭제할 수 없습니다."),
 
     ALREADY_BOOKMARKED("BSE456", "이미 북마크를 선택했습니다."),

@@ -2,7 +2,6 @@ package com.dope.breaking.exception.bookmark;
 
 import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.ErrorCode;
-import com.dope.breaking.exception.like.AlreadyLikedException;
 import org.springframework.http.HttpStatus;
 
 public class AlreadyBookmarkedException extends BreakingException {

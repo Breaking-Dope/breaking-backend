@@ -5,6 +5,8 @@ import com.dope.breaking.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     //팔로워 수
@@ -14,5 +16,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     int countFollowsByFollowed(User user);
 
     boolean existsFollowsByFollowedAndFollowing(User followed, User following);
+
+    void deleteByFollowedAndFollowing(User followed, User following);
+
+    List<Follow> findAllByFollowing(User following);
+
+    List<Follow> findAllByFollowed(User followed);
 
 }

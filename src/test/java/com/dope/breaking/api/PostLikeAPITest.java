@@ -6,6 +6,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.PostLikeRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.service.FollowService;
 import com.dope.breaking.service.PostLikeService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import org.assertj.core.api.Assertions;
@@ -52,6 +53,9 @@ class PostLikeAPITest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private FollowService followService;
+
     @BeforeEach //DB에 유저정보를 먼저 저장.
     public void createUserInfo() {
 
@@ -65,11 +69,6 @@ class PostLikeAPITest {
 
     }
 
-    @AfterEach
-    public void afterCleanUp() {
-        userRepository.deleteAll();
-        postRepository.deleteAll();
-    }
 
     @WithMockCustomUser
     @Test
@@ -137,6 +136,7 @@ class PostLikeAPITest {
     }
 
     @Test
+    @WithMockCustomUser
     void likedUserList() throws Exception{
 
         //Given
@@ -151,9 +151,13 @@ class PostLikeAPITest {
         postLikeService.likePost(user1,post);
         postLikeService.likePost(user2,post);
 
+        followService.follow("12345g",user1.getId());
+
         //When
         this.mockMvc.perform(get("/post/{postId}/like-list",post.getId()))
                 .andExpect(status().isOk()) //Then
+                .andExpect(jsonPath("$[0].isFollowing").value(true))
+                .andExpect(jsonPath("$[1].isFollowing").value(false))
                 .andExpect(jsonPath("$", hasSize(2)));
     }
 

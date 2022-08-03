@@ -1,7 +1,6 @@
 package com.dope.breaking.domain.user;
 
 import com.dope.breaking.domain.financial.Purchase;
-import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.post.Post;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,11 +25,11 @@ public class User {
     private List<Post> postList = new ArrayList<Post>();
 
     //유저가 팔로잉하는 유저리스트
-    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "following")
     private List<Follow> followingList = new ArrayList<Follow>();
 
     //유저를 팔로우하는 유저리스트
-    @OneToMany(mappedBy = "followed", orphanRemoval = true)
+    @OneToMany(mappedBy = "followed")
     private List<Follow> followerList = new ArrayList<Follow>();
 
     //유저가 차단한 리스트

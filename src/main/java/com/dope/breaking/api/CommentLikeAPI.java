@@ -36,9 +36,9 @@ public class CommentLikeAPI {
     }
 
     @GetMapping("/post/comment/{commentId}/like-list")
-    public ResponseEntity<List<ForListInfoResponseDto>> commentLikedUserList (@PathVariable Long commentId){
+    public ResponseEntity<List<ForListInfoResponseDto>> commentLikedUserList(Principal principal, @PathVariable Long commentId){
 
-        return ResponseEntity.ok().body(commentLikeService.commentLikeList(commentId));
+        return ResponseEntity.ok().body(commentLikeService.commentLikeList(principal,commentId));
 
     }
 

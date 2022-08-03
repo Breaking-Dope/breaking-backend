@@ -10,6 +10,7 @@ import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.service.CommentLikeService;
 import com.dope.breaking.service.CommentService;
+import com.dope.breaking.service.FollowService;
 import com.dope.breaking.withMockCustomAuthorize.WithMockCustomUser;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,6 +61,9 @@ class CommentLikeAPITest {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private FollowService followService;
 
     @Autowired
     private EntityManager entityManager;
@@ -174,6 +178,7 @@ class CommentLikeAPITest {
 
     @DisplayName("세명의 유저가 댓글에 좋아요를 누른 경우, 리턴 된 리스트는 두명의 정보를 담는다.")
     @Transactional
+    @WithMockCustomUser
     @Test
     void commentLikeList() throws Exception {
 
@@ -198,12 +203,17 @@ class CommentLikeAPITest {
         commentLikeRepository.save(commentLike2);
         commentLikeRepository.save(commentLike3);
 
+        followService.follow("12345g",user2.getId());
+
         entityManager.flush();
         entityManager.clear();
 
         //When
         this.mockMvc.perform(get("/post/comment/{commentId}/like-list",commentId))
                 .andExpect(status().isOk()) //Then
+                .andExpect(jsonPath("$[0].isFollowing").value(false))
+                .andExpect(jsonPath("$[1].isFollowing").value(true))
+                .andExpect(jsonPath("$[2].isFollowing").value(false))
                 .andExpect(jsonPath("$", hasSize(3)));
 
     }

@@ -24,7 +24,7 @@ public class RelationshipAPI {
     @PostMapping("/follow/{userId}")
     public ResponseEntity followUser( Principal principal, @PathVariable Long userId) {
 
-       followService.followUser(principal.getName(),userId);
+       followService.follow(principal.getName(),userId);
        return ResponseEntity.status(HttpStatus.CREATED).build();
 
     }
@@ -33,22 +33,22 @@ public class RelationshipAPI {
     @DeleteMapping("/follow/{userId}")
     public ResponseEntity unfollowUser(Principal principal, @PathVariable Long userId) {
 
-       followService.unfollowUser(principal.getName(),userId);
+       followService.unfollow(principal.getName(),userId);
        return ResponseEntity.ok().build();
 
     }
 
     @GetMapping("/follow/following/{userId}")
-    public ResponseEntity<List<ForListInfoResponseDto>>followingUsers (@PathVariable Long userId) {
+    public ResponseEntity<List<ForListInfoResponseDto>>followingUsers (Principal principal, @PathVariable Long userId) {
 
-        return ResponseEntity.ok().body(followService.followingUsers(userId));
+        return ResponseEntity.ok().body(followService.followingUsers(principal, userId));
 
     }
 
     @GetMapping("/follow/follower/{userId}")
-    public ResponseEntity<List<ForListInfoResponseDto>> followerUsers (@PathVariable Long userId){
+    public ResponseEntity<List<ForListInfoResponseDto>> followerUsers (Principal principal, @PathVariable Long userId){
 
-        return ResponseEntity.ok().body(followService.followerUsers(userId));
+        return ResponseEntity.ok().body(followService.followerUsers(principal,userId));
 
     }
 

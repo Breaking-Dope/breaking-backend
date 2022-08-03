@@ -1,5 +1,6 @@
 package com.dope.breaking.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,5 +12,7 @@ public class ForListInfoResponseDto {
     private String nickname;
     private String statusMsg;
     private String profileImgURL;
+    @JsonProperty(value = "isFollowing")
+    private boolean isFollowing = false;
 
 }

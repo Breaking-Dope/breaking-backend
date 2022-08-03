@@ -23,7 +23,6 @@ class FollowRepositoryTest {
 
     @Autowired UserRepository userRepository;
     @Autowired FollowRepository followRepository;
-    @Autowired EntityManager em;
 
     @BeforeEach //DB에 유저정보를 먼저 저장.
     public void createUserInfo() {
@@ -76,22 +75,11 @@ class FollowRepositoryTest {
         );
         userRepository.save(follower2);
 
-        Follow follow1 = new Follow();
+        Follow follow1 = new Follow(hero,follower1);
+        Follow follow2 = new Follow(hero,follower2);
 
-        follow1.updateFollowing(hero);
-        follow1.updateFollowed(follower1);
-        follower1.getFollowingList().add(follow1);
-        hero.getFollowerList().add(follow1);
-
-        // ==================
-
-        Follow follow2 = new Follow();
-
-        follow2.updateFollowing(hero);
-        follow2.updateFollowed(follower2);
-
-        follower2.getFollowingList().add(follow2);
-        hero.getFollowerList().add(follow2);
+        followRepository.save(follow1);
+        followRepository.save(follow2);
 
     }
 

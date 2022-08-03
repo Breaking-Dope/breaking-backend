@@ -32,8 +32,8 @@ public class PostLikeAPI {
     }
 
     @GetMapping("post/{postId}/like-list")
-    public ResponseEntity<List<ForListInfoResponseDto>> likedUserList (@PathVariable Long postId){
-        return ResponseEntity.ok().body(postLikeService.likedUserList(postId));
+    public ResponseEntity<List<ForListInfoResponseDto>> likedUserList (Principal principal, @PathVariable Long postId){
+        return ResponseEntity.ok().body(postLikeService.likedUserList(principal, postId));
     }
 
 }

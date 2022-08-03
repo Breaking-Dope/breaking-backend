@@ -1,18 +1,26 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.follow.AlreadyFollowingException;
+import com.dope.breaking.exception.follow.AlreadyUnfollowingException;
+import com.dope.breaking.exception.user.NoSuchUserException;
+import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.UserRepository;
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 @SpringBootTest
 @Transactional
@@ -20,117 +28,176 @@ class FollowServiceTest {
 
     @Autowired private FollowService followService;
     @Autowired private UserRepository userRepository;
+    @Autowired private FollowRepository followRepository;
+    @Autowired private EntityManager entityManager;
 
-
+    @DisplayName("팔로우 하고 있지 않은 경우, 정상적으로 팔로우 된다.")
     @Test
-    void isFollowing() {
+    void follow() {
 
         //Given
-        User followingUser = new User();
-        User followedUser = new User();
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
 
         //When
-        followService.follow(followingUser,followedUser);
+        followService.follow("username1",user2.getId());
 
         //Then
-        assertTrue(followService.isFollowing(followingUser,followedUser));
+        assertTrue(followRepository.existsFollowsByFollowedAndFollowing(user2,user1));
+    }
+
+    @DisplayName("유저네임이 불일치 할 경우, 예외가 발생한다.")
+    @Test
+    void followWithWrongUsername(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        //When
+        Assertions.assertThrows(InvalidAccessTokenException.class, ()
+                ->  followService.follow("wrong username",user2.getId())); //Then
+    }
+
+    @DisplayName("유저아이디가 불일치 할 경우, 예외가 발생한다")
+    @Test
+    void followWithWrongUserId(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        //Then
+        Assertions.assertThrows(NoSuchUserException.class, ()
+                ->  followService.follow("username1",100L)); //When
+    }
+
+    @DisplayName("이미 팔로우 하고 있는 유저를 팔로우 할 경우, 예외가 발생한다.")
+    @Test
+    void followAlreadyFollowingUser(){
+
+        //Given
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        followService.follow("username1",user2.getId());
+
+        //Then
+        Assertions.assertThrows(AlreadyFollowingException.class, ()
+                ->  followService.follow("username1",user2.getId())); //When
 
     }
 
+    @DisplayName("팔로우 중인 유저를 언팔로우 할 경우, 언팔로우가 실행된다")
     @Test
-    void isNotFollowing() {
+    void unfollow(){
 
         //Given
-        User followingUser = new User();
-        User followedUser = new User();
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        followService.follow("username1",user2.getId());
 
         //When
-        followService.follow(followingUser,followedUser);
-        followService.unfollow(followingUser,followedUser);
+        followService.unfollow("username1",user2.getId());
 
         //Then
-        assertFalse(followService.isFollowing(followingUser,followedUser));
-    }
-
-
-    @Test
-    void Follow() {
-
-        //Given
-        User followingUser = new User();
-        User followedUser = new User();
-
-        //When
-        followService.follow(followingUser,followedUser);
-
-        //Then
-        Assertions.assertThat(followingUser.getFollowingList().get(0).getFollowed()).isEqualTo(followedUser);
-        Assertions.assertThat(followedUser.getFollowerList().get(0).getFollowing()).isEqualTo(followingUser);
-
+        followRepository.existsFollowsByFollowedAndFollowing(user2,user1);
 
     }
 
+    @DisplayName("팔로우하고 있지 않은 유저를 언팔로우 할 경우, 예외가 발생한다.")
     @Test
-    void Unfollow() {
+    void unfollowAlreadyUnfollowingUser(){
 
         //Given
-        User followingUser = new User();
-        User followedUser = new User();
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
 
-        //When
-        followService.follow(followingUser,followedUser);
-        followService.unfollow(followingUser,followedUser);
 
         //Then
-        Assertions.assertThat(followingUser.getFollowingList().size()).isEqualTo(0);
-        Assertions.assertThat(followedUser.getFollowerList().size()).isEqualTo(0);
+        Assertions.assertThrows(AlreadyUnfollowingException.class, ()
+                ->  followService.unfollow("username1",user2.getId())); //When
+
     }
 
+    @DisplayName("해당 유저가 두명을 팔로우 할 경우, 팔로잉 리스트의 길이는 2다.")
     @Test
     void followingUsers(){
 
         //Given
-        User followingUser = new User();
-        User followedUser1 = new User();
-        User followedUser2 = new User();
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        User user3 = new User();
+        user3.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username3", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
+        userRepository.save(user3);
 
         //When
-        followService.follow(followingUser,followedUser1);
-        followService.follow(followingUser,followedUser2);
+        followService.follow("username1",user2.getId());
+        followService.follow("username1",user3.getId());
 
-        userRepository.save(followingUser);
-        userRepository.save(followedUser1);
-        userRepository.save(followedUser2);
-
-        List<ForListInfoResponseDto> followInfoResponseDtoList = followService.followingUsers(followingUser.getId());
+        List<ForListInfoResponseDto> followingUserList  = followService.followingUsers(null,user1.getId());
+        List<ForListInfoResponseDto> followerUserList  = followService.followerUsers(null,user1.getId());
 
         //Then
-        Assertions.assertThat(followInfoResponseDtoList.size()).isEqualTo(2);
+        assertEquals(2,followingUserList.size());
+        assertEquals(0,followerUserList.size());
 
     }
 
+    @DisplayName("해당 유저를 두명이 팔로우 할 경우, 팔로워 리스트의 길이는 2다.")
     @Test
     void followerUsers(){
 
         //Given
-        User followingUser1 = new User();
-        User followingUser2 = new User();
-        User followedUser = new User();
+        User user1 = new User();
+        user1.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username1", Role.USER);
+        User user2 = new User();
+        user2.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username2", Role.USER);
+        User user3 = new User();
+        user3.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username3", Role.USER);
+        userRepository.save(user1);
+        userRepository.save(user2);
+        userRepository.save(user3);
 
         //When
-        followService.follow(followingUser1,followedUser);
-        followService.follow(followingUser2,followedUser);
+        followService.follow("username1",user3.getId());
+        followService.follow("username2",user3.getId());
 
-        userRepository.save(followingUser1);
-        userRepository.save(followingUser2);
-        userRepository.save(followedUser);
-
-        List<ForListInfoResponseDto> followInfoResponseDtoList = followService.followerUsers(followedUser.getId());
-
+        List<ForListInfoResponseDto> followingUserList  = followService.followingUsers(null,user3.getId());
+        List<ForListInfoResponseDto> followerUserList  = followService.followerUsers(null,user3.getId());
 
         //Then
-        Assertions.assertThat(followInfoResponseDtoList.size()).isEqualTo(2);
-
+        assertEquals(0,followingUserList.size());
+        assertEquals(2,followerUserList.size());
     }
 
 }

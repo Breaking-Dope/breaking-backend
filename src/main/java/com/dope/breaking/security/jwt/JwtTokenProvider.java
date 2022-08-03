@@ -19,19 +19,17 @@ import java.util.*;
 public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
-    private  String secret;
+    private String secret;
 
     private final String accessHeader = "Authorization";
     private final String refreshHeader = "Authorization-Refresh";
 
     private static final String BEARER = "Bearer ";
 
-    private final long accesstokenValidityInMilliseconds = 604800 *  1000L; //엑세스 토큰 유효기간 1주
+    private final long accesstokenValidityInMilliseconds = 604800 * 1000L; //엑세스 토큰 유효기간 1주
     private final long refreshtokenValidityInMilliseconds = 2 * 604800 * 1000L; //리플리쉬 토큰 유효기간 2주
 
-    private final UserRepository userRepository;
 
-    // JWT 토큰 생성
     @PostConstruct
     protected void init() {
         secret = Base64.getEncoder().encodeToString(secret.getBytes());
@@ -49,7 +47,7 @@ public class JwtTokenProvider {
                 .compact(); //토큰생성
     }
 
-    public String createRefreshToken(String username){
+    public String createRefreshToken(String username) {
         Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
         return Jwts.builder().setSubject("RefreshToken")
@@ -66,13 +64,18 @@ public class JwtTokenProvider {
     }
 
 
-    public Optional<String> extractAccessToken(String request) throws IOException{
+    public Optional<String> extractAccessToken(String request) throws IOException {
         return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
     }
 
 
-    public Optional<String> extractRefreshToken(String request) throws IOException{
+    public Optional<String> extractRefreshToken(String request) throws IOException {
         return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
+    }
+
+
+    public Long getExpireTime(String token) {
+        return Jwts.claims().getExpiration().getTime();
     }
 
 
@@ -86,7 +89,7 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
             return true;
-        }  catch (SignatureException  | MalformedJwtException e) {
+        } catch (SignatureException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
@@ -94,7 +97,7 @@ public class JwtTokenProvider {
             log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
-        }catch(Exception e){
+        } catch (Exception e) {
             log.info("JWT에 알 수 없는 문제가 발생하였습니다");
         }
         return false;

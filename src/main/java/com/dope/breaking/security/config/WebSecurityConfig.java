@@ -59,7 +59,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/**").hasRole("USER") //USER를 가진 권한만이 접근이 허용됨
                 .antMatchers("/**").permitAll() //그외 접근은 모두 허용됨.
                 .and()
-                .exceptionHandling().authenticationEntryPoint(jwtEntryPoint()); //에러코드 반환할 except
+                .exceptionHandling().authenticationEntryPoint(jwtEntryPoint()); //에러코드 반환할 ExceptionPoint
 
 
         http.addFilterBefore(jwtAuthenticationFilter(),
@@ -76,7 +76,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService, redisService );
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, principalDetailsService);
         return jwtAuthenticationFilter;
     }
 

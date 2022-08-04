@@ -68,10 +68,10 @@ class JwtAuthenticationFilterTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static String USERNAME = "2318483287k";
+    private static String USERNAME = "";
     private static String PASSWORD = "123456789";
 
-    private static String accesstoken = "QSxDpx-bcxchYgE9tWNbsyx-98tsfMv16oB1MF1vCj11XAAAAYJmjVor";
+    private static String accesstoken = "";
 
     static String accessjwt;
     static String refreshjwt;

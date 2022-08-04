@@ -266,6 +266,7 @@ public class FeedServiceRepositoryTest {
         assertEquals(page, content2.size());
         assertEquals(page, content6.size());
         assertEquals(0, content7.size(), () -> "남은 포스트 10개는 숨김처리되어 조회되지 않는다.");
+        
     }
 
     @DisplayName("유저페이지에서는 해당 유저가 작성한 게시글만 조회된다.")

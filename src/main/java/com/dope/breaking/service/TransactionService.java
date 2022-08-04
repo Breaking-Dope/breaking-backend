@@ -51,7 +51,7 @@ public class TransactionService {
         List<TransactionResponseDto> transactionResponseDtoList= new ArrayList<>();
         
         if(transactionList!=null){
-            transactionResponseDtoList = transactionList.stream().map(o -> new TransactionResponseDto(o.getTransactionTime(), o.getTransactionType().getTitle(), o.getAmount(),o.getBalance())).collect(Collectors.toList());
+            transactionResponseDtoList = transactionList.stream().map(transaction -> new TransactionResponseDto(transaction)).collect(Collectors.toList());
         }
         return transactionResponseDtoList;
     }

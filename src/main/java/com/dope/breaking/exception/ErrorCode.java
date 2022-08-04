@@ -14,6 +14,8 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN("BSE003", "Refresh Token이 유효하지 않습니다."),
     EXPIRED_REFRESH_TOKEN("BSE004", "Refresh Token이 만료되었습니다."),
 
+    ALREADY_LOGIN("BSE010", " 로그인된 유저입니다."),
+
     NO_PERMISSION("BSE005", "해당 기능에 대한 권한이 없습니다."),
     BAD_REQUEST("BSE400", "클라이언트 요청오류."),
     NO_SUCH_USER("BSE401", "해당 유저를 찾을 수 없습니다."),

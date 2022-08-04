@@ -8,6 +8,7 @@ import com.dope.breaking.exception.financial.NotEnoughBalanceException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.NotPurchasablePostException;
 import com.dope.breaking.exception.post.SoldExclusivePostException;
+import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.PurchaseRepository;
 import com.dope.breaking.repository.TransactionRepository;
@@ -49,6 +50,9 @@ class PurchaseServiceTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired
+    private FollowService followService;
 
     @DisplayName("무료제보를 구매할 경우, 1. 제보가 정상적으로 구매 된다. 2. Transaction 이 생성되지 않는다. 3. balance 가 변하지 않는다.")
     @Test
@@ -385,7 +389,7 @@ class PurchaseServiceTest {
 
     @DisplayName("존재하지 않는 제보를 구매할 경우, 예외가 발생한다.")
     @Test
-    void purchaseNotExistingPost () {
+    void purchaseNotExistingPost() {
 
         //Given
         User buyer = new User();
@@ -397,6 +401,107 @@ class PurchaseServiceTest {
         Assertions.assertThrows(NoSuchPostException.class, ()
                 -> purchaseService.purchasePost("buyer", 100L)); //When
 
+    }
+
+    @DisplayName("유저네임이 일치할 경우, 구매자 리스트가 정확히 반환된다")
+    @Test
+    void purchaseListWhenValidUsername() throws Exception {
+
+        //Given
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.USER);
+        buyer1.updateBalance(1000);
+        userRepository.save(buyer1);
+
+        User buyer2 = new User();
+        buyer2.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer2", Role.USER);
+        buyer2.updateBalance(2000);
+        userRepository.save(buyer2);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(2000);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 0," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"free\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        purchaseService.purchasePost("buyer1", postId);
+        purchaseService.purchasePost("buyer2", postId);
+
+        //When
+        followService.follow("seller", buyer1.getId());
+
+        //Then
+        assertTrue(purchaseService.purchaserList("seller",postId).get(0).isFollowing());
+        assertFalse(purchaseService.purchaserList("seller",postId).get(1).isFollowing());
+
+    }
+
+    @DisplayName("유저네임이 판매자의 유저네임이 아닐 경우, 예외가 발생한다")
+    @Test
+    void purchaseListWhenNotSellerUsername() throws Exception {
+
+        //Given
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.USER);
+        buyer1.updateBalance(1000);
+        userRepository.save(buyer1);
+
+        User buyer2 = new User();
+        buyer2.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer2", Role.USER);
+        buyer2.updateBalance(2000);
+        userRepository.save(buyer2);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(2000);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 0," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"free\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        purchaseService.purchasePost("buyer1", postId);
+        purchaseService.purchasePost("buyer2", postId);
+
+        Assertions.assertThrows(NoPermissionException.class, ()
+                ->  purchaseService.purchaserList("buyer1",postId)); //When
     }
 
 }

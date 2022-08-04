@@ -37,7 +37,7 @@ public class JwtAuthenticationAPI {
 
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/oauth2/validate-jwt")
+    @GetMapping("/oauth2/validate-jwt")
     public ResponseEntity<UserBriefInformationResponseDto> validateJwt(Principal principal) {
         return ResponseEntity.ok().body(userService.userBriefInformation(principal.getName()));
     }

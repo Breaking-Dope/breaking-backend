@@ -50,5 +50,10 @@ public class JwtAuthenticationAPI {
     }
 
 
-
+    //AcessToken을 받아 무효화 처리를 한다.
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/oauth2/sign-out")
+    public ResponseEntity logout(@RequestHeader(value = "Authorization") String accessToken) throws IOException{
+        return jwtAuthenticationService.logout(accessToken);
+    }
 }

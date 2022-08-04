@@ -28,38 +28,53 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {//모든 서�
     private final PrincipalDetailsService principalDetailsService;
 
 
+    private final RedisService redisService;
+
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        if(request.getRequestURI().equals("/reissue")) {
+        if (request.getRequestURI().equals("/reissue")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String accessToken = jwtTokenProvider.extractAccessToken(request).orElse(null);
-
-        if (accessToken != null && jwtTokenProvider.validateToken(accessToken) == true) {
-
-            String username = jwtTokenProvider.getUsername(accessToken);
+        boolean isAccessToken = false;
+        if (accessToken != null) {
             try {
-                UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
-
-                SecurityContext context = SecurityContextHolder.createEmptyContext();
-                context.setAuthentication(authentication);
-                SecurityContextHolder.setContext(context);
-            }catch (UsernameNotFoundException e){
-                request.setAttribute("exception", "UsernameNotFoundException"); //유저 정보를 찾을 수 없다는 에러.
-            }
-        } else if (accessToken != null && jwtTokenProvider.validateToken(accessToken) == false) {
-            try {
-                String username = jwtTokenProvider.getUsername(accessToken);
+                isAccessToken = jwtTokenProvider.getTokenType(accessToken).equals("AccessToken");
             } catch (ExpiredJwtException e) {
                 request.setAttribute("exception", "ExpiredJwtException"); //만료 에러.
+                filterChain.doFilter(request, response);
+                return;
             } catch (SecurityException | IllegalArgumentException | JwtException e) {
                 request.setAttribute("exception", "AccessJwtException"); //유효하지 않은 예외.
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+
+            if (isAccessToken == false) {
+                request.setAttribute("exception", "AccessJwtException"); //엑세스 토큰이 아니기에 예외 반환.
+            }
+            else if(redisService.hasKeyBlackListToken(accessToken)){
+                request.setAttribute("exception", "AccessJwtException"); //블랙리스트에 있는 토큰이기에 예외 반환.
+            }
+            else {
+                String username = jwtTokenProvider.getUsername(accessToken);
+                try {
+                    UserDetails userDetails = principalDetailsService.loadUserByUsername(username);
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+
+                    SecurityContext context = SecurityContextHolder.createEmptyContext();
+                    context.setAuthentication(authentication);
+                    SecurityContextHolder.setContext(context);
+                } catch (UsernameNotFoundException e) {
+                    request.setAttribute("exception", "UsernameNotFoundException"); //유저 정보를 찾을 수 없다는 에러.
+
+                }
+
             }
         }
-
 
         filterChain.doFilter(request, response);
     }

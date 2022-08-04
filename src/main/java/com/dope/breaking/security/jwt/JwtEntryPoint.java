@@ -20,8 +20,10 @@ public class JwtEntryPoint implements AuthenticationEntryPoint {
 
 
         String exceptionInfo = (String) request.getAttribute("exception");
+
         //JwtAuthenticationFilter에서 전달받은 예외 내용
         if (exceptionInfo != null) {
+            log.info(exceptionInfo.toString());
             setException(response, exceptionInfo);
         }
         //PreAuthorize 어노테이션에 의한 예외

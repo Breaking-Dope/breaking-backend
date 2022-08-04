@@ -3,6 +3,7 @@ package com.dope.breaking.api;
 import com.dope.breaking.dto.user.*;
 
 
+import com.dope.breaking.exception.auth.AlreadyLoginException;
 import com.dope.breaking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,11 +58,11 @@ public class UserAPI {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("isAnonymous")
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> signUp(
+    public ResponseEntity<?> signUp(Principal principal,
             @RequestPart String signUpRequest,
             @RequestPart (required = false) List<MultipartFile> profileImg) {
+        if(principal != null) throw new AlreadyLoginException();
         return userService.signUp(signUpRequest, profileImg);
     }
 

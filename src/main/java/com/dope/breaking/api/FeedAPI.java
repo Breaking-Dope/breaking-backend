@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +28,8 @@ public class FeedAPI {
 
     @GetMapping("/feed")
     public ResponseEntity<List<FeedResultPostDto>> searchFeed(
-            @RequestParam(value="cursor") Long cursor,
+            Principal principal,
+            @RequestParam(value="cursor") Long cursorId,
             @RequestParam(value="size") Long size,
             @RequestParam(value="search", required = false) String searchKeyword,
             @RequestParam(value="sort", required = false) String sortStrategy,
@@ -39,7 +41,6 @@ public class FeedAPI {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .searchKeyword(searchKeyword)
-                .cursorId(cursor)
                 .size(size)
                 .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
@@ -49,28 +50,38 @@ public class FeedAPI {
                 .forLastMin(forLastMin)
                 .build();
 
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto));
+        String username = null;
+        if(principal!=null) {
+            username = principal.getName();
+        }
+
+        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, username, cursorId));
 
     }
 
     @GetMapping("/feed/user/{ownerId}/{userFeedPostOption}")
     public ResponseEntity<List<FeedResultPostDto>> searchUserFeed(
+            Principal principal,
             @PathVariable("ownerId") Long ownerId,
             @PathVariable("userFeedPostOption") String userFeedPostOption,
-            @RequestParam(value="cursor") Long cursor,
+            @RequestParam(value="cursor") Long cursorId,
             @RequestParam(value="size") Long size,
             @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption
     ) {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
-                .cursorId(cursor)
                 .size(size)
                 .ownerId(ownerId)
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
                 .userPageFeedOption(UserPageFeedOption.findMatchedEnum(userFeedPostOption))
                 .build();
 
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto));
+        String username = null;
+        if(principal!=null) {
+            username = principal.getName();
+        }
+
+        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, username, cursorId));
 
     }
 

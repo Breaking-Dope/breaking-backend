@@ -17,8 +17,6 @@ public class SearchFeedConditionDto {
 
     private String searchKeyword;
 
-    private Long cursorId;
-
     private Long size;
 
     private SortStrategy sortStrategy;
@@ -34,10 +32,9 @@ public class SearchFeedConditionDto {
     private Integer forLastMin;
 
     @Builder
-    public SearchFeedConditionDto(Long ownerId, String searchKeyword, Long cursorId, Long size, SortStrategy sortStrategy, SoldOption soldOption, UserPageFeedOption userPageFeedOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
+    public SearchFeedConditionDto(Long ownerId, String searchKeyword, Long size, SortStrategy sortStrategy, SoldOption soldOption, UserPageFeedOption userPageFeedOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
         this.ownerId = ownerId;
         this.searchKeyword = searchKeyword;
-        this.cursorId = cursorId;
         this.size = size;
         this.sortStrategy = sortStrategy;
         this.soldOption = soldOption;

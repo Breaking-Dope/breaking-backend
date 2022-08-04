@@ -57,7 +57,7 @@ public class JwtAuthenticationService {
 
             return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        throw new InvalidRefreshTokenException();
     }
 
 

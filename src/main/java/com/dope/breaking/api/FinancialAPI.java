@@ -2,18 +2,19 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.financial.TransactionType;
 import com.dope.breaking.dto.financial.AmountRequestDto;
+import com.dope.breaking.dto.financial.TransactionResponseDto;
 import com.dope.breaking.service.PurchaseService;
 import com.dope.breaking.service.StatementService;
+import com.dope.breaking.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class FinancialAPI {
 
     private final StatementService statementService;
     private final PurchaseService purchaseService;
+    private final TransactionService transactionService;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/financial/deposit")
@@ -49,4 +51,11 @@ public class FinancialAPI {
 
     }
 
+    @PreAuthorize("isAuthenticated")
+    @GetMapping("/profile/transaction")
+    public ResponseEntity<List<TransactionResponseDto>> transactionList(Principal principal){
+
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionList(principal.getName()));
+
+    }
 }

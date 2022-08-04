@@ -1,17 +1,21 @@
 package com.dope.breaking.domain.financial;
 
 
+import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor
-public class Transaction {
+public class Transaction extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,16 +36,22 @@ public class Transaction {
 
     private int amount;
 
+    private int balance;
+
+    @CreatedDate
+    private LocalDateTime transactionTime;
+
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
 
     @Builder
-    public Transaction(User user, Statement statement, Purchase purchase, int amount, TransactionType transactionType){
+    public Transaction(User user, Statement statement, Purchase purchase, int amount, int balance, TransactionType transactionType){
 
         this.user = user;
         this.statement =  statement;
         this.purchase = purchase;
         this.amount = amount;
+        this.balance = balance;
         this.transactionType = transactionType;
 
     }

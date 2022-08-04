@@ -34,7 +34,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -316,6 +318,56 @@ class FinancialAPITest {
         //When
         this.mockMvc.perform(post("/post/{postId}/purchase", postId))
                 .andExpect(status().isBadRequest()); //Then
+
+    }
+
+    @DisplayName("유제네임이 일치할 경우, 입출금 및 제보 거래내역이 최신순으로 반환된다.")
+    @WithMockCustomUser
+    @Transactional
+    @Test
+    void transactionList() throws Exception {
+
+        //Given
+        statementService.depositOrWithdraw("12345g", 30000, TransactionType.DEPOSIT);
+        statementService.depositOrWithdraw("12345g", 10000, TransactionType.WITHDRAW);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(0);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 1000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"charged\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+        purchaseService.purchasePost("12345g",postId);
+
+        Long postId2 = postService.create("12345g", json, multipartFiles);
+        purchaseService.purchasePost("seller",postId2);
+
+        //Then
+        this.mockMvc.perform(get("/profile/transaction"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].transactionType").value("sell_post"))
+                .andExpect(jsonPath("$[1].transactionType").value("buy_post"))
+                .andExpect(jsonPath("$[2].transactionType").value("withdraw"))
+                .andExpect(jsonPath("$[3].transactionType").value("deposit"));
 
     }
 

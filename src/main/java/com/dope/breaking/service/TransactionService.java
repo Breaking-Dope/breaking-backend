@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,17 +47,13 @@ public class TransactionService {
         
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
 
-        List<Transaction> transactionList = transactionRepository.findAllByUser(user);
+        List<Transaction> transactionList = transactionRepository.findAllByUserOrderByTransactionTimeDesc(user);
         List<TransactionResponseDto> transactionResponseDtoList= new ArrayList<>();
         
         if(transactionList!=null){
-            Collections.reverse(transactionList);
-            for (Transaction transaction : transactionList) {
-                transactionResponseDtoList.add(new TransactionResponseDto(transaction.getTransactionTime(),transaction.getTransactionType().getTitle(), transaction.getAmount(), transaction.getBalance()));
-            }
+            transactionResponseDtoList = transactionList.stream().map(o -> new TransactionResponseDto(o.getTransactionTime(), o.getTransactionType().getTitle(), o.getAmount(),o.getBalance())).collect(Collectors.toList());
         }
         return transactionResponseDtoList;
     }
-
 
 }

@@ -15,6 +15,8 @@ import java.time.Duration;
 public class RedisService {
     private final RedisTemplate<String, Object> redisTemplate;
 
+    private final RedisTemplate<String, Object> redisBlackListTemplate; //블랙리스트를 위한 template
+
     public String getData(String key){
         return (String) redisTemplate.opsForValue().get(key); //key값을 바탕으로 value를 가져온다.
     }
@@ -32,9 +34,30 @@ public class RedisService {
         redisTemplate.opsForValue().set(key, value, expireDuration);
     }
 
+    public boolean hasKey(String key) {
+        return redisBlackListTemplate.hasKey(key);
+    }
 
     public void deleteValues(String key){ //데이터 삭제
         redisTemplate.delete(key);
+    }
+
+
+    public void setBlackListToken(String key, String value, Long time ){
+        Duration expireDuration = Duration.ofSeconds(time);
+        redisBlackListTemplate.opsForValue().set(key, value, expireDuration);
+    }
+
+    public Object getBlackListToken(String key) {
+        return redisBlackListTemplate.opsForValue().get(key);
+    }
+
+    public boolean hasKeyBlackListToken(String key) {
+        return redisBlackListTemplate.hasKey(key);
+    }
+
+    public void deleteBlackListToken(String key) {
+        redisBlackListTemplate.delete(key);
     }
 
 

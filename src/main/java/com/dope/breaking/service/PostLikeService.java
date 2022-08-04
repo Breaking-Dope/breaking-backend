@@ -1,13 +1,10 @@
 package com.dope.breaking.service;
 
-import com.dope.breaking.domain.comment.Comment;
-import com.dope.breaking.domain.comment.CommentLike;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
-import com.dope.breaking.exception.comment.NoSuchCommentException;
 import com.dope.breaking.exception.like.AlreadyLikedException;
 import com.dope.breaking.exception.like.AlreadyUnlikedException;
 import com.dope.breaking.exception.post.NoSuchPostException;

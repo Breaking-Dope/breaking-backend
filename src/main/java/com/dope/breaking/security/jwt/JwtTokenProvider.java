@@ -39,8 +39,8 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
         return Jwts.builder()
-                .setSubject("AccessToken")// 제목 지정
-                .setClaims(claims) //유저이름 지정.
+                .setClaims(claims)
+                .setIssuer("AccessToken")
                 .setIssuedAt(now) // 토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + accesstokenValidityInMilliseconds)) // set Expire Time
                 .signWith(SignatureAlgorithm.HS256, secret)  // 사용할 암호화 알고리즘과 signature 에 들어갈 secret값 세팅
@@ -50,8 +50,11 @@ public class JwtTokenProvider {
     public String createRefreshToken(String username) {
         Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
-        return Jwts.builder().setSubject("RefreshToken")
+        return Jwts.builder()
+                //토큰 종류 지정
+
                 .setClaims(claims) //유저이름 지정.
+                .setIssuer("RefreshToken")
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + refreshtokenValidityInMilliseconds))
                 .signWith(SignatureAlgorithm.HS256, secret)
@@ -75,7 +78,9 @@ public class JwtTokenProvider {
 
 
     public Long getExpireTime(String token) {
-        return Jwts.claims().getExpiration().getTime();
+        Date expirationDate =  Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
+        Long now = new Date().getTime();
+        return ((expirationDate.getTime() - now) % 1000) + 1;
     }
 
 
@@ -84,6 +89,13 @@ public class JwtTokenProvider {
         String username = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
         return username;
     }
+
+    //토큰에서 토큰 종류를 구별
+    public String getTokenType(String token){
+        String tokenType = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getIssuer();
+        return tokenType;
+    }
+
 
     public boolean validateToken(String token) { //유효한가를 체크.
         try {

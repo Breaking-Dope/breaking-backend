@@ -1,4 +1,4 @@
-package com.dope.breaking.service;
+package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -7,32 +7,32 @@ import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
-import com.dope.breaking.repository.FeedRepository;
-import com.dope.breaking.repository.PostLikeRepository;
-import com.dope.breaking.repository.PostRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.service.SoldOption;
+import com.dope.breaking.service.SortStrategy;
+import com.dope.breaking.service.UserPageFeedOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-
+import javax.transaction.Transactional;
 import java.util.List;
 
 import static com.dope.breaking.domain.user.Role.PRESS;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Transactional
+
 @SpringBootTest
-class FeedSearchServiceTest {
+@Transactional
+public class FeedServiceRepositoryTest {
 
     @Autowired PostRepository postRepository;
+
     @Autowired FeedRepository feedRepository;
     @Autowired PostLikeRepository postLikeRepository;
-    @Autowired SearchFeedService searchFeedService;
-    @Autowired EntityManager em;
+    @Autowired
+    EntityManager em;
     @Autowired UserRepository userRepository;
 
     @DisplayName("포스트가 없으면, 에러가 나지 않고 빈 배열을 반환한다.")
@@ -40,12 +40,11 @@ class FeedSearchServiceTest {
     void whenThereAreNoPosts() {
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .cursorId(null)
                 .size(15L)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = searchFeedService.searchFeed(searchFeedConditionDto);
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, null);
 
         assertEquals(0, result.size());
     }
@@ -89,20 +88,19 @@ class FeedSearchServiceTest {
         //첫번째 게시글 조회
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .cursorId(null)
                 .size(1L)
                 .soldOption(SoldOption.ALL)
                 .sortStrategy(SortStrategy.LIKE)
                 .build();
-        List<FeedResultPostDto> content1 = searchFeedService.searchFeed(searchFeedConditionDto);
+        List<FeedResultPostDto> content1 = feedRepository.searchFeedBy(searchFeedConditionDto, null, null);
 
         //두번째 게시글 조회
-        searchFeedConditionDto.setCursorId(content1.get(0).getPostId());
-        List<FeedResultPostDto> content2 = searchFeedService.searchFeed(searchFeedConditionDto);
+        Post cursorPost = postRepository.findById(content1.get(0).getPostId()).get();
+        List<FeedResultPostDto> content2 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
 
         //세번째 게시글 조회
-        searchFeedConditionDto.setCursorId(content2.get(0).getPostId());
-        List<FeedResultPostDto> content3 = searchFeedService.searchFeed(searchFeedConditionDto);
+        cursorPost = postRepository.findById(content2.get(0).getPostId()).get();
+        List<FeedResultPostDto> content3 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
 
         //then 3 1 2 순서
         assertEquals(thirdPost.getId(), content1.get(0).getPostId(), ()->"좋아요가 1인 게시글이 조회된다.");
@@ -155,24 +153,23 @@ class FeedSearchServiceTest {
         //첫번째 게시글 조회
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .cursorId(null)
                 .size(1L)
                 .soldOption(SoldOption.ALL)
                 .sortStrategy(SortStrategy.VIEW)
                 .build();
-        List<FeedResultPostDto> content1 = searchFeedService.searchFeed(searchFeedConditionDto);
+        List<FeedResultPostDto> content1 = feedRepository.searchFeedBy(searchFeedConditionDto, null, null);
 
         //두번째 게시글 조회
-        searchFeedConditionDto.setCursorId(content1.get(0).getPostId());
-        List<FeedResultPostDto> content2 = searchFeedService.searchFeed(searchFeedConditionDto);
+        Post cursorPost = postRepository.findById(content1.get(0).getPostId()).get();
+        List<FeedResultPostDto> content2 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
 
         //세번째 게시글 조회
-        searchFeedConditionDto.setCursorId(content2.get(0).getPostId());
-        List<FeedResultPostDto> content3 = searchFeedService.searchFeed(searchFeedConditionDto);
+        cursorPost = postRepository.findById(content2.get(0).getPostId()).get();
+        List<FeedResultPostDto> content3 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
 
         //네번째 게시글 조회
-        searchFeedConditionDto.setCursorId(content3.get(0).getPostId());
-        List<FeedResultPostDto> content4 = searchFeedService.searchFeed(searchFeedConditionDto);
+        cursorPost = postRepository.findById(content3.get(0).getPostId()).get();
+        List<FeedResultPostDto> content4 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
 
         //then 3 1 2 순서
         assertEquals(secondPost.getId(), content1.get(0).getPostId(), ()->content1.get(0).getViewCount() + " :조회수가 3인 게시글이 조회된다.");
@@ -246,30 +243,30 @@ class FeedSearchServiceTest {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .cursorId(null)
                 .size(page)
                 .soldOption(SoldOption.ALL)
                 .sortStrategy(SortStrategy.CHRONOLOGICAL)
                 .build();
 
-        List<FeedResultPostDto> content1 = searchFeedService.searchFeed(searchFeedConditionDto);
-        searchFeedConditionDto.setCursorId(content1.get(content1.size() - 1).getPostId());
-        List<FeedResultPostDto> content2 = searchFeedService.searchFeed(searchFeedConditionDto);
-        searchFeedConditionDto.setCursorId(content2.get(content2.size() - 1).getPostId());
-        List<FeedResultPostDto> content3 = searchFeedService.searchFeed(searchFeedConditionDto);
-        searchFeedConditionDto.setCursorId(content3.get(content3.size() - 1).getPostId());
-        List<FeedResultPostDto> content4 = searchFeedService.searchFeed(searchFeedConditionDto);
-        searchFeedConditionDto.setCursorId(content4.get(content4.size() - 1).getPostId());
-        List<FeedResultPostDto> content5 = searchFeedService.searchFeed(searchFeedConditionDto);
-        searchFeedConditionDto.setCursorId(content5.get(content5.size() - 1).getPostId());
-        List<FeedResultPostDto> content6 = searchFeedService.searchFeed(searchFeedConditionDto);
-        searchFeedConditionDto.setCursorId(content6.get(content6.size() - 1).getPostId());
-        List<FeedResultPostDto> content7 = searchFeedService.searchFeed(searchFeedConditionDto);
+        List<FeedResultPostDto> content1 = feedRepository.searchFeedBy(searchFeedConditionDto, null, null);
+        Post cursorPost = postRepository.findById(content1.get(content1.size() - 1).getPostId()).get();
+        List<FeedResultPostDto> content2 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
+        cursorPost = postRepository.findById(content2.get(content1.size() - 1).getPostId()).get();
+        List<FeedResultPostDto> content3 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
+        cursorPost = postRepository.findById(content3.get(content1.size() - 1).getPostId()).get();
+        List<FeedResultPostDto> content4 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
+        cursorPost = postRepository.findById(content4.get(content1.size() - 1).getPostId()).get();
+        List<FeedResultPostDto> content5 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
+        cursorPost = postRepository.findById(content5.get(content1.size() - 1).getPostId()).get();
+        List<FeedResultPostDto> content6 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
+        cursorPost = postRepository.findById(content6.get(content1.size() - 1).getPostId()).get();
+        List<FeedResultPostDto> content7 = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, null);
 
         assertEquals(page, content1.size());
         assertEquals(page, content2.size());
         assertEquals(page, content6.size());
         assertEquals(0, content7.size(), () -> "남은 포스트 10개는 숨김처리되어 조회되지 않는다.");
+        
     }
 
     @DisplayName("유저페이지에서는 해당 유저가 작성한 게시글만 조회된다.")
@@ -305,15 +302,13 @@ class FeedSearchServiceTest {
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
                 .ownerId(owner.getId())
-                .cursorId(null)
                 .size(10L)
                 .userPageFeedOption(UserPageFeedOption.WRITE)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> content = searchFeedService.searchFeed(searchFeedConditionDto);
+        List<FeedResultPostDto> content = feedRepository.searchFeedBy(searchFeedConditionDto, null,null);
 
         assertEquals(7, content.size());
     }
-
 }

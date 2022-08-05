@@ -1,11 +1,14 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
+import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +22,18 @@ public class SearchFeedService {
     private final FeedRepository feedRepository;
     private final PostRepository postRepository;
 
-    public List<FeedResultPostDto> searchFeed(SearchFeedConditionDto searchFeedConditionDto) {
+    private final UserRepository userRepository;
+
+    public List<FeedResultPostDto> searchFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
+
+        User me = null;
+        if(username != null) {
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
 
         Post cursorPost = null;
-        if(searchFeedConditionDto.getCursorId() != null && searchFeedConditionDto.getCursorId() != 0) {
-            cursorPost = postRepository.findById(searchFeedConditionDto.getCursorId()).orElseThrow(NoSuchPostException::new);
+        if(cursorId != null && cursorId != 0) {
+            cursorPost = postRepository.findById(cursorId).orElseThrow(NoSuchPostException::new);
         }
 
         if(searchFeedConditionDto.getForLastMin() != null) {
@@ -31,7 +41,7 @@ public class SearchFeedService {
             searchFeedConditionDto.setDateTo(LocalDateTime.now());
         }
 
-        return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost);
+        return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
     }
 
 }

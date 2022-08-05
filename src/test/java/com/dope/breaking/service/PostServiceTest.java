@@ -10,6 +10,8 @@ import com.dope.breaking.dto.post.DetailPostResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.exception.NotValidRequestBodyException;
+import com.dope.breaking.exception.post.AlreadyNotPurchasableException;
+import com.dope.breaking.exception.post.AlreadyPurchasableException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -22,8 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.persistence.EntityManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,7 +55,6 @@ class PostServiceTest {
 
 
     @BeforeEach
-    @Test
     void saveUser() {
         User user = User.builder()
                 .username("12345g")
@@ -381,9 +380,103 @@ class PostServiceTest {
 
         //When
         postService.delete(postId, "12345g");
+
         //then
         Assertions.assertFalse(postRepository.existsById(postId));
 
+    }
+
+    @DisplayName("구매 비활성화 된 제보를 활성화 할 경우, 제보가 활성화 된다.")
+    @Test
+    void activatePurchasedDeactivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsPurchasable(false);
+        long postId = postRepository.save(post).getId();
+
+        //When
+        postService.activatePurchase("12345g", post.getId());
+
+        //then
+        Assertions.assertTrue(post.isPurchasable());
 
     }
+
+    @DisplayName("구매 활성화 된 제보를 활성화 할 경우, 예외가 발생한다.")
+    @Test
+    void activatePurchaseActivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(AlreadyPurchasableException.class, ()
+                -> postService.activatePurchase("12345g", postId)); //When
+
+    }
+
+    @DisplayName("사용자가 다른 이의 제보를 활성화 할 경우, 에외가 발생한다.")
+    @Test
+    void activatePurchaseByAnotherUser(){
+
+        //Given
+        User user = new User();
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        userRepository.save(user);
+
+
+        Post post = new Post();
+        post.setUser(userRepository.findByUsername("12345g").get());
+        post.updateIsPurchasable(false);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(NoPermissionException.class, ()
+                -> postService.activatePurchase("username", postId)); //When
+
+
+    }
+
+    @DisplayName("구매 활성화 된 제보를 비활성화 할 경우, 제보가 비활성화 된다.")
+    @Test
+    void deactivateActivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //When
+        postService.deactivatePurchase("12345g", post.getId());
+
+        //then
+        Assertions.assertFalse(post.isPurchasable());
+
+    }
+
+    @DisplayName("구매 비활성화 된 제보를 비활성화 할 경우, 예외가 발생한다.")
+    @Test
+    void deactivateDeactivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsPurchasable(false);
+        long postId = postRepository.save(post).getId();
+        //Then
+        Assertions.assertThrows(AlreadyNotPurchasableException.class, ()
+                -> postService.deactivatePurchase("12345g", postId)); //When
+
+    }
+
 }

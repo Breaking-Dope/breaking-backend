@@ -41,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @ExtendWith(SpringExtension.class)
@@ -90,7 +91,7 @@ class PostAPITest {
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .characterEncoding("UTF-8"))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().is4xxClientError()).andReturn();
+                .andExpect(status().is4xxClientError()).andReturn();
 
 
         MockHttpServletResponse response = resultActions.getResponse();
@@ -138,7 +139,7 @@ class PostAPITest {
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .characterEncoding("UTF-8"))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+                .andExpect(status().isOk()).andReturn();
 
 
         MockHttpServletResponse response = resultActions.getResponse();
@@ -193,7 +194,7 @@ class PostAPITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+                .andExpect(status().isNotFound()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String contentBody = response.getContentAsString();
@@ -267,7 +268,7 @@ class PostAPITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotAcceptable()).andReturn();
+                .andExpect(status().isNotAcceptable()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String contentBody = response.getContentAsString();
@@ -333,7 +334,7 @@ class PostAPITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+                .andExpect(status().isOk()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String contentBody = response.getContentAsString();
@@ -348,7 +349,7 @@ class PostAPITest {
 
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.get("/post/" + -1))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+                .andExpect(status().isNotFound()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
@@ -397,7 +398,7 @@ class PostAPITest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.isLiked").value(false))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.isBookmarked").value(false))
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+                .andExpect(status().isOk()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
@@ -441,7 +442,7 @@ class PostAPITest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.isLiked").value(false))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.isBookmarked").value(false))
-                .andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+                .andExpect(status().isOk()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
@@ -461,7 +462,7 @@ class PostAPITest {
 
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/" + -1))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+                .andExpect(status().isNotFound()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
@@ -493,7 +494,7 @@ class PostAPITest {
 
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/" + postId))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNotAcceptable()).andReturn();
+                .andExpect(status().isNotAcceptable()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
@@ -513,20 +514,152 @@ class PostAPITest {
 
         userRepository.save(user);
 
-
-
         Post post = new Post();
         long postId = postRepository.save(post).getId();
         post.setUser(user);
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/" + postId))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isNoContent()).andReturn();
+                .andExpect(status().isNoContent()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();
         System.out.println(content);
+
     }
 
+    @DisplayName("구매 비활성화 된 제보를 활성화 할 경우, 제보가 활성화 된다.")
+    @WithMockCustomUser
+    @Test
+    void activatePurchasedDeactivatedPost() throws Exception {
 
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        userRepository.save(user);
+
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsPurchasable(false);
+        Long postId = postRepository.save(post).getId();
+
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/activate-purchase",postId))
+                .andExpect(status().isOk()); //Then
+
+        //Then
+        Assertions.assertTrue(post.isPurchasable());
+
+    }
+
+    @DisplayName("구매 활성화 된 제보를 활성화 할 경우, 예외가 발생한다.")
+    @WithMockCustomUser
+    @Test
+    void activatePurchaseActivatedPost() throws Exception {
+
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        userRepository.save(user);
+
+        Post post = new Post();
+        post.setUser(user);
+        Long postId = postRepository.save(post).getId();
+
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/activate-purchase",postId))
+                .andExpect(status().isBadRequest()); //Then
+
+
+    }
+
+    @DisplayName("다른 유저의 제보를 구매 활성화 할 경우, 예외가 발생한다.")
+    @WithMockCustomUser
+    @Test
+    void activateOthersPost() throws Exception {
+
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        User user2 = new User();
+
+        userRepository.save(user);
+        userRepository.save(user2);
+
+        Post post = new Post();
+        post.setUser(user2);
+        post.updateIsPurchasable(false);
+        Long postId = postRepository.save(post).getId();
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/activate-purchase",postId))
+                .andExpect(status().isNotAcceptable()); //Then
+
+    }
+
+    @DisplayName("구매 활성화가 된 제보를 구매 비활성화 할 경우, 제보 구매가 비활성화 된다.")
+    @WithMockCustomUser
+    @Test
+    void deactivatePurchaseActivatedPost() throws Exception {
+
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        userRepository.save(user);
+
+        Post post = new Post();
+        post.setUser(user);
+        Long postId = postRepository.save(post).getId();
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/deactivate-purchase",postId))
+                .andExpect(status().isOk()); //Then
+
+        //Then
+        Assertions.assertFalse(post.isPurchasable());
+
+    }
+
+    @DisplayName("이미 구매 비활성화가 된 제보를 구매 비활성화 할 경우, 예외가 발생한다..")
+    @WithMockCustomUser
+    @Test
+    void deactivatePurchaseDeactivatedPost() throws Exception {
+
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        userRepository.save(user);
+
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsPurchasable(false);
+        Long postId = postRepository.save(post).getId();
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/deactivate-purchase",postId))
+                .andExpect(status().isBadRequest()); //Then
+
+    }
 
 }

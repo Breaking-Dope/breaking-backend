@@ -61,7 +61,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .select(new QFeedResultPostDto(
                         post.id,
                         post.title,
-                        post.location.region,
+                        post.location.address,
                         post.thumbnailImgURL,
                         Expressions.asNumber(0),
                         post.postType,

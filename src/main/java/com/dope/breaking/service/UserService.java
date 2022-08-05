@@ -11,6 +11,7 @@ import com.dope.breaking.exception.user.DuplicatedUserInformationException;
 import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
+import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.RedisService;
@@ -41,6 +42,7 @@ public class UserService {
     private final MediaService mediaService;
     private final FollowRepository followRepository;
     private final FollowService followService;
+    private final PostRepository postRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -318,6 +320,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
         int followerCount = followRepository.countFollowsByFollowed(user);
         int followingCount = followRepository.countFollowsByFollowing(user);
+        int postCount = postRepository.countPostByUser(user);
 
         boolean isFollowing = false;
         if(username != null) {
@@ -334,6 +337,7 @@ public class UserService {
                 .role(user.getRole())
                 .followerCount(followerCount)
                 .followingCount(followingCount)
+                .postCount(postCount)
                 .isFollowing(isFollowing)
                 .build();
 

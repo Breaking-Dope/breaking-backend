@@ -4,17 +4,23 @@ import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.financial.NotEnoughBalanceException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.NotPurchasablePostException;
 import com.dope.breaking.exception.post.SoldExclusivePostException;
+import com.dope.breaking.exception.user.NoPermissionException;
+import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.PurchaseRepository;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,7 @@ public class PurchaseService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final TransactionService transactionService;
+    private final FollowRepository followRepository;
 
     public void purchasePost(String username, Long postId) {
 
@@ -86,6 +93,30 @@ public class PurchaseService {
 
         buyer.updateBalance(amount*(-1));
         seller.updateBalance(amount);
+
+    }
+
+    public List<ForListInfoResponseDto> purchaserList(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(user != post.getUser()){
+            throw new NoPermissionException();
+        }
+
+        List<Purchase> purchaseList = purchaseRepository.findAllByPost(post);
+        List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
+
+        if(purchaseList != null){
+            for (Purchase purchase : purchaseList) {
+                User purchasedUser = purchase.getUser();
+                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(purchasedUser,user);
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(purchasedUser.getId(),purchasedUser.getNickname(),purchasedUser.getStatusMsg(),purchasedUser.getOriginalProfileImgURL(),isFollowing));
+            }
+        }
+
+        return forListInfoResponseDtoList;
 
     }
 

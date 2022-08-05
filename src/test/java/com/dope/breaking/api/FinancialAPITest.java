@@ -1,12 +1,14 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.domain.financial.TransactionType;
+import com.dope.breaking.domain.user.Follow;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.financial.AmountRequestDto;
 import com.dope.breaking.repository.StatementRepository;
 import com.dope.breaking.repository.TransactionRepository;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.service.FollowService;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.PurchaseService;
 import com.dope.breaking.service.StatementService;
@@ -70,6 +72,9 @@ class FinancialAPITest {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private FollowService followService;
 
 
     @BeforeEach
@@ -321,7 +326,7 @@ class FinancialAPITest {
 
     }
 
-    @DisplayName("유제네임이 일치할 경우, 입출금 및 제보 거래내역이 최신순으로 반환된다.")
+    @DisplayName("유저네임이 일치할 경우, 입출금 및 제보 거래내역이 최신순으로 반환된다.")
     @WithMockCustomUser
     @Transactional
     @Test
@@ -368,6 +373,91 @@ class FinancialAPITest {
                 .andExpect(jsonPath("$[1].transactionType").value("buy_post"))
                 .andExpect(jsonPath("$[2].transactionType").value("withdraw"))
                 .andExpect(jsonPath("$[3].transactionType").value("deposit"));
+
+    }
+
+    @DisplayName("본인이 판매한 제보일 경우, 구매자 리스트를 조회할 수 있다")
+    @WithMockCustomUser
+    @Transactional
+    @Test
+    void purchaseListWhenPostSoldByUser() throws Exception {
+
+        //Given
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 1000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"charged\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("12345g", json, multipartFiles);
+
+        User buyer = new User();
+        buyer.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer", Role.USER);
+        buyer.updateBalance(2000);
+        userRepository.save(buyer);
+
+        //When
+        purchaseService.purchasePost("buyer",postId);
+        followService.follow("12345g", buyer.getId());
+
+
+
+        //Then
+        this.mockMvc.perform(get("/post/{postId}/buy-list",postId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isFollowing").value(true));
+
+    }
+
+    @DisplayName("본인이 판매한 제보가 아닐 경우, 구매자 리스트를 조회할 수 없다")
+    @WithMockCustomUser
+    @Transactional
+    @Test
+    void purchaseListWhenPostSoldByOtherUser() throws Exception {
+
+        //Given
+        User user = new User();
+        user.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "username", Role.USER);
+        user.updateBalance(2000);
+        userRepository.save(user);
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 1000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"charged\"," +
+                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"region\" : \"abgujung\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345" +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        //When
+        Long postId = postService.create("username", json, multipartFiles);
+
+        //Then
+        this.mockMvc.perform(get("/post/{postId}/buy-list",postId))
+                .andExpect(status().isNotAcceptable());
 
     }
 

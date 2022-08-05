@@ -3,6 +3,7 @@ package com.dope.breaking.api;
 import com.dope.breaking.domain.financial.TransactionType;
 import com.dope.breaking.dto.financial.AmountRequestDto;
 import com.dope.breaking.dto.financial.TransactionResponseDto;
+import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.service.PurchaseService;
 import com.dope.breaking.service.StatementService;
 import com.dope.breaking.service.TransactionService;
@@ -58,4 +59,13 @@ public class FinancialAPI {
         return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionList(principal.getName()));
 
     }
+
+    @PreAuthorize("isAuthenticated")
+    @GetMapping("/post/{postId}/buy-list")
+    public ResponseEntity<List<ForListInfoResponseDto>> buyerList(Principal principal, @PathVariable Long postId){
+
+        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.purchaserList(principal.getName(), postId));
+
+    }
+
 }

@@ -28,13 +28,7 @@ class UserServiceTest {
 
     @Autowired UserService userService;
     @Autowired UserRepository userRepository;
-    @Autowired EntityManager em;
 
-
-    @Test
-    void validateNickname() {
-
-    }
 
     @Test
     void signUpConfirm() {
@@ -66,48 +60,6 @@ class UserServiceTest {
 
     }
 
-//    @Test
-//    void updateUser(){
-//        // Given
-//        SignUpRequestDto signUpRequest =  new SignUpRequestDto
-//                ("statusMsg","nickname","phoneNumber","mwk300@nyu.edu","realname","username", "PRess");
-//
-//        User user = new User();
-//        user.setRequestFields(
-//                "anyURL",
-//                signUpRequest.getNickname(),
-//                signUpRequest.getPhoneNumber(),
-//                signUpRequest.getEmail(),
-//                signUpRequest.getRealName(),
-//                signUpRequest.getStatusMsg(),
-//                signUpRequest.getUsername(),
-//                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
-//        );
-//
-//        userService.save(user);
-//
-//        //When
-//        User updatedUser = userService.findById(1L).get();
-//        updatedUser.setRequestFields(
-//                "anyURL",
-//                "newNickname",
-//                signUpRequest.getPhoneNumber(),
-//                signUpRequest.getEmail(),
-//                signUpRequest.getRealName(),
-//                signUpRequest.getStatusMsg(),
-//                signUpRequest.getUsername(),
-//                Role.valueOf(signUpRequest.getRole().toUpperCase(Locale.ROOT))
-//        );
-//
-//        userService.save(updatedUser);
-//
-//        //Then
-//        User foundUser = userService.findById(1L).get();
-//
-//        assertThat(foundUser.getId()).isEqualTo(1L);
-//        assertThat(foundUser.getNickname()).isEqualTo("newNickname");
-//
-//    }
 
     @Test
     void validateJwtTokenSuccess() {
@@ -231,6 +183,7 @@ class UserServiceTest {
 
         assertEquals(profileInformationResponseDto.getEmail(), user.getEmail());
         assertEquals(profileInformationResponseDto.getNickname(), user.getNickname());
+        assertEquals(0,profileInformationResponseDto.getPostCount());
 
     }
 

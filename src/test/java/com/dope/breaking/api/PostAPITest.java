@@ -75,9 +75,11 @@ class PostAPITest {
                 "\"postType\" : \"free\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -123,9 +125,11 @@ class PostAPITest {
                 "\"postType\" : \"free\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -155,8 +159,12 @@ class PostAPITest {
     public void modifyNoSuchPost () throws Exception {
         LocationDto location = LocationDto.builder()
                 .longitude(1.2)
-                .region("andong")
-                .latitude(1.3).build();
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
         List<String> hashTags = new LinkedList<>();
         hashTags.add("tag2");
 
@@ -229,8 +237,11 @@ class PostAPITest {
 
         LocationDto location = LocationDto.builder()
                 .longitude(1.2)
-                .region("andong")
-                .latitude(1.3).build();
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
         List<String> hashTags = new LinkedList<>();
         hashTags.add("tag2");
 
@@ -295,8 +306,11 @@ class PostAPITest {
         post.setUser(user);
         LocationDto location = LocationDto.builder()
                 .longitude(1.2)
-                .region("andong")
-                .latitude(1.3).build();
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
         List<String> hashTags = new LinkedList<>();
         hashTags.add("tag2");
 
@@ -373,8 +387,11 @@ class PostAPITest {
         userRepository.save(user);
         Location location = Location.builder()
                 .longitude(1.2)
-                .region("andong")
-                .latitude(1.3).build();
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
 
 
         Post post= Post.builder()
@@ -419,8 +436,11 @@ class PostAPITest {
 
         Location location = Location.builder()
                 .longitude(1.2)
-                .region("andong")
-                .latitude(1.3).build();
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
 
 
         Post post= Post.builder()
@@ -526,7 +546,5 @@ class PostAPITest {
         String content = response.getContentAsString();
         System.out.println(content);
     }
-
-
 
 }

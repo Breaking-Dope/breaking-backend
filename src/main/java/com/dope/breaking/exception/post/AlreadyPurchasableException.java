@@ -4,10 +4,9 @@ import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-public class NoSuchPostException extends BreakingException {
+public class AlreadyPurchasableException extends BreakingException {
 
-    public NoSuchPostException() {
-        super(ErrorCode.NO_SUCH_POST, HttpStatus.NOT_FOUND);
-    }
+    public AlreadyPurchasableException() {super(ErrorCode.ALREADY_PURCHASABLE, HttpStatus.BAD_REQUEST);}
 
 }
+

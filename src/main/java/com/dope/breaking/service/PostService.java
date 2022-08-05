@@ -12,6 +12,9 @@ import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.dto.post.WriterDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.post.AlreadyNotPurchasableException;
+import com.dope.breaking.exception.post.AlreadyPurchasableException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class PostService {
+
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
@@ -46,6 +50,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
 
     private final HashtagRepository hashtagRepository;
+
     private final HashtagService hashtagService;
 
     private final MediaRepository mediaRepository;
@@ -234,6 +239,41 @@ public class PostService {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @Transactional
+    public void deactivatePurchase(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(post.getUser() != user){
+            throw new NoPermissionException();
+        }
+
+        if(!post.isPurchasable()){
+            throw new AlreadyNotPurchasableException();
+        }
+
+        post.updateIsPurchasable(false);
+
+    }
+
+    @Transactional
+    public void activatePurchase(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(post.getUser() != user){
+            throw new NoPermissionException();
+        }
+
+        if(post.isPurchasable()){
+            throw new AlreadyPurchasableException();
+        }
+
+        post.updateIsPurchasable(true);
+
+    }
 
     private PostRequestDto transferPostRequestToObject(String contentData) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());

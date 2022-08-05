@@ -183,6 +183,7 @@ public class PostService {
         DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
                 .isLiked(isLiked)
                 .isBookmarked(isBookmarked)
+                .isPurchased(isPurchased)
                 .user(writerDto)
                 .title(post.getTitle())
                 .content(post.getContent())

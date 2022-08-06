@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 public class BookmarkRepositoryTest {
 
-    @Autowired private BookmarkRepository bookmarkRepository;
+    @Autowired BookmarkRepository bookmarkRepository;
     @Autowired UserRepository userRepository;
     @Autowired PostRepository postRepository;
 

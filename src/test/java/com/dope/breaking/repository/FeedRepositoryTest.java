@@ -17,6 +17,7 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -53,6 +54,7 @@ public class FeedRepositoryTest {
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
 
         assertTrue(result.get(0).getIsLiked());
+        assertEquals(1, result.get(0).getLikeCount());
     }
 
     @DisplayName("유저가 bookmark한 게시글은, isBookmarked가 true로 반환된다.")

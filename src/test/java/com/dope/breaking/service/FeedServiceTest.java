@@ -8,6 +8,7 @@ import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,7 @@ public class FeedServiceTest {
     @InjectMocks
     private SearchFeedService feedService;
 
+    @DisplayName("유저 피드 조회가 정상적으로 작동한다.")
     @Test
     void searchUserPageTest() {
 

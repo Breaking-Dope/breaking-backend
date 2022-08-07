@@ -30,9 +30,14 @@ import static com.dope.breaking.domain.user.QUser.user;
 public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final BookmarkRepository bookmarkRepository;
 
-    public FeedRepositoryCustomImpl(EntityManager em) {
+    private final PostLikeRepository postLikeRepository;
+
+    public FeedRepositoryCustomImpl(EntityManager em, BookmarkRepository bookmarkRepository, PostLikeRepository postLikeRepository) {
         this.queryFactory = new JPAQueryFactory(em);
+        this.bookmarkRepository = bookmarkRepository;
+        this.postLikeRepository = postLikeRepository;
     }
 
     @Override
@@ -63,7 +68,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.title,
                         post.location.address,
                         post.thumbnailImgURL,
-                        Expressions.asNumber(0),
+                        post.postLikeList.size(),
                         post.postType,
                         post.isSold,
                         post.viewCount,
@@ -80,6 +85,11 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .where(post.id.in(contentIdList))
                 .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()), boardSort(SortStrategy.CHRONOLOGICAL))
                 .fetch();
+
+        for(FeedResultPostDto dto : content) {
+            dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
+            dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
+        }
 
         return content;
     }

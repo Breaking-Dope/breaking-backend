@@ -107,10 +107,13 @@ public class CommentService {
                 if(!postRepository.existsById(searchCommentConditionDto.getTargetId())) {
                     throw new NoSuchPostException();
                 }
+                break;
+
             case COMMENT:
                 if(!commentRepository.existsById(searchCommentConditionDto.getTargetId())) {
                     throw new NoSuchCommentException();
                 }
+                break;
         }
 
         return commentRepository.searchCommentList(me, searchCommentConditionDto);

@@ -100,7 +100,7 @@ public class PostService {
             }
 
         } catch (Exception e) {
-            throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
+            throw new CustomInternalErrorException(e.getMessage());
         }
 
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
@@ -150,7 +150,7 @@ public class PostService {
         } catch (Exception e) {
             log.info("게시글 수정 실패");
             e.printStackTrace();
-            throw new CustomInternalErrorException("게시글을 수정할 수 없습니다.");
+            throw new CustomInternalErrorException(e.getMessage());
         }
         log.info(modifyPost.toString());
     }

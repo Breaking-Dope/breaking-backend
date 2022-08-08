@@ -8,6 +8,7 @@ import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
+import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -46,7 +47,9 @@ public class SearchFeedService {
 
     }
 
-    public List<FeedResultPostDto> searchUserFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
+    public List<FeedResultPostDto> searchUserFeed(SearchFeedConditionDto searchFeedConditionDto, Long ownerId, String username, Long cursorId) {
+
+        User owner = userRepository.findById(ownerId).orElseThrow(NoSuchUserException::new);
 
         User me = null;
         if(username != null) {
@@ -54,7 +57,7 @@ public class SearchFeedService {
             me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
 
             if(searchFeedConditionDto.getUserPageFeedOption() != UserPageFeedOption.WRITE
-                    && searchFeedConditionDto.getOwnerId() == me.getId()) {
+                    && owner != me) {
                 throw new NoPermissionException();
             }
 
@@ -68,7 +71,7 @@ public class SearchFeedService {
             cursorPost = postRepository.findById(cursorId).orElseThrow(NoSuchPostException::new);
         }
 
-        return feedRepository.searchUserPageBy(searchFeedConditionDto, cursorPost, me);
+        return feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
 
     }
 

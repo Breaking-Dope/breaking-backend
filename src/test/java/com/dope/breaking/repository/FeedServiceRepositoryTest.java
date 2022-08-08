@@ -304,13 +304,12 @@ public class FeedServiceRepositoryTest {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .ownerId(owner.getId())
                 .size(10L)
                 .userPageFeedOption(UserPageFeedOption.WRITE)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> content = feedRepository.searchUserPageBy(searchFeedConditionDto, null,null);
+        List<FeedResultPostDto> content = feedRepository.searchUserPageBy(searchFeedConditionDto, owner,null, null);
 
         assertEquals(7, content.size());
     }
@@ -345,13 +344,12 @@ public class FeedServiceRepositoryTest {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .ownerId(owner.getId())
                 .size(3L)
                 .userPageFeedOption(UserPageFeedOption.BOOKMARK)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, null, owner);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, null, null);
 
         assertEquals(3, result.size());
     }
@@ -386,13 +384,12 @@ public class FeedServiceRepositoryTest {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .ownerId(owner.getId())
                 .size(3L)
                 .userPageFeedOption(UserPageFeedOption.BUY)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, null, owner);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, null, null);
 
         assertEquals(3, result.size());
     }

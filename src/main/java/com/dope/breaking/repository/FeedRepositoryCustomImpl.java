@@ -96,7 +96,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
     }
 
     @Override
-    public List<FeedResultPostDto> searchUserPageBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me) {
+    public List<FeedResultPostDto> searchUserPageBy(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost) {
 
         List<Tuple> paginatedResult = queryFactory
                 .select(post.id, postLike.post.id.count())
@@ -106,7 +106,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .leftJoin(post.purchaseList, purchase)
                 .where(
                         post.isHidden.eq(false),
-                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), searchFeedConditionDto.getOwnerId(), me),
+                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
                         sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
                 )
@@ -149,7 +149,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         return content;
     }
 
-    private Predicate userPageFeedOption(UserPageFeedOption userPageFeedOption, Long ownerId, User me) {
+    private Predicate userPageFeedOption(UserPageFeedOption userPageFeedOption, User owner, User me) {
 
         if(userPageFeedOption == null) {
             return null;
@@ -162,7 +162,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 return bookmark.user.eq(me);
             case WRITE:
             default:
-                return post.user.id.eq(ownerId);
+                return post.user.eq(owner);
         }
     }
 

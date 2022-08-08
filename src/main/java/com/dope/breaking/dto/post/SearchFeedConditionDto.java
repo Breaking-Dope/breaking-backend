@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 public class SearchFeedConditionDto {
 
-    private Long ownerId;
-
     private String searchKeyword;
 
     private Long size;
@@ -32,8 +30,7 @@ public class SearchFeedConditionDto {
     private Integer forLastMin;
 
     @Builder
-    public SearchFeedConditionDto(Long ownerId, String searchKeyword, Long size, SortStrategy sortStrategy, SoldOption soldOption, UserPageFeedOption userPageFeedOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
-        this.ownerId = ownerId;
+    public SearchFeedConditionDto(String searchKeyword, Long size, SortStrategy sortStrategy, SoldOption soldOption, UserPageFeedOption userPageFeedOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
         this.searchKeyword = searchKeyword;
         this.size = size;
         this.sortStrategy = sortStrategy;

@@ -82,9 +82,12 @@ public class PostService {
                     .content(postRequestDto.getContent())
                     .postType(postType)
                     .location(Location.builder()
-                            .region(postRequestDto.getLocationDto().getRegion())
+                            .address(postRequestDto.getLocationDto().getAddress())
                             .latitude(postRequestDto.getLocationDto().getLatitude())
-                            .longitude(postRequestDto.getLocationDto().getLongitude()).build())
+                            .longitude(postRequestDto.getLocationDto().getLongitude())
+                            .region_1depth_name(postRequestDto.getLocationDto().getRegion_1depth_name())
+                            .region_2depth_name(postRequestDto.getLocationDto().getRegion_2depth_name())
+                            .build())
                     .eventTime(postRequestDto.getEventTime())
                     .isAnonymous(postRequestDto.getIsAnonymous())
                     .price(postRequestDto.getPrice())
@@ -134,9 +137,12 @@ public class PostService {
         Post modifyPost = postRepository.getById(postId);
         try {
             Location location = Location.builder()
-                    .region(postRequestDto.getLocationDto().getRegion())
+                    .address(postRequestDto.getLocationDto().getAddress())
                     .latitude(postRequestDto.getLocationDto().getLatitude())
-                    .longitude(postRequestDto.getLocationDto().getLongitude()).build();
+                    .longitude(postRequestDto.getLocationDto().getLongitude())
+                    .region_1depth_name(postRequestDto.getLocationDto().getRegion_1depth_name())
+                    .region_2depth_name(postRequestDto.getLocationDto().getRegion_2depth_name())
+                    .build();
 
             modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
             hashtagService.updateHashtag(postRequestDto.getHashtagList(), modifyPost.getId(), HashtagType.POST);
@@ -181,9 +187,12 @@ public class PostService {
                 .userId(post.getUser().getId()).build();
 
         LocationDto locationDto = LocationDto.builder()
-                .region(post.getLocation().getRegion())
+                .address(post.getLocation().getAddress())
                 .latitude(post.getLocation().getLatitude())
-                .longitude(post.getLocation().getLongitude()).build();
+                .longitude(post.getLocation().getLongitude())
+                .region_1depth_name(post.getLocation().getRegion_1depth_name())
+                .region_2depth_name(post.getLocation().getRegion_2depth_name())
+                .build();
 
         DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
                 .isLiked(isLiked)

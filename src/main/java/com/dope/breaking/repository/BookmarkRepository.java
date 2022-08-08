@@ -11,4 +11,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     int countByPost(Post post);
 
     void deleteByUserAndPost(User user, Post post);
+
+    Boolean existsByUserAndPostId(User me, Long postId);
 }

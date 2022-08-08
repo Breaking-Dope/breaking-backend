@@ -221,9 +221,11 @@ class FinancialAPITest {
                 "\"postType\" : \"free\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -263,9 +265,11 @@ class FinancialAPITest {
                 "\"postType\" : \"charged\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -307,9 +311,11 @@ class FinancialAPITest {
                 "\"postType\" : \"exclusive\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -351,9 +357,11 @@ class FinancialAPITest {
                 "\"postType\" : \"charged\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -393,9 +401,11 @@ class FinancialAPITest {
                 "\"postType\" : \"charged\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +
@@ -443,9 +453,11 @@ class FinancialAPITest {
                 "\"postType\" : \"charged\"," +
                 "\"eventTime\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
-                " \"region\" : \"abgujung\"," +
+                " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
-                "\"latitude\" : 12.12345" +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
                 "}," +
                 "\"hashtagList\" : [" +
                 "\"hello\", \"hello2\"]," +

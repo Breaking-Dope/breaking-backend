@@ -74,6 +74,7 @@ public class FeedAPI {
                 .ownerId(ownerId)
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
                 .userPageFeedOption(UserPageFeedOption.findMatchedEnum(userFeedPostOption))
+                .sortStrategy(SortStrategy.CHRONOLOGICAL)
                 .build();
 
         String username = null;

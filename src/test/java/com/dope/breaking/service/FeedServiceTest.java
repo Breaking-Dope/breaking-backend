@@ -51,7 +51,9 @@ public class FeedServiceTest {
                 .build();
         post2.setUser(user);
 
-        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder().build();
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.WRITE)
+                .build();
 
         Mockito.lenient().when(userRepository.findByUsername(null)).thenReturn(Optional.of(user));
         Mockito.lenient().when(postRepository.findById(0L)).thenReturn(null);
@@ -62,7 +64,7 @@ public class FeedServiceTest {
         FeedResultPostDto content2 = new FeedResultPostDto();
         content2.setTitle("post2");
         dummy.add(content2);
-        given(feedRepository.searchFeedBy(searchFeedConditionDto, null, null)).willReturn(dummy);
+        given(feedRepository.searchUserPageBy(searchFeedConditionDto, null, null)).willReturn(dummy);
 
         //when
         List<FeedResultPostDto> result = feedService.searchFeed(searchFeedConditionDto, null, null);

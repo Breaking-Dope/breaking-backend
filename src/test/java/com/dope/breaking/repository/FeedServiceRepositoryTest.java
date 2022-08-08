@@ -1,9 +1,11 @@
 package com.dope.breaking.repository;
 
+import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.post.PostType;
+import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
@@ -22,7 +24,6 @@ import java.util.List;
 import static com.dope.breaking.domain.user.Role.PRESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 @SpringBootTest
 @Transactional
 public class FeedServiceRepositoryTest {
@@ -34,6 +35,8 @@ public class FeedServiceRepositoryTest {
     @Autowired
     EntityManager em;
     @Autowired UserRepository userRepository;
+    @Autowired BookmarkRepository bookmarkRepository;
+    @Autowired PurchaseRepository purchaseRepository;
 
     @DisplayName("포스트가 없으면, 에러가 나지 않고 빈 배열을 반환한다.")
     @Test
@@ -307,8 +310,90 @@ public class FeedServiceRepositoryTest {
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> content = feedRepository.searchFeedBy(searchFeedConditionDto, null,null);
+        List<FeedResultPostDto> content = feedRepository.searchUserPageBy(searchFeedConditionDto, null,null);
 
         assertEquals(7, content.size());
+    }
+
+    @DisplayName("유저가 본인의 북마크를 조회한다.")
+    @Test
+    void bookmarkFeedSearch() {
+
+        User owner = User.builder()
+                .username("username")
+                .password("password")
+                .role(PRESS)
+                .build();
+        userRepository.save(owner);
+
+        Post post = Post.builder()
+                .isHidden(false)
+                .isAnonymous(false)
+                .build();
+        postRepository.save(post);
+
+        //3 not owner's posts
+        for(int i=0;i<3;i++) {
+            post = Post.builder()
+                    .isHidden(false)
+                    .isAnonymous(false)
+                    .build();
+            postRepository.save(post);
+            Bookmark bookmark = new Bookmark(owner, post);
+            bookmarkRepository.save(bookmark);
+        }
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .ownerId(owner.getId())
+                .size(3L)
+                .userPageFeedOption(UserPageFeedOption.BOOKMARK)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, null, owner);
+
+        assertEquals(3, result.size());
+    }
+
+    @DisplayName("유저가 본인이 구매한 게시글을 조회한다.")
+    @Test
+    void purchasedFeedSearch() {
+
+        User owner = User.builder()
+                .username("username")
+                .password("password")
+                .role(PRESS)
+                .build();
+        userRepository.save(owner);
+
+        Post post = Post.builder()
+                .isHidden(false)
+                .isAnonymous(false)
+                .build();
+        postRepository.save(post);
+
+        //3 not owner's posts
+        for(int i=0;i<3;i++) {
+            post = Post.builder()
+                    .isHidden(false)
+                    .isAnonymous(false)
+                    .build();
+            postRepository.save(post);
+            Purchase purchase = new Purchase(owner, post, 1000);
+            purchaseRepository.save(purchase);
+        }
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .ownerId(owner.getId())
+                .size(3L)
+                .userPageFeedOption(UserPageFeedOption.BUY)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, null, owner);
+
+        assertEquals(3, result.size());
     }
 }

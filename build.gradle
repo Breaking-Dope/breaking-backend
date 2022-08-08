@@ -47,6 +47,7 @@ dependencies {
 	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.11'
 	implementation group: 'org.jcodec', name: 'jcodec', version: '0.2.5'
 	implementation group: 'org.jcodec', name: 'jcodec-javase', version: '0.2.5'
+	implementation 'com.github.maricn:logback-slack-appender:1.4.0'
 
 }
 

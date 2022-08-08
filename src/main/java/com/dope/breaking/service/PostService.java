@@ -175,7 +175,7 @@ public class PostService {
             isMyPost = user == post.getUser();
         }
 
-        WriterDto writerDto = new WriterDto();
+        WriterDto writerDto = null;
 
         if(!(!isMyPost && post.isAnonymous())){
             writerDto = WriterDto.builder()

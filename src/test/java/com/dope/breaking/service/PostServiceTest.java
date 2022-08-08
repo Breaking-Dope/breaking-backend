@@ -320,7 +320,7 @@ class PostServiceTest {
 
         //Then
         Assertions.assertFalse(detailPostResponseDto.isMyPost());
-        Assertions.assertNull(detailPostResponseDto.getUser().getUserId());
+        Assertions.assertNull(detailPostResponseDto.getUser());
 
     }
 
@@ -396,7 +396,7 @@ class PostServiceTest {
         DetailPostResponseDto detailPostResponseDto = postService.read(postId, "12345g");
 
         //Then
-       Assertions.assertNull(detailPostResponseDto.getUser().getUserId());
+       Assertions.assertNull(detailPostResponseDto.getUser());
 
     }
 

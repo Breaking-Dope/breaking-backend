@@ -4,6 +4,7 @@ import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
@@ -103,6 +104,88 @@ public class FeedServiceTest {
 
         //when, then
         Assertions.assertThrows(NoPermissionException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, "guestUsername", null));
+
+    }
+
+    @DisplayName("다른 유저의 구매 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenOtherUserSearchOtherUserPurchaseList() {
+
+        //given
+
+        User guest = User.builder()
+                .username("guestUsername")
+                .build();
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BUY)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(userRepository.findByUsername("guestUsername")).thenReturn(Optional.of(guest));
+
+        //when, then
+        Assertions.assertThrows(NoPermissionException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, "guestUsername", null));
+
+    }
+
+    @DisplayName("로그인 하지 않은 유저가 북마크 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenGuestSearchOtherUserBookmarkList() {
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BOOKMARK)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+
+        //when, then
+        Assertions.assertThrows(LoginRequireException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null));
+
+    }
+
+    @DisplayName("로그인 하지 않은 유저가 구매 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenGuestSearchOtherUserPurchaseList() {
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BUY)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+
+        //when, then
+        Assertions.assertThrows(LoginRequireException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null));
 
     }
 }

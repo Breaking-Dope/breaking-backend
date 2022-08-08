@@ -41,7 +41,6 @@ public class PostAPI {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-
     @GetMapping(value = "/post/{postId}")
     public ResponseEntity<DetailPostResponseDto> postRead(@PathVariable("postId") long postId, Principal principal){
         String crntUsername = null;
@@ -51,11 +50,24 @@ public class PostAPI {
         return new ResponseEntity<DetailPostResponseDto>(postService.read(postId, crntUsername), HttpStatus.OK);
     }
 
-
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}")
     public ResponseEntity postDelete(@PathVariable("postId") long postId, Principal principal){
         return postService.delete(postId, principal.getName());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/post/{postId}/deactivate-purchase")
+    public ResponseEntity deactivatePurchase(Principal principal, @PathVariable Long postId){
+        postService.deactivatePurchase(principal.getName(),postId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/post/{postId}/activate-purchase")
+    public ResponseEntity activatePurchase(Principal principal, @PathVariable Long postId){
+        postService.activatePurchase(principal.getName(),postId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

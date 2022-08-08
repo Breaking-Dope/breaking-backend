@@ -69,8 +69,10 @@ public class DetailPostResponseDto {
 
 	private int totalCommentCount;
 
+	private boolean isMyPost = false;
+
 	@Builder
-	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdTime, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount) {
+	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdTime, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount, boolean isMyPost) {
 		this.isLiked = isLiked;
 		this.isBookmarked = isBookmarked;
 		this.isPurchased = isPurchased;
@@ -93,6 +95,7 @@ public class DetailPostResponseDto {
 		this.isHidden = isHidden;
 		this.likeCount = likeCount;
 		this.totalCommentCount = totalCommentCount;
+		this.isMyPost = isMyPost;
 	}
 }
 

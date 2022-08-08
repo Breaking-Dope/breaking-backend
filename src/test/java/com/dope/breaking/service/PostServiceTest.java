@@ -287,6 +287,7 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isBookmarked());
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
+        Assertions.assertFalse(detailPostResponseDto.isMyPost());
     }
 
 
@@ -325,6 +326,7 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isBookmarked());
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
+        Assertions.assertTrue(detailPostResponseDto.isMyPost());
     }
 
     @DisplayName("존재하지 않는 게시글을 삭제할 시, 예외가 반환된다.")

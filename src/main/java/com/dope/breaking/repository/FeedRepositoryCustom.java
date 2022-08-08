@@ -10,4 +10,7 @@ import java.util.List;
 public interface FeedRepositoryCustom {
 
     List<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me);
+
+    List<FeedResultPostDto> searchUserPageBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me);
+
 }

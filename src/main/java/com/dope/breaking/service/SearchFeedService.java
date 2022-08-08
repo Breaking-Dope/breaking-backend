@@ -21,7 +21,6 @@ public class SearchFeedService {
 
     private final FeedRepository feedRepository;
     private final PostRepository postRepository;
-
     private final UserRepository userRepository;
 
     public List<FeedResultPostDto> searchFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
@@ -41,7 +40,12 @@ public class SearchFeedService {
             searchFeedConditionDto.setDateTo(LocalDateTime.now());
         }
 
-        return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
+        if(searchFeedConditionDto.getUserPageFeedOption() != null) {
+            return feedRepository.searchUserPageBy(searchFeedConditionDto, cursorPost, me);
+        } else {
+            return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
+        }
+
     }
 
 }

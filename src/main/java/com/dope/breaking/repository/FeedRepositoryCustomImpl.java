@@ -22,8 +22,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.dope.breaking.domain.financial.QPurchase.purchase;
 import static com.dope.breaking.domain.post.QPostLike.*;
 import static com.dope.breaking.domain.post.QPost.post;
+import static com.dope.breaking.domain.user.QBookmark.bookmark;
 import static com.dope.breaking.domain.user.QUser.user;
 
 @Repository
@@ -49,7 +51,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .leftJoin(post.postLikeList, postLike)
                 .where(
                         post.isHidden.eq(false),
-                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), searchFeedConditionDto.getOwnerId()),
                         soldOption(searchFeedConditionDto.getSoldOption()),
                         period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
@@ -94,7 +95,61 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         return content;
     }
 
-    private Predicate userPageFeedOption(UserPageFeedOption userPageFeedOption, Long ownerId) {
+    @Override
+    public List<FeedResultPostDto> searchUserPageBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me) {
+
+        List<Tuple> paginatedResult = queryFactory
+                .select(post.id, postLike.post.id.count())
+                .from(post)
+                .leftJoin(post.postLikeList, postLike)
+                .leftJoin(post.bookmarkList, bookmark)
+                .leftJoin(post.purchaseList, purchase)
+                .where(
+                        post.isHidden.eq(false),
+                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), searchFeedConditionDto.getOwnerId(), me),
+                        cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
+                        sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
+                )
+                .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
+                .groupBy(post.id, postLike.post.id)
+                .limit(searchFeedConditionDto.getSize())
+                .fetch();
+
+        List<Long> contentIdList = paginatedResult.stream().map(x -> x.get(post.id)).collect(Collectors.toList());
+
+        List<FeedResultPostDto> content = queryFactory
+                .select(new QFeedResultPostDto(
+                        post.id,
+                        post.title,
+                        post.location.address,
+                        post.thumbnailImgURL,
+                        post.postLikeList.size(),
+                        post.postType,
+                        post.isSold,
+                        post.viewCount,
+                        user.id,
+                        user.compressedProfileImgURL,
+                        user.nickname,
+                        post.price,
+                        Expressions.asBoolean(false),
+                        Expressions.asBoolean(false),
+                        post.createdDate
+                ))
+                .from(post)
+                .leftJoin(post.user, user)
+                .where(post.id.in(contentIdList))
+                .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
+                .fetch();
+
+        for(FeedResultPostDto dto : content) {
+            dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
+            dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
+        }
+
+        return content;
+    }
+
+    private Predicate userPageFeedOption(UserPageFeedOption userPageFeedOption, Long ownerId, User me) {
 
         if(userPageFeedOption == null) {
             return null;
@@ -102,7 +157,9 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
 
         switch (userPageFeedOption) {
             case BUY:
+                return purchase.user.eq(me);
             case BOOKMARK:
+                return bookmark.user.eq(me);
             case WRITE:
             default:
                 return post.user.id.eq(ownerId);

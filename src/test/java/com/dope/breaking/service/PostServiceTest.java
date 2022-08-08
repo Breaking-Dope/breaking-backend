@@ -249,9 +249,6 @@ class PostServiceTest {
     }
 
 
-
-
-
     @DisplayName(value = "로그인을 하지 않은 유저가 게시글을 조회하려고 할 시, 게시글이 반환된다.")
     @Test
     void readWithAnonymous() {
@@ -290,10 +287,47 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isMyPost());
     }
 
+    @DisplayName(value = "로그인을 하지 않은 유저가 익명 게시글을 조회하려고 할 시, 제보자 정보가 null로 반환된다.")
+    @Test
+    void readAnonymousPostWithoutLogin() {
+        Location location = Location.builder()
+                .longitude(1.2)
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
+
+        Post post= Post.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(true)
+                .postType(PostType.FREE)
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .location(location)
+                .build();
+
+
+        long postId = postRepository.save(post).getId();
+        User user = userRepository.findByUsername("12345g").get();
+        post.setUser(user);
+
+        //When
+        DetailPostResponseDto detailPostResponseDto = postService.read(postId, null);
+
+        //Then
+        Assertions.assertFalse(detailPostResponseDto.isMyPost());
+        Assertions.assertNull(detailPostResponseDto.getUser().getUserId());
+
+    }
+
 
     @DisplayName(value = "로그인한 사용자가 게시글 조회 시, 게시글이 반환한다.")
     @Test
-    void readWithLikedUser() {
+    void readByLoggedinUser() {
         Location location = Location.builder()
                 .longitude(1.2)
                 .address("andong")
@@ -327,6 +361,80 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
         Assertions.assertTrue(detailPostResponseDto.isMyPost());
+    }
+
+    @DisplayName(value = "다른 사용자가 익명 게시글을 조회할 시, 사용자 정보는 null로 반환된다.")
+    @Test
+    void readAnonymousByOtherUser() {
+        Location location = Location.builder()
+                .longitude(1.2)
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
+
+        Post post= Post.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(true)
+                .postType(PostType.FREE)
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .location(location)
+                .build();
+
+
+        long postId = postRepository.save(post).getId();
+        User user = new User();
+        userRepository.save(user);
+        post.setUser(user);
+
+        //When
+        DetailPostResponseDto detailPostResponseDto = postService.read(postId, "12345g");
+
+        //Then
+       Assertions.assertNull(detailPostResponseDto.getUser().getUserId());
+
+    }
+
+    @DisplayName(value = "본인이 본인의 익명 게시글을 조회할 시, 사용자 정보가 나타난다 반환된다.")
+    @Test
+    void readAnonymousByWriter() {
+        Location location = Location.builder()
+                .longitude(1.2)
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
+
+        Post post= Post.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(true)
+                .postType(PostType.FREE)
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .location(location)
+                .build();
+
+
+        long postId = postRepository.save(post).getId();
+        User user = userRepository.findByUsername("12345g").get();
+        post.setUser(user);
+
+        //When
+        DetailPostResponseDto detailPostResponseDto = postService.read(postId, "12345g");
+
+        //Then
+        Assertions.assertNotNull(detailPostResponseDto.getUser().getUserId());
+        Assertions.assertTrue(detailPostResponseDto.isMyPost());
+
     }
 
     @DisplayName("존재하지 않는 게시글을 삭제할 시, 예외가 반환된다.")

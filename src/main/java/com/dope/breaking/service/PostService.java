@@ -158,6 +158,7 @@ public class PostService {
 
     @Transactional
     public DetailPostResponseDto read(Long postId, String crntUsername) {
+
         //1. 없다면 예외반환.
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException:: new);
 
@@ -174,15 +175,19 @@ public class PostService {
             isMyPost = user == post.getUser();
         }
 
+        WriterDto writerDto = new WriterDto();
+
+        if(!(!isMyPost && post.isAnonymous())){
+            writerDto = WriterDto.builder()
+                    .nickname(post.getUser().getNickname())
+                    .phoneNumber(post.getUser().getPhoneNumber())
+                    .profileImgURL(post.getUser().getOriginalProfileImgURL())
+                    .userId(post.getUser().getId()).build();
+        }
+
 
         //조회수 증가.
         post.updateViewCount();
-
-        WriterDto writerDto = WriterDto.builder()
-                .nickname(post.getUser().getNickname())
-                .phoneNumber(post.getUser().getPhoneNumber())
-                .profileImgURL(post.getUser().getOriginalProfileImgURL())
-                .userId(post.getUser().getId()).build();
 
         LocationDto locationDto = LocationDto.builder()
                 .address(post.getLocation().getAddress())

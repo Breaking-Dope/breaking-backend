@@ -1,7 +1,5 @@
 package com.dope.breaking.domain.post;
 
-
-
 import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.financial.Purchase;

@@ -67,7 +67,7 @@ public class FeedServiceTest {
         given(feedRepository.searchUserPageBy(searchFeedConditionDto, null, null)).willReturn(dummy);
 
         //when
-        List<FeedResultPostDto> result = feedService.searchFeed(searchFeedConditionDto, null, null);
+        List<FeedResultPostDto> result = feedService.searchUserFeed(searchFeedConditionDto, null, null);
 
         //then
         Assertions.assertEquals(2, result.size());

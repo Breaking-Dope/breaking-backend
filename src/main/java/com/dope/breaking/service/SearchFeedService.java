@@ -6,6 +6,8 @@ import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.post.NoSuchPostException;
+import com.dope.breaking.exception.user.LoginRequireException;
+import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -23,7 +25,7 @@ public class SearchFeedService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public List<FeedResultPostDto> searchFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
+    public List<FeedResultPostDto> searchMainFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
 
         User me = null;
         if(username != null) {
@@ -40,11 +42,33 @@ public class SearchFeedService {
             searchFeedConditionDto.setDateTo(LocalDateTime.now());
         }
 
-        if(searchFeedConditionDto.getUserPageFeedOption() != null) {
-            return feedRepository.searchUserPageBy(searchFeedConditionDto, cursorPost, me);
-        } else {
-            return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
+        return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
+
+    }
+
+    public List<FeedResultPostDto> searchUserFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
+
+        User me = null;
+        if(username != null) {
+
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+
+            if(searchFeedConditionDto.getUserPageFeedOption() != UserPageFeedOption.WRITE
+                    && searchFeedConditionDto.getOwnerId() == me.getId()) {
+                throw new NoPermissionException();
+            }
+
+        } else if(searchFeedConditionDto.getUserPageFeedOption() != UserPageFeedOption.WRITE) {
+
+            throw new LoginRequireException();
         }
+
+        Post cursorPost = null;
+        if(cursorId != null && cursorId != 0) {
+            cursorPost = postRepository.findById(cursorId).orElseThrow(NoSuchPostException::new);
+        }
+
+        return feedRepository.searchUserPageBy(searchFeedConditionDto, cursorPost, me);
 
     }
 

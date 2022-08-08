@@ -55,7 +55,7 @@ public class FeedAPI {
             username = principal.getName();
         }
 
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, username, cursorId));
+        return ResponseEntity.ok().body(searchFeedService.searchMainFeed(searchFeedConditionDto, username, cursorId));
 
     }
 
@@ -82,7 +82,7 @@ public class FeedAPI {
             username = principal.getName();
         }
 
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, username, cursorId));
+        return ResponseEntity.ok().body(searchFeedService.searchUserFeed(searchFeedConditionDto, username, cursorId));
 
     }
 

@@ -1,7 +1,5 @@
 package com.dope.breaking.domain.post;
 
-
-
 import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.financial.Purchase;
@@ -59,6 +57,7 @@ public class Post extends BaseTimeEntity {
 
     private String title;
 
+    @Column(length = 2500)
     private String content;
 
     @Enumerated(EnumType.STRING)

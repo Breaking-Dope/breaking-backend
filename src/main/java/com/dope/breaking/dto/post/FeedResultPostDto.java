@@ -26,12 +26,12 @@ public class FeedResultPostDto {
     private int price;
     private Boolean isLiked;
     private Boolean isBookmarked;
-    private LocalDateTime createdTime;
+    private LocalDateTime createdDate;
 
     @QueryProjection
     public FeedResultPostDto(Long postId, String title, String region, String thumbnailImgURL, int likeCount,
                              PostType postType, Boolean isSold, int viewCount, Long userId, String profileImgURL,
-                             String nickname, int price, Boolean isLiked, Boolean isBookmarked, LocalDateTime createdTime) {
+                             String nickname, int price, Boolean isLiked, Boolean isBookmarked, LocalDateTime createdDate) {
         this.postId = postId;
         this.title = title;
         this.region = region;
@@ -46,7 +46,7 @@ public class FeedResultPostDto {
         this.price = price;
         this.isLiked = isLiked;
         this.isBookmarked = isBookmarked;
-        this.createdTime = createdTime;
+        this.createdDate = createdDate;
     }
 
 }

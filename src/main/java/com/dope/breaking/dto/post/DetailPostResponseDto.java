@@ -46,7 +46,7 @@ public class DetailPostResponseDto {
 
 	private LocalDateTime eventTime;
 
-	private LocalDateTime createdTime;
+	private LocalDateTime createdDate;
 
 	private LocalDateTime modifiedTime;
 
@@ -72,7 +72,7 @@ public class DetailPostResponseDto {
 	private boolean isMyPost = false;
 
 	@Builder
-	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdTime, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount, boolean isMyPost) {
+	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdDate, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount, boolean isMyPost) {
 		this.isLiked = isLiked;
 		this.isBookmarked = isBookmarked;
 		this.isPurchased = isPurchased;
@@ -86,7 +86,7 @@ public class DetailPostResponseDto {
 		this.postType = postType;
 		this.isAnonymous = isAnonymous;
 		this.eventTime = eventTime;
-		this.createdTime = createdTime;
+		this.createdDate = createdDate;
 		this.modifiedTime = modifiedTime;
 		this.viewCount = viewCount;
 		this.isSold = isSold;

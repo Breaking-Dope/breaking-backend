@@ -211,7 +211,7 @@ public class PostService {
                 .postType(post.getPostType().getTitle())
                 .isAnonymous(post.isAnonymous())
                 .eventTime(post.getEventTime())
-                .createdTime(post.getCreatedDate())
+                .createdDate(post.getCreatedDate())
                 .modifiedTime(post.getModifiedDate())
                 .viewCount(post.getViewCount())
                 .bookmarkedCount(bookmarkRepository.countByPost(post))

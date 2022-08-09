@@ -7,12 +7,14 @@ import com.dope.breaking.dto.user.*;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.auth.NotFoundUserAgent;
 import com.dope.breaking.exception.user.DuplicatedUserInformationException;
 import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.security.jwt.DistinguishUserAgent;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.RedisService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,13 +25,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -46,11 +50,14 @@ public class UserService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final DistinguishUserAgent distinguishUserAgent;
+
     private final RedisService redisService;
 
 
+    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg, HttpServletRequest httpServletRequest) throws ServletException, IOException {
 
-    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg) {
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow(() -> new NotFoundUserAgent());
 
         SignUpRequestDto signUpRequestDto = transformUserInformationToObject(signUpRequest);
 
@@ -81,10 +88,11 @@ public class UserService {
         userRepository.save(user);
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername()));
+        String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
+        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername(), userAgentType));
         String refreshjwt = jwtTokenProvider.createRefreshToken(signUpRequestDto.getUsername());
         httpHeaders.set("Authorization-Refresh", refreshjwt);
-        redisService.setDataWithExpiration(signUpRequestDto.getUsername(), refreshjwt,2 * 604800L); //리플리쉬 토큰 redis에 저장.
+        redisService.setDataWithExpiration(userAgentType + "_" + signUpRequestDto.getUsername(), refreshjwt, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
 
         UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                 .balance(user.getBalance())
@@ -111,7 +119,7 @@ public class UserService {
         String currentCompressedProfileImgURL = user.getCompressedProfileImgURL();
 
 
-        if(updateUserRequestDto.getIsProfileImgChanged()) {
+        if (updateUserRequestDto.getIsProfileImgChanged()) {
 
             // case 1: 유저 본인 선택 이미지 -> 기본 이미지
             if (currentOriginalProfileImgUrl != null && profileImg == null) {
@@ -138,8 +146,7 @@ public class UserService {
                 toSetCompressedProfileImgURL = mediaService.compressImage(toSetOriginalProfileImgURL);
             }
 
-        }
-        else{
+        } else {
 
             toSetOriginalProfileImgURL = currentOriginalProfileImgUrl;
             toSetCompressedProfileImgURL = currentCompressedProfileImgURL;
@@ -192,7 +199,7 @@ public class UserService {
         //String 으로 되어있는 객체를 변환
         try {
             updateUserRequestDto = mapper.readerFor(UpdateUserRequestDto.class).readValue(updateUserRequest);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CustomInternalErrorException(e.getMessage());
         }
 
@@ -249,9 +256,9 @@ public class UserService {
 
     public void validatePhoneNumber(String phoneNumber, String username) {
 
-        if(username != null) {
+        if (username != null) {
             String currentUserPhoneNumber = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new).getPhoneNumber();
-            if(currentUserPhoneNumber.equals(phoneNumber)) {
+            if (currentUserPhoneNumber.equals(phoneNumber)) {
                 return;
             }
         }
@@ -268,9 +275,9 @@ public class UserService {
 
     public void validateEmail(String email, String username) {
 
-        if(username != null) {
+        if (username != null) {
             String currentUserEmail = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new).getEmail();
-            if(currentUserEmail.equals(email)) {
+            if (currentUserEmail.equals(email)) {
                 return;
             }
         }
@@ -287,9 +294,9 @@ public class UserService {
 
     public void validateNickname(String nickname, String username) {
 
-        if(username != null) {
+        if (username != null) {
             String currentUserNickname = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new).getNickname();
-            if(currentUserNickname.equals(nickname)) {
+            if (currentUserNickname.equals(nickname)) {
                 return;
             }
         }
@@ -323,7 +330,7 @@ public class UserService {
         int postCount = postRepository.countPostByUser(user);
 
         boolean isFollowing = false;
-        if(username != null) {
+        if (username != null) {
             User me = userRepository.findByUsername(username).orElseThrow();
             isFollowing = followRepository.existsFollowsByFollowedAndFollowing(user, me);
         }

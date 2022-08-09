@@ -18,6 +18,9 @@ import java.util.*;
 @Component //빈 등록
 public class JwtTokenProvider {
 
+    private final DistinguishUserAgent distinguishUserAgent;
+
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -35,12 +38,13 @@ public class JwtTokenProvider {
         secret = Base64.getEncoder().encodeToString(secret.getBytes());
     }
 
-    public String createAccessToken(String username) {
+    public String createAccessToken(String username, String userAgent) {
         Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuer("AccessToken")
+                .setAudience(userAgent)
                 .setIssuedAt(now) // 토큰 발행 시간 정보
                 .setExpiration(new Date(now.getTime() + accesstokenValidityInMilliseconds)) // set Expire Time
                 .signWith(SignatureAlgorithm.HS256, secret)  // 사용할 암호화 알고리즘과 signature 에 들어갈 secret값 세팅
@@ -52,7 +56,6 @@ public class JwtTokenProvider {
         Date now = new Date();
         return Jwts.builder()
                 //토큰 종류 지정
-
                 .setClaims(claims) //유저이름 지정.
                 .setIssuer("RefreshToken")
                 .setIssuedAt(now)
@@ -94,6 +97,11 @@ public class JwtTokenProvider {
     public String getTokenType(String token){
         String tokenType = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getIssuer();
         return tokenType;
+    }
+
+    public String getUserAgent(String token){
+        String userAgent = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getAudience();
+        return userAgent;
     }
 
 

@@ -55,7 +55,7 @@ public class FeedAPI {
             username = principal.getName();
         }
 
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, username, cursorId));
+        return ResponseEntity.ok().body(searchFeedService.searchMainFeed(searchFeedConditionDto, username, cursorId));
 
     }
 
@@ -71,7 +71,6 @@ public class FeedAPI {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .size(size)
-                .ownerId(ownerId)
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
                 .userPageFeedOption(UserPageFeedOption.findMatchedEnum(userFeedPostOption))
                 .sortStrategy(SortStrategy.CHRONOLOGICAL)
@@ -82,7 +81,7 @@ public class FeedAPI {
             username = principal.getName();
         }
 
-        return ResponseEntity.ok().body(searchFeedService.searchFeed(searchFeedConditionDto, username, cursorId));
+        return ResponseEntity.ok().body(searchFeedService.searchUserFeed(searchFeedConditionDto, ownerId, username, cursorId));
 
     }
 

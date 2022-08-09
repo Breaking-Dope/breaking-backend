@@ -4,6 +4,8 @@ import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.exception.user.LoginRequireException;
+import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FeedServiceTest {
@@ -41,20 +44,21 @@ public class FeedServiceTest {
     void searchUserPageTest() {
 
         //given
-        User user = new User();
+        User owner = new User();
         Post post1 = Post.builder()
                 .title("post1")
                 .build();
-        post1.setUser(user);
+        post1.setUser(owner);
         Post post2 = Post.builder()
                 .title("post2")
                 .build();
-        post2.setUser(user);
+        post2.setUser(owner);
 
-        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder().build();
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.WRITE)
+                .build();
 
-        Mockito.lenient().when(userRepository.findByUsername(null)).thenReturn(Optional.of(user));
-        Mockito.lenient().when(postRepository.findById(0L)).thenReturn(null);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
         List<FeedResultPostDto> dummy = new ArrayList<>();
         FeedResultPostDto content1 = new FeedResultPostDto();
         content1.setTitle("post1");
@@ -62,12 +66,126 @@ public class FeedServiceTest {
         FeedResultPostDto content2 = new FeedResultPostDto();
         content2.setTitle("post2");
         dummy.add(content2);
-        given(feedRepository.searchFeedBy(searchFeedConditionDto, null, null)).willReturn(dummy);
+        given(feedRepository.searchUserPageBy(searchFeedConditionDto, owner, null, null)).willReturn(dummy);
 
         //when
-        List<FeedResultPostDto> result = feedService.searchFeed(searchFeedConditionDto, null, null);
+        List<FeedResultPostDto> result = feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null);
 
         //then
         Assertions.assertEquals(2, result.size());
+    }
+
+    @DisplayName("다른 유저의 북마크 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenOtherUserSearchOtherUserBookmarkList() {
+
+        //given
+
+        User guest = User.builder()
+                .username("guestUsername")
+                .build();
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BOOKMARK)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(userRepository.findByUsername("guestUsername")).thenReturn(Optional.of(guest));
+
+        //when, then
+        Assertions.assertThrows(NoPermissionException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, "guestUsername", null));
+
+    }
+
+    @DisplayName("다른 유저의 구매 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenOtherUserSearchOtherUserPurchaseList() {
+
+        //given
+
+        User guest = User.builder()
+                .username("guestUsername")
+                .build();
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BUY)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(userRepository.findByUsername("guestUsername")).thenReturn(Optional.of(guest));
+
+        //when, then
+        Assertions.assertThrows(NoPermissionException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, "guestUsername", null));
+
+    }
+
+    @DisplayName("로그인 하지 않은 유저가 북마크 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenGuestSearchOtherUserBookmarkList() {
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BOOKMARK)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+
+        //when, then
+        Assertions.assertThrows(LoginRequireException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null));
+
+    }
+
+    @DisplayName("로그인 하지 않은 유저가 구매 리스트를 조회할 때, 예외가 발생한다.")
+    @Test
+    void failureWhenGuestSearchOtherUserPurchaseList() {
+
+        User owner = User.builder()
+                .username("ownerUsername")
+                .build();
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.BUY)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+
+        //when, then
+        Assertions.assertThrows(LoginRequireException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null));
+
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 
 import static com.dope.breaking.domain.comment.QComment.comment;
 import static com.dope.breaking.domain.user.QUser.user;
+import static com.querydsl.core.types.ExpressionUtils.and;
 
 @Repository
 public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
@@ -82,7 +83,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
 
         switch (targetType) {
             case POST:
-                return comment.post.id.eq(targetId);
+                return and(comment.post.id.eq(targetId), comment.parent.isNull());
             case COMMENT:
                 return comment.parent.id.eq(targetId);
         }

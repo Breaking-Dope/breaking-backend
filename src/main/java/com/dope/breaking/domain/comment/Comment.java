@@ -1,5 +1,6 @@
 package com.dope.breaking.domain.comment;
 
+import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.hashtag.Hashtag;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
@@ -18,7 +19,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Comment {
+public class Comment extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column (name="COMMENT_ID")

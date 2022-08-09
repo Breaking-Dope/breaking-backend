@@ -3,7 +3,9 @@ package com.dope.breaking.service;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.UserBriefInformationResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.auth.NotFoundUserAgent;
 import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.security.jwt.DistinguishUserAgent;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.security.userInfoDto.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,11 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Optional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -25,8 +32,9 @@ public class Oauth2LoginService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    private final RedisService redisService;
+    private final DistinguishUserAgent distinguishUserAgent;
 
+    private final RedisService redisService;
 
     public ResponseEntity<String> kakaoUserInfo(String accessToken){
         HttpHeaders headers = new HttpHeaders();
@@ -51,7 +59,9 @@ public class Oauth2LoginService {
         return kakaoUserinfo;
     }
 
-    public ResponseEntity<?> kakaoLogin(ResponseEntity<String> kakaoUserinfo) throws ParseException {
+    public ResponseEntity<?> kakaoLogin(ResponseEntity<String> kakaoUserinfo, HttpServletRequest httpServletRequest) throws ParseException, ServletException, IOException {
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
+        log.info(userAgent);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(kakaoUserinfo.getBody());
         log.info(jsonObject.toJSONString());
@@ -87,12 +97,14 @@ public class Oauth2LoginService {
             return ResponseEntity.status(200).body(dto);
         } else {
             log.info("기존 유저 정보가 있음.");
-            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+            String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
+            log.info(userAgentType);
+            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername(), userAgentType);
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", accessToken);
             httpHeaders.set("Authorization-Refresh", refreshToken);
-            redisService.setDataWithExpiration(dto.getUsername(), refreshToken,2 * 604800L);
+            redisService.setDataWithExpiration(userAgentType + "_" +dto.getUsername(), refreshToken,2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
@@ -126,7 +138,9 @@ public class Oauth2LoginService {
 
 
 
-    public ResponseEntity<?> googleLogin(ResponseEntity<String> GoogleUserinfo) throws ParseException {
+    public ResponseEntity<?> googleLogin(ResponseEntity<String> GoogleUserinfo, HttpServletRequest httpServletRequest) throws ParseException, ServletException, IOException {
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
+
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(GoogleUserinfo.getBody());
         log.info(jsonObject.toJSONString());
@@ -139,14 +153,12 @@ public class Oauth2LoginService {
             log.info("유저 이메일을 불러올 수 없음");
             dto.setEmail(null);
         }
-
         if(jsonObject.containsKey("given_name")) {
             dto.setFullname(jsonObject.get("given_name").toString());
         }else{
             log.info("유저 이름을 불러올 수 없음");
             dto.setFullname(null);
         }
-
         if(jsonObject.containsKey("picture")){
 
             dto.setProfileImgURL(jsonObject.get("picture").toString());
@@ -154,18 +166,18 @@ public class Oauth2LoginService {
             log.info("기존 프로필 사진을 불러올 수 없음");
             dto.setProfileImgURL(null);
         }
-
         if (!userRepository.existsByUsername(dto.getUsername())) {
             log.info("유저 정보가 없음");
             return ResponseEntity.status(200).body(dto);
         } else {
             log.info("유저 정보가 있다.");
-            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername());
+            String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
+            String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername(), userAgentType);
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("Authorization", accessToken);
             httpHeaders.set("Authorization-Refresh", refreshToken);
-            redisService.setDataWithExpiration(dto.getUsername(), refreshToken, 2 * 604800L);
+            redisService.setDataWithExpiration(userAgentType + "_" + dto.getUsername(), refreshToken, 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
@@ -174,7 +186,6 @@ public class Oauth2LoginService {
                     .profileImgURL(user.getOriginalProfileImgURL())
                     .build();
             return new ResponseEntity<UserBriefInformationResponseDto>(userBriefInformationResponseDto, httpHeaders, HttpStatus.OK);
-
         }
     }
 }

@@ -3,6 +3,8 @@ package com.dope.breaking.service;
 import com.dope.breaking.exception.auth.ExpiredRefreshTokenException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.auth.InvalidRefreshTokenException;
+import com.dope.breaking.exception.auth.NotFoundUserAgent;
+import com.dope.breaking.security.jwt.DistinguishUserAgent;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -14,7 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,9 +28,13 @@ public class JwtAuthenticationService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final DistinguishUserAgent distinguishUserAgent;
+
     private final RedisService redisService;
 
-    public ResponseEntity<?> reissue(String accessToken, String refreshToken) throws IOException {
+    public ResponseEntity<?> reissue(String accessToken, String refreshToken, HttpServletRequest httpServletRequest) throws IOException, ServletException {
+
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
 
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
         String getRefreshToken = jwtTokenProvider.extractRefreshToken(refreshToken).orElse(null);
@@ -40,20 +49,22 @@ public class JwtAuthenticationService {
             }
         } else if (getAccessToken != null && jwtTokenProvider.validateToken(getRefreshToken) == true) {
             String username = jwtTokenProvider.getUsername(getRefreshToken);
-            String redisRefreshToken = redisService.getData(username);
+            String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
+            log.info(userAgentType);
+            String redisRefreshToken = redisService.getData(userAgentType + "_" + username);
             if (!getRefreshToken.equals(redisRefreshToken)) { //Redis에 저장된 Refresh토큰이 존재하지 않을 때.
                 throw new InvalidRefreshTokenException();
             }
-            if(jwtTokenProvider.validateToken(getAccessToken) == true) { //만일 유효한 엑세스토큰이라면 블랙리스트로 지정.
+            if (jwtTokenProvider.validateToken(getAccessToken) == true) { //만일 유효한 엑세스토큰이라면 블랙리스트로 지정.
                 Long expiration = jwtTokenProvider.getExpireTime(getAccessToken);
                 redisService.setBlackListToken(getAccessToken, "BLACKLIST_ACCESSTOKEN_" + username, expiration); //엑세스 토큰 블랙리스트 저장
             }
 
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username));
+            httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username, userAgentType));
             String newRefrsehToken = jwtTokenProvider.createRefreshToken(username);
             httpHeaders.set("Authorization-Refresh", newRefrsehToken);
-            redisService.setDataWithExpiration(username, newRefrsehToken, 2 * 604800L);
+            redisService.setDataWithExpiration(userAgentType + "_" + username, newRefrsehToken, 2 * 604800L);
 
             return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();
         }
@@ -61,11 +72,13 @@ public class JwtAuthenticationService {
     }
 
 
-    public ResponseEntity<?> logout(String accessToken) throws IOException {
+    public ResponseEntity<?> logout(String accessToken) throws IOException, ServletException {
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
 
         String username = jwtTokenProvider.getUsername(getAccessToken);
-        redisService.deleteValues(username); //레디스에 저장된 refreshToken 삭제
+        String userAgentType = jwtTokenProvider.getUserAgent(getAccessToken);
+        log.info(userAgentType);
+        redisService.deleteValues(userAgentType + "_" + username); //레디스에 저장된 refreshToken 삭제
 
         Long expiration = jwtTokenProvider.getExpireTime(getAccessToken);
         redisService.setBlackListToken(getAccessToken, "BLACKLIST_ACCESSTOKEN_" + username, expiration); //엑세스 토큰 블랙리스트 저장

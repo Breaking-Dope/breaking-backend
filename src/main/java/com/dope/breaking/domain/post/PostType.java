@@ -6,9 +6,9 @@ import lombok.*;
 @ToString
 @RequiredArgsConstructor
 public enum PostType {
-    EXCLUSIVE("exclusive"),
-    CHARGED("charged"),
-    FREE("free");
+    EXCLUSIVE("EXCLUSIVE"),
+    CHARGED("CHARGED"),
+    FREE("FREE");
 
     private final String title;
 }

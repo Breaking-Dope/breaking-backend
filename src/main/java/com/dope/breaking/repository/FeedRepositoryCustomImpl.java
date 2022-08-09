@@ -15,6 +15,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -105,7 +106,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .leftJoin(post.bookmarkList, bookmark)
                 .leftJoin(post.purchaseList, purchase)
                 .where(
-                        post.isHidden.eq(false),
+                        hiddenPostFilter(owner, me),
                         userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
                         sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
@@ -147,6 +148,15 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         }
 
         return content;
+    }
+
+    private Predicate hiddenPostFilter(User owner, User me) {
+
+        if(owner == me) {
+            return null;
+        } else {
+            return post.isHidden.eq(false);
+        }
     }
 
     private Predicate userPageFeedOption(UserPageFeedOption userPageFeedOption, User owner, User me) {

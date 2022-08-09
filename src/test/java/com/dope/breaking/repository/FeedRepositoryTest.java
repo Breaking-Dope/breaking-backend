@@ -81,4 +81,55 @@ public class FeedRepositoryTest {
         assertTrue(result.get(0).getIsBookmarked());
     }
 
+    @DisplayName("다른 사람이 숨긴 게시글은, 유저 페이지에 나타나지 않는다.")
+    @Test
+    void hideHiddenPostInOtherUserPage() {
+
+        User owner = new User();
+        userRepository.save(owner);
+        Post post = Post.builder()
+                .isHidden(true)
+                .build();
+        postRepository.save(post);
+        Bookmark bookmark = new Bookmark(owner, post);
+        bookmarkRepository.save(bookmark);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, null, null);
+
+        assertTrue(result.isEmpty());
+    }
+    @DisplayName("본인이 숨긴 게시글은, 본인 유저 페이지에서 나타난다.")
+    @Test
+    void displayHiddenPostInMyPage() {
+
+        User user = new User();
+        userRepository.save(user);
+        Post post = Post.builder()
+                .isHidden(true)
+                .build();
+        postRepository.save(post);
+        Bookmark bookmark = new Bookmark(user, post);
+        bookmarkRepository.save(bookmark);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, user, null);
+
+        assertEquals(result.get(0).getPostId(), post.getId());
+    }
+
 }

@@ -158,33 +158,36 @@ public class PostService {
 
     @Transactional
     public DetailPostResponseDto read(Long postId, String crntUsername) {
-        //1. 없다면 예외반환.
-        if (!postRepository.findById(postId).isPresent()) {
-            throw new NoSuchPostException();
-        }
 
-        Post post = postRepository.getById(postId);
+        //1. 없다면 예외반환.
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException:: new);
 
         //2. 현재 사용자 게시글 좋아요 했는지 판별
         boolean isLiked = false;
         boolean isBookmarked = false;
         boolean isPurchased = false;
+        boolean isMyPost = false;
         if (crntUsername != null) {
             User user = userRepository.findByUsername(crntUsername).get();
             isLiked = postLikeRepository.existsPostLikesByUserAndPost(user, post);
             isBookmarked = bookmarkRepository.existsByUserAndPost(user, post);
             isPurchased = purchaseRepository.existsByPostAndUser(post, user);
+            isMyPost = user == post.getUser();
+        }
+
+        WriterDto writerDto = null;
+
+        if(!(!isMyPost && post.isAnonymous())){
+            writerDto = WriterDto.builder()
+                    .nickname(post.getUser().getNickname())
+                    .phoneNumber(post.getUser().getPhoneNumber())
+                    .profileImgURL(post.getUser().getOriginalProfileImgURL())
+                    .userId(post.getUser().getId()).build();
         }
 
 
         //조회수 증가.
         post.updateViewCount();
-
-        WriterDto writerDto = WriterDto.builder()
-                .nickname(post.getUser().getNickname())
-                .phoneNumber(post.getUser().getPhoneNumber())
-                .profileImgURL(post.getUser().getOriginalProfileImgURL())
-                .userId(post.getUser().getId()).build();
 
         LocationDto locationDto = LocationDto.builder()
                 .address(post.getLocation().getAddress())
@@ -217,6 +220,7 @@ public class PostService {
                 .soldCount(purchaseRepository.countByPost(post))
                 .isHidden(post.isHidden())
                 .totalCommentCount(commentRepository.countByPost(post))
+                .isMyPost(isMyPost)
                 .build();
 
         return detailPostResponseDto;

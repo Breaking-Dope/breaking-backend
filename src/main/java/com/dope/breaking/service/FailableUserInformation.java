@@ -1,6 +1,5 @@
 package com.dope.breaking.service;
 
-import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.ErrorCode;
 
 public enum FailableUserInformation {

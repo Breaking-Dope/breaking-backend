@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
@@ -18,7 +21,13 @@ public class CustomExceptionHandler {
     @ExceptionHandler(CustomInternalErrorException.class)
     protected ResponseEntity<ErrorResponseDto> handleCustomInternalErrorException(CustomInternalErrorException e) {
 
-        log.error(e.getMessage());
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        String stacktraceAsString = sw.toString();
+
+        log.error(stacktraceAsString);
+        System.out.println("e.getMessage() = " + e.getMessage());
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponseDto(ErrorCode.INTERNAL_SERVER_ERROR));

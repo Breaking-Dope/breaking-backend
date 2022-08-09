@@ -5,8 +5,6 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-
-
   jpa:
     hibernate:
       ddl-auto: create
@@ -14,6 +12,7 @@ spring:
       hibernate:
         #        show_sql: true
         format_sql: true
+
   profiles:
     include: jwt
 
@@ -27,12 +26,12 @@ spring:
       max-file-size: 100MB
       max-request-size: 200MB
 
-
   redis:
     host: localhost
     port: 6379
 
-logging.level:
-  org.hibernate.SQL: debug
 
+logging:
+  level:
+    org.hibernate.SQL: debug
 

@@ -131,4 +131,35 @@ class CommentRepositoryTest {
         assertEquals(4, content2.size());
         assertEquals(2, content3.size(), ()->"마지막 페지이는 2개가 나온다.");
     }
+
+    @DisplayName("최상위 댓글 조회에서는 대댓글이 조회되지 않는다.")
+    @Test
+    void replyCommentNotSearchedInParentCommentSearch() {
+
+        User me = new User();
+        userRepository.save(me);
+
+        Post post = new Post();
+        postRepository.save(post);
+
+        Comment parentComment = new Comment(me, post, "부모댓글");
+        commentRepository.save(parentComment);
+
+        Comment replyComment = new Comment(me, post, parentComment, "자식댓글");
+        commentRepository.save(replyComment);
+
+        em.flush();
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetId(post.getId())
+                .targetType(CommentTargetType.POST)
+                .size(4L)
+                .cursorId(null)
+                .build();
+
+        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+
+        assertEquals(1, content1.size());
+        assertEquals(parentComment.getId(), content1.get(0).getCommentId());
+    }
 }

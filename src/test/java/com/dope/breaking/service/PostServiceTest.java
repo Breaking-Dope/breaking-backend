@@ -10,6 +10,8 @@ import com.dope.breaking.dto.post.DetailPostResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.exception.NotValidRequestBodyException;
+import com.dope.breaking.exception.post.AlreadyNotPurchasableException;
+import com.dope.breaking.exception.post.AlreadyPurchasableException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -22,8 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.persistence.EntityManager;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,7 +55,6 @@ class PostServiceTest {
 
 
     @BeforeEach
-    @Test
     void saveUser() {
         User user = User.builder()
                 .username("12345g")
@@ -250,9 +249,6 @@ class PostServiceTest {
     }
 
 
-
-
-
     @DisplayName(value = "로그인을 하지 않은 유저가 게시글을 조회하려고 할 시, 게시글이 반환된다.")
     @Test
     void readWithAnonymous() {
@@ -288,12 +284,50 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isBookmarked());
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
+        Assertions.assertFalse(detailPostResponseDto.isMyPost());
+    }
+
+    @DisplayName(value = "로그인을 하지 않은 유저가 익명 게시글을 조회하려고 할 시, 제보자 정보가 null로 반환된다.")
+    @Test
+    void readAnonymousPostWithoutLogin() {
+        Location location = Location.builder()
+                .longitude(1.2)
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
+
+        Post post= Post.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(true)
+                .postType(PostType.FREE)
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .location(location)
+                .build();
+
+
+        long postId = postRepository.save(post).getId();
+        User user = userRepository.findByUsername("12345g").get();
+        post.setUser(user);
+
+        //When
+        DetailPostResponseDto detailPostResponseDto = postService.read(postId, null);
+
+        //Then
+        Assertions.assertFalse(detailPostResponseDto.isMyPost());
+        Assertions.assertNull(detailPostResponseDto.getUser());
+
     }
 
 
     @DisplayName(value = "로그인한 사용자가 게시글 조회 시, 게시글이 반환한다.")
     @Test
-    void readWithLikedUser() {
+    void readByLoggedinUser() {
         Location location = Location.builder()
                 .longitude(1.2)
                 .address("andong")
@@ -326,6 +360,81 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isBookmarked());
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
+        Assertions.assertTrue(detailPostResponseDto.isMyPost());
+    }
+
+    @DisplayName(value = "다른 사용자가 익명 게시글을 조회할 시, 사용자 정보는 null로 반환된다.")
+    @Test
+    void readAnonymousByOtherUser() {
+        Location location = Location.builder()
+                .longitude(1.2)
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
+
+        Post post= Post.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(true)
+                .postType(PostType.FREE)
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .location(location)
+                .build();
+
+
+        long postId = postRepository.save(post).getId();
+        User user = new User();
+        userRepository.save(user);
+        post.setUser(user);
+
+        //When
+        DetailPostResponseDto detailPostResponseDto = postService.read(postId, "12345g");
+
+        //Then
+       Assertions.assertNull(detailPostResponseDto.getUser());
+
+    }
+
+    @DisplayName(value = "본인이 본인의 익명 게시글을 조회할 시, 사용자 정보가 나타난다 반환된다.")
+    @Test
+    void readAnonymousByWriter() {
+        Location location = Location.builder()
+                .longitude(1.2)
+                .address("andong")
+                .latitude(1.3)
+                .region_1depth_name("region1")
+                .region_2depth_name("region2")
+                .build();
+
+
+        Post post= Post.builder()
+                .title("title")
+                .content("content")
+                .price(123)
+                .isAnonymous(true)
+                .postType(PostType.FREE)
+                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .location(location)
+                .build();
+
+
+        long postId = postRepository.save(post).getId();
+        User user = userRepository.findByUsername("12345g").get();
+        post.setUser(user);
+
+        //When
+        DetailPostResponseDto detailPostResponseDto = postService.read(postId, "12345g");
+
+        //Then
+        Assertions.assertNotNull(detailPostResponseDto.getUser().getUserId());
+        Assertions.assertTrue(detailPostResponseDto.isMyPost());
+
     }
 
     @DisplayName("존재하지 않는 게시글을 삭제할 시, 예외가 반환된다.")
@@ -396,9 +505,103 @@ class PostServiceTest {
 
         //When
         postService.delete(postId, "12345g");
+
         //then
         Assertions.assertFalse(postRepository.existsById(postId));
 
+    }
+
+    @DisplayName("구매 비활성화 된 제보를 활성화 할 경우, 제보가 활성화 된다.")
+    @Test
+    void activatePurchasedDeactivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsPurchasable(false);
+        long postId = postRepository.save(post).getId();
+
+        //When
+        postService.activatePurchase("12345g", post.getId());
+
+        //then
+        Assertions.assertTrue(post.isPurchasable());
 
     }
+
+    @DisplayName("구매 활성화 된 제보를 활성화 할 경우, 예외가 발생한다.")
+    @Test
+    void activatePurchaseActivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(AlreadyPurchasableException.class, ()
+                -> postService.activatePurchase("12345g", postId)); //When
+
+    }
+
+    @DisplayName("사용자가 다른 이의 제보를 활성화 할 경우, 에외가 발생한다.")
+    @Test
+    void activatePurchaseByAnotherUser(){
+
+        //Given
+        User user = new User();
+        user.setRequestFields("URL","anyURL","nickname", "01012345678","mwk300@nyu.edu","Minwu Kim","msg","username", Role.USER);
+        userRepository.save(user);
+
+
+        Post post = new Post();
+        post.setUser(userRepository.findByUsername("12345g").get());
+        post.updateIsPurchasable(false);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(NoPermissionException.class, ()
+                -> postService.activatePurchase("username", postId)); //When
+
+
+    }
+
+    @DisplayName("구매 활성화 된 제보를 비활성화 할 경우, 제보가 비활성화 된다.")
+    @Test
+    void deactivateActivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //When
+        postService.deactivatePurchase("12345g", post.getId());
+
+        //then
+        Assertions.assertFalse(post.isPurchasable());
+
+    }
+
+    @DisplayName("구매 비활성화 된 제보를 비활성화 할 경우, 예외가 발생한다.")
+    @Test
+    void deactivateDeactivatedPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsPurchasable(false);
+        long postId = postRepository.save(post).getId();
+        //Then
+        Assertions.assertThrows(AlreadyNotPurchasableException.class, ()
+                -> postService.deactivatePurchase("12345g", postId)); //When
+
+    }
+
 }

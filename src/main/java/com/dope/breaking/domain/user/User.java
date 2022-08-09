@@ -68,7 +68,7 @@ public class User {
 
     private String phoneNumber;
 
-    private int balance;
+    private int balance = 0;
 
     private String originalProfileImgURL;
 
@@ -86,7 +86,6 @@ public class User {
         this.realName = realName;
         this.statusMsg = statusMsg;
         this.username = username;
-        this.balance = 0;
         this.role = role;
         this.password = UUID.randomUUID().toString();
     }

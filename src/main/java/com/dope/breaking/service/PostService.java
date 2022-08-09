@@ -12,6 +12,9 @@ import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.dto.post.WriterDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.post.AlreadyNotPurchasableException;
+import com.dope.breaking.exception.post.AlreadyPurchasableException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.PurchasedPostException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class PostService {
+
     private final PostRepository postRepository;
 
     private final UserRepository userRepository;
@@ -46,6 +50,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
 
     private final HashtagRepository hashtagRepository;
+
     private final HashtagService hashtagService;
 
     private final MediaRepository mediaRepository;
@@ -95,7 +100,7 @@ public class PostService {
             }
 
         } catch (Exception e) {
-            throw new CustomInternalErrorException("게시글을 등록할 수 없습니다.");
+            throw new CustomInternalErrorException(e.getMessage());
         }
 
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
@@ -145,7 +150,7 @@ public class PostService {
         } catch (Exception e) {
             log.info("게시글 수정 실패");
             e.printStackTrace();
-            throw new CustomInternalErrorException("게시글을 수정할 수 없습니다.");
+            throw new CustomInternalErrorException(e.getMessage());
         }
         log.info(modifyPost.toString());
     }
@@ -153,33 +158,36 @@ public class PostService {
 
     @Transactional
     public DetailPostResponseDto read(Long postId, String crntUsername) {
-        //1. 없다면 예외반환.
-        if (!postRepository.findById(postId).isPresent()) {
-            throw new NoSuchPostException();
-        }
 
-        Post post = postRepository.getById(postId);
+        //1. 없다면 예외반환.
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException:: new);
 
         //2. 현재 사용자 게시글 좋아요 했는지 판별
         boolean isLiked = false;
         boolean isBookmarked = false;
         boolean isPurchased = false;
+        boolean isMyPost = false;
         if (crntUsername != null) {
             User user = userRepository.findByUsername(crntUsername).get();
             isLiked = postLikeRepository.existsPostLikesByUserAndPost(user, post);
             isBookmarked = bookmarkRepository.existsByUserAndPost(user, post);
             isPurchased = purchaseRepository.existsByPostAndUser(post, user);
+            isMyPost = user == post.getUser();
+        }
+
+        WriterDto writerDto = null;
+
+        if(!(!isMyPost && post.isAnonymous())){
+            writerDto = WriterDto.builder()
+                    .nickname(post.getUser().getNickname())
+                    .phoneNumber(post.getUser().getPhoneNumber())
+                    .profileImgURL(post.getUser().getOriginalProfileImgURL())
+                    .userId(post.getUser().getId()).build();
         }
 
 
         //조회수 증가.
         post.updateViewCount();
-
-        WriterDto writerDto = WriterDto.builder()
-                .nickname(post.getUser().getNickname())
-                .phoneNumber(post.getUser().getPhoneNumber())
-                .profileImgURL(post.getUser().getOriginalProfileImgURL())
-                .userId(post.getUser().getId()).build();
 
         LocationDto locationDto = LocationDto.builder()
                 .address(post.getLocation().getAddress())
@@ -212,6 +220,7 @@ public class PostService {
                 .soldCount(purchaseRepository.countByPost(post))
                 .isHidden(post.isHidden())
                 .totalCommentCount(commentRepository.countByPost(post))
+                .isMyPost(isMyPost)
                 .build();
 
         return detailPostResponseDto;
@@ -243,6 +252,41 @@ public class PostService {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @Transactional
+    public void deactivatePurchase(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(post.getUser() != user){
+            throw new NoPermissionException();
+        }
+
+        if(!post.isPurchasable()){
+            throw new AlreadyNotPurchasableException();
+        }
+
+        post.updateIsPurchasable(false);
+
+    }
+
+    @Transactional
+    public void activatePurchase(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(post.getUser() != user){
+            throw new NoPermissionException();
+        }
+
+        if(post.isPurchasable()){
+            throw new AlreadyPurchasableException();
+        }
+
+        post.updateIsPurchasable(true);
+
+    }
 
     private PostRequestDto transferPostRequestToObject(String contentData) {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());

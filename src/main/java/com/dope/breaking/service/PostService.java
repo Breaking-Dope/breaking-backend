@@ -321,11 +321,11 @@ public class PostService {
 
     private PostType confirmPostType(String requestPostType) {
         PostType postType = null;
-        if (PostType.EXCLUSIVE.getTitle().equals(requestPostType)) {
+        if (PostType.EXCLUSIVE.getTitle().equalsIgnoreCase(requestPostType)) {
             postType = PostType.EXCLUSIVE;
-        } else if (PostType.CHARGED.getTitle().equals(requestPostType)) {
+        } else if (PostType.CHARGED.getTitle().equalsIgnoreCase(requestPostType)) {
             postType = PostType.CHARGED;
-        } else if (PostType.FREE.getTitle().equals(requestPostType)) {
+        } else if (PostType.FREE.getTitle().equalsIgnoreCase(requestPostType)) {
             postType = PostType.FREE;
         }
         return postType;

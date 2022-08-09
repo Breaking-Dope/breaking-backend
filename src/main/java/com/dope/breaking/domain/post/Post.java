@@ -54,10 +54,6 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Bookmark> bookmarkList = new ArrayList<Bookmark>();
 
-
-    @CreatedDate
-    private LocalDateTime createdDate;
-
     private String title;
 
     @Column(length = 2500)

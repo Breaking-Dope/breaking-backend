@@ -5,7 +5,6 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -26,16 +25,16 @@ public class CommentResponseDto {
 
     private Boolean isLiked;
 
-    private LocalDateTime createdTime;
+    private LocalDateTime createdDate;
 
     @QueryProjection
-    public CommentResponseDto(Long commentId, String content, Integer likeCount, Integer replyCount, WriterDto user, Boolean isLiked, LocalDateTime createdTime) {
+    public CommentResponseDto(Long commentId, String content, Integer likeCount, Integer replyCount, WriterDto user, Boolean isLiked, LocalDateTime createdDate) {
         this.commentId = commentId;
         this.content = content;
         this.likeCount = likeCount;
         this.replyCount = replyCount;
         this.user = user;
         this.isLiked = isLiked;
-        this.createdTime = createdTime;
+        this.createdDate = createdDate;
     }
 }

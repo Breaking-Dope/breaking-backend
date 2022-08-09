@@ -45,7 +45,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
                                 Expressions.asString("")
                             ),
                             Expressions.asBoolean(false),
-                            comment.createdTime
+                            comment.createdDate
                         ))
                 .from(comment)
                 .leftJoin(comment.user, user)

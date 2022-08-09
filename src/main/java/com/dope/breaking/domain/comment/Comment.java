@@ -54,9 +54,6 @@ public class Comment extends BaseTimeEntity {
 
     private LocalDateTime eventTime;
 
-    @CreatedDate
-    private LocalDateTime createdTime;
-
     @Builder
     public Comment(User user, Post post, String content){
         this.user = user;

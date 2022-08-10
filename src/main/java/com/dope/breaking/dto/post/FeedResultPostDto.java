@@ -14,42 +14,40 @@ import java.time.LocalDateTime;
 public class FeedResultPostDto {
     private Long postId;
     private String title;
-    private String region;
+    private LocationDto location;
     private String thumbnailImgURL;
     private int likeCount;
+    private int commentCount;
     private PostType postType;
-    private Boolean isSold;
     private int viewCount;
-    private Long userId;
-    private String profileImgURL;
-    private String nickname;
+    private WriterDto user;
     private int price;
+    private LocalDateTime createdDate;
+    private Boolean isPurchasable;
+    private Boolean isSold;
+    private Boolean isAnonymous;
+    private Boolean isMyPost;
     private Boolean isLiked;
     private Boolean isBookmarked;
-    private Boolean isPurchasable;
-    private LocalDateTime createdDate;
 
     @QueryProjection
-    public FeedResultPostDto(Long postId, String title, String region, String thumbnailImgURL, int likeCount,
-                             PostType postType, Boolean isSold, int viewCount, Long userId, String profileImgURL,
-                             String nickname, int price, Boolean isLiked, Boolean isBookmarked, Boolean isPurchasable,
-                             LocalDateTime createdDate) {
+    public FeedResultPostDto(Long postId, String title, LocationDto location, String thumbnailImgURL, int likeCount, int commentCount, PostType postType, int viewCount, WriterDto user, int price, LocalDateTime createdDate, Boolean isPurchasable, Boolean isSold, Boolean isAnonymous, Boolean isMyPost, Boolean isLiked, Boolean isBookmarked) {
         this.postId = postId;
         this.title = title;
-        this.region = region;
+        this.location = location;
         this.thumbnailImgURL = thumbnailImgURL;
         this.likeCount = likeCount;
+        this.commentCount = commentCount;
         this.postType = postType;
-        this.isSold = isSold;
         this.viewCount = viewCount;
-        this.userId = userId;
-        this.profileImgURL = profileImgURL;
-        this.nickname = nickname;
+        this.user = user;
         this.price = price;
+        this.createdDate = createdDate;
+        this.isPurchasable = isPurchasable;
+        this.isSold = isSold;
+        this.isAnonymous = isAnonymous;
+        this.isMyPost = isMyPost;
         this.isLiked = isLiked;
         this.isBookmarked = isBookmarked;
-        this.isPurchasable = isPurchasable;
-        this.createdDate = createdDate;
     }
-
 }

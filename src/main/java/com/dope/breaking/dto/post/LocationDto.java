@@ -1,6 +1,7 @@
 package com.dope.breaking.dto.post;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ public class LocationDto {
     private String region_2depth_name;
 
     @Builder
+    @QueryProjection
     public LocationDto(String address, Double longitude, Double latitude, String region_1depth_name, String region_2depth_name){
         this.address = address;
         this.longitude = longitude;

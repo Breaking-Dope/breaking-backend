@@ -2,9 +2,7 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.post.FeedResultPostDto;
-import com.dope.breaking.dto.post.QFeedResultPostDto;
-import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.dto.post.*;
 import com.dope.breaking.service.SoldOption;
 import com.dope.breaking.service.SortStrategy;
 import com.dope.breaking.service.UserPageFeedOption;
@@ -68,20 +66,32 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .select(new QFeedResultPostDto(
                         post.id,
                         post.title,
-                        post.location.address,
+                        new QLocationDto(
+                                post.location.address,
+                                post.location.longitude,
+                                post.location.latitude,
+                                post.location.region_1depth_name,
+                                post.location.region_2depth_name
+                        ),
                         post.thumbnailImgURL,
                         post.postLikeList.size(),
+                        Expressions.asNumber(0),
                         post.postType,
-                        post.isSold,
                         post.viewCount,
-                        user.id,
-                        user.compressedProfileImgURL,
-                        user.nickname,
+                        new QWriterDto(
+                                user.id,
+                                user.compressedProfileImgURL,
+                                user.nickname,
+                                Expressions.asString("")
+                        ),
                         post.price,
-                        Expressions.asBoolean(false),
-                        Expressions.asBoolean(false),
+                        post.createdDate,
                         post.isPurchasable,
-                        post.createdDate
+                        post.isSold,
+                        post.isAnonymous,
+                        Expressions.asBoolean(false), //isMyPost
+                        Expressions.asBoolean(false), //isLiked
+                        Expressions.asBoolean(false) //isBookmarked
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
@@ -123,20 +133,32 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .select(new QFeedResultPostDto(
                         post.id,
                         post.title,
-                        post.location.address,
+                        new QLocationDto(
+                                post.location.address,
+                                post.location.longitude,
+                                post.location.latitude,
+                                post.location.region_1depth_name,
+                                post.location.region_2depth_name
+                        ),
                         post.thumbnailImgURL,
                         post.postLikeList.size(),
+                        Expressions.asNumber(0),
                         post.postType,
-                        post.isSold,
                         post.viewCount,
-                        user.id,
-                        user.compressedProfileImgURL,
-                        user.nickname,
+                        new QWriterDto(
+                                user.id,
+                                user.compressedProfileImgURL,
+                                user.nickname,
+                                Expressions.asString("")
+                        ),
                         post.price,
-                        Expressions.asBoolean(false),
-                        Expressions.asBoolean(false),
+                        post.createdDate,
                         post.isPurchasable,
-                        post.createdDate
+                        post.isSold,
+                        post.isAnonymous,
+                        Expressions.asBoolean(false), //isMyPost
+                        Expressions.asBoolean(false), //isLiked
+                        Expressions.asBoolean(false) //isBookmarked
                 ))
                 .from(post)
                 .leftJoin(post.user, user)

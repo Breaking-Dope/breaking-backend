@@ -89,7 +89,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.isPurchasable,
                         post.isSold,
                         post.isAnonymous,
-                        Expressions.asBoolean(false), //isMyPost
+                        post.user.eq(me), //isMyPost
                         Expressions.asBoolean(false), //isLiked
                         Expressions.asBoolean(false) //isBookmarked
                 ))
@@ -118,6 +118,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .leftJoin(post.purchaseList, purchase)
                 .where(
                         hiddenPostFilter(owner, me),
+                        anonymousPostFilter(owner, me),
                         userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
                         sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
@@ -156,7 +157,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.isPurchasable,
                         post.isSold,
                         post.isAnonymous,
-                        Expressions.asBoolean(false), //isMyPost
+                        post.user.eq(me), //isMyPost
                         Expressions.asBoolean(false), //isLiked
                         Expressions.asBoolean(false) //isBookmarked
                 ))
@@ -172,6 +173,15 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         }
 
         return content;
+    }
+
+    private Predicate anonymousPostFilter(User owner, User me) {
+
+        if(owner == me) {
+            return null;
+        } else {
+            return post.isAnonymous.eq(false);
+        }
     }
 
     private Predicate hiddenPostFilter(User owner, User me) {

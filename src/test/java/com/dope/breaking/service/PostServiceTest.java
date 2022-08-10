@@ -76,7 +76,7 @@ class PostServiceTest {
                 "\"price\" : 123," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"free\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -111,7 +111,7 @@ class PostServiceTest {
                 "\"price\" : 123," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"free\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -150,7 +150,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(false)
                 .postType("free")
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .locationDto(location)
                 .hashtagList(hashTags).build();
@@ -192,7 +192,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(false)
                 .postType("free")
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .locationDto(location)
                 .hashtagList(hashTags).build();
@@ -267,7 +267,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(false)
                 .postType(PostType.FREE)
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .location(location)
                 .build();
@@ -305,7 +305,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(true)
                 .postType(PostType.FREE)
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .location(location)
                 .build();
@@ -343,7 +343,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(false)
                 .postType(PostType.FREE)
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .location(location)
                 .build();
@@ -381,7 +381,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(true)
                 .postType(PostType.FREE)
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .location(location)
                 .build();
@@ -418,7 +418,7 @@ class PostServiceTest {
                 .price(123)
                 .isAnonymous(true)
                 .postType(PostType.FREE)
-                .eventTime(LocalDateTime.parse("2016-10-31 23:59:59",
+                .eventDate(LocalDateTime.parse("2016-10-31 23:59:59",
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .location(location)
                 .build();

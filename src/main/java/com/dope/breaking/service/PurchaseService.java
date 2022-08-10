@@ -40,7 +40,7 @@ public class PurchaseService {
 
         User seller = post.getUser();
 
-        if (!post.isPurchasable()) {
+        if (!post.getIsPurchasable()) {
             throw new NotPurchasablePostException();
         }
 

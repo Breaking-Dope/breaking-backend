@@ -89,7 +89,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.isPurchasable,
                         post.isSold,
                         post.isAnonymous,
-                        post.user.eq(me), //isMyPost
+                        me == null ? Expressions.asBoolean(false) : post.user.eq(me), //isMyPost
                         Expressions.asBoolean(false), //isLiked
                         Expressions.asBoolean(false) //isBookmarked
                 ))
@@ -157,7 +157,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.isPurchasable,
                         post.isSold,
                         post.isAnonymous,
-                        post.user.eq(me), //isMyPost
+                        me == null ? Expressions.asBoolean(false) : post.user.eq(me), //isMyPost
                         Expressions.asBoolean(false), //isLiked
                         Expressions.asBoolean(false) //isBookmarked
                 ))

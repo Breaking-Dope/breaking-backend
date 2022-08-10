@@ -106,6 +106,7 @@ public class FeedRepositoryTest {
 
         assertTrue(result.isEmpty());
     }
+
     @DisplayName("본인이 숨긴 게시글은, 본인 유저 페이지에서 나타난다.")
     @Test
     void displayHiddenPostInMyPage() {
@@ -130,6 +131,81 @@ public class FeedRepositoryTest {
         List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, user, null);
 
         assertEquals(result.get(0).getPostId(), post.getId());
+    }
+
+    @DisplayName("익명 포스트는 다른 유저의 유저페이지에서 나타나지 않는다.")
+    @Test
+    void hideAnonymousPostInOtherUsersPage() {
+
+        User user = new User();
+        userRepository.save(user);
+        Post post = Post.builder()
+                .isAnonymous(true)
+                .build();
+        postRepository.save(post);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, null, null);
+
+        assertEquals(0, result.size());
+    }
+
+    @DisplayName("익명 포스트는 나의 유저페이지에서 나타난다.")
+    @Test
+    void displayAnonymousPostInMyPage() {
+
+        User user = new User();
+        userRepository.save(user);
+        Post post = Post.builder()
+                .isAnonymous(true)
+                .build();
+        postRepository.save(post);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, user, null);
+
+        assertEquals(1, result.size());
+        assertEquals(post.getId(), result.get(0).getPostId());
+    }
+
+    @DisplayName("메인피드에서 만약 나의 포스트가 있으면, isMyPost 가 true로 반환된다.")
+    @Test
+    void setTrueIsMyPostWhenFindMyPost() {
+
+        User user = new User();
+        userRepository.save(user);
+        Post post = Post.builder()
+                .isAnonymous(true)
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getIsMyPost());
     }
 
 }

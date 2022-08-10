@@ -88,7 +88,7 @@ public class PostService {
                             .region_1depth_name(postRequestDto.getLocationDto().getRegion_1depth_name())
                             .region_2depth_name(postRequestDto.getLocationDto().getRegion_2depth_name())
                             .build())
-                    .eventTime(postRequestDto.getEventTime())
+                    .eventDate(postRequestDto.getEventDate())
                     .isAnonymous(postRequestDto.getIsAnonymous())
                     .price(postRequestDto.getPrice())
                     .build();
@@ -144,7 +144,7 @@ public class PostService {
                     .region_2depth_name(postRequestDto.getLocationDto().getRegion_2depth_name())
                     .build();
 
-            modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventTime());
+            modifyPost.UpdatePost(postRequestDto.getTitle(), postRequestDto.getContent(), postType, location, postRequestDto.getPrice(), postRequestDto.getIsAnonymous(), postRequestDto.getEventDate());
             hashtagService.updateHashtag(postRequestDto.getHashtagList(), modifyPost.getId(), HashtagType.POST);
 
         } catch (Exception e) {
@@ -210,9 +210,9 @@ public class PostService {
                 .price(post.getPrice())
                 .postType(post.getPostType().getTitle())
                 .isAnonymous(post.isAnonymous())
-                .eventTime(post.getEventTime())
+                .eventDate(post.getEventDate())
                 .createdDate(post.getCreatedDate())
-                .modifiedTime(post.getModifiedDate())
+                .modifiedDate(post.getModifiedDate())
                 .viewCount(post.getViewCount())
                 .bookmarkedCount(bookmarkRepository.countByPost(post))
                 .likeCount(postLikeRepository.countPostLikesByPost(post))

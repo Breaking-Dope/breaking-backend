@@ -11,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -75,14 +74,14 @@ public class Post extends BaseTimeEntity {
 
     private Boolean isPurchasable = true;
 
-    private LocalDateTime eventTime;
+    private LocalDateTime eventDate;
 
     private String thumbnailImgURL;
 
     private int viewCount;
 
     @Builder
-    public Post(String title, String content, PostType postType, Location location, int price, boolean isAnonymous, boolean isSold, boolean isHidden, LocalDateTime eventTime, String thumbnailImgURL, int viewCount) {
+    public Post(String title, String content, PostType postType, Location location, int price, boolean isAnonymous, boolean isSold, boolean isHidden, LocalDateTime eventDate, String thumbnailImgURL, int viewCount) {
         this.title = title;
         this.content = content;
         this.postType = postType;
@@ -91,7 +90,7 @@ public class Post extends BaseTimeEntity {
         this.isAnonymous = isAnonymous;
         this.isSold = isSold;
         this.isHidden = isHidden;
-        this.eventTime = eventTime;
+        this.eventDate = eventDate;
         this.thumbnailImgURL = thumbnailImgURL;
         this.viewCount = viewCount;
     }
@@ -103,7 +102,7 @@ public class Post extends BaseTimeEntity {
         this.location = location;
         this.price = price;
         this.isAnonymous = isAnonymous;
-        this.eventTime = eventTime;
+        this.eventDate = eventTime;
     }
 
     public void setUser(User user){

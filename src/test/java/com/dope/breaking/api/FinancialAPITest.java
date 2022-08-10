@@ -219,7 +219,7 @@ class FinancialAPITest {
                 "\"price\" : 0," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"free\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -263,7 +263,7 @@ class FinancialAPITest {
                 "\"price\" : 3000," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"charged\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -309,7 +309,7 @@ class FinancialAPITest {
                 "\"price\" : 1000," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"exclusive\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -355,7 +355,7 @@ class FinancialAPITest {
                 "\"price\" : 1000," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"charged\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -399,7 +399,7 @@ class FinancialAPITest {
                 "\"price\" : 1000," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"charged\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +
@@ -451,7 +451,7 @@ class FinancialAPITest {
                 "\"price\" : 1000," +
                 "\"isAnonymous\" : \"false\"," +
                 "\"postType\" : \"charged\"," +
-                "\"eventTime\" : \"2020-01-01 14:01:01\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
                 "\"location\" : {" +
                 " \"address\" : \"address\"," +
                 "\"longitude\" : 12.1234," +

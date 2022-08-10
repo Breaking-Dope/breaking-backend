@@ -44,11 +44,11 @@ public class DetailPostResponseDto {
 	@JsonProperty(value = "isAnonymous")
 	private boolean isAnonymous;
 
-	private LocalDateTime eventTime;
+	private LocalDateTime eventDate;
 
 	private LocalDateTime createdDate;
 
-	private LocalDateTime modifiedTime;
+	private LocalDateTime modifiedDate;
 
 	private int viewCount;
 
@@ -74,7 +74,7 @@ public class DetailPostResponseDto {
 	private Boolean isPurchasable = true;
 
 	@Builder
-	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventTime, LocalDateTime createdDate, LocalDateTime modifiedTime, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount, boolean isMyPost, Boolean isPurchasable) {
+	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventDate, LocalDateTime createdDate, LocalDateTime modifiedDate, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int totalCommentCount, boolean isMyPost, Boolean isPurchasable) {
 		this.isLiked = isLiked;
 		this.isBookmarked = isBookmarked;
 		this.isPurchased = isPurchased;
@@ -87,9 +87,9 @@ public class DetailPostResponseDto {
 		this.price = price;
 		this.postType = postType;
 		this.isAnonymous = isAnonymous;
-		this.eventTime = eventTime;
+		this.eventDate = eventDate;
 		this.createdDate = createdDate;
-		this.modifiedTime = modifiedTime;
+		this.modifiedDate = modifiedDate;
 		this.viewCount = viewCount;
 		this.isSold = isSold;
 		this.soldCount = soldCount;

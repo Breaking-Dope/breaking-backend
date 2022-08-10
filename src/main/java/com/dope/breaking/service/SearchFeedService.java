@@ -43,14 +43,7 @@ public class SearchFeedService {
             searchFeedConditionDto.setDateTo(LocalDateTime.now());
         }
 
-        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
-        for(FeedResultPostDto dto: result) {
-            if(dto.getIsAnonymous()) {
-                dto.setUser(null);
-            }
-        }
-
-        return result;
+        return feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
 
     }
 

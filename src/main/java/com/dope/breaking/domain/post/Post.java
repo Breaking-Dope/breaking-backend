@@ -73,7 +73,7 @@ public class Post extends BaseTimeEntity {
 
     private boolean isHidden;
 
-    private boolean isPurchasable = true;
+    private Boolean isPurchasable = true;
 
     private LocalDateTime eventTime;
 

@@ -572,7 +572,7 @@ class PostAPITest {
                 .andExpect(status().isOk()); //Then
 
         //Then
-        Assertions.assertTrue(post.isPurchasable());
+        Assertions.assertTrue(post.getIsPurchasable());
 
     }
 
@@ -653,7 +653,7 @@ class PostAPITest {
                 .andExpect(status().isOk()); //Then
 
         //Then
-        Assertions.assertFalse(post.isPurchasable());
+        Assertions.assertFalse(post.getIsPurchasable());
 
     }
 

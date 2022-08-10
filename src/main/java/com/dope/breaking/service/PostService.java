@@ -221,6 +221,7 @@ public class PostService {
                 .isHidden(post.isHidden())
                 .totalCommentCount(commentRepository.countByPost(post))
                 .isMyPost(isMyPost)
+                .isPurchasable(post.getIsPurchasable())
                 .build();
 
         return detailPostResponseDto;
@@ -262,7 +263,7 @@ public class PostService {
             throw new NoPermissionException();
         }
 
-        if(!post.isPurchasable()){
+        if(!post.getIsPurchasable()){
             throw new AlreadyNotPurchasableException();
         }
 
@@ -280,7 +281,7 @@ public class PostService {
             throw new NoPermissionException();
         }
 
-        if(post.isPurchasable()){
+        if(post.getIsPurchasable()){
             throw new AlreadyPurchasableException();
         }
 

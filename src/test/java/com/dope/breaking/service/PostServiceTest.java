@@ -527,7 +527,7 @@ class PostServiceTest {
         postService.activatePurchase("12345g", post.getId());
 
         //then
-        Assertions.assertTrue(post.isPurchasable());
+        Assertions.assertTrue(post.getIsPurchasable());
 
     }
 
@@ -584,7 +584,7 @@ class PostServiceTest {
         postService.deactivatePurchase("12345g", post.getId());
 
         //then
-        Assertions.assertFalse(post.isPurchasable());
+        Assertions.assertFalse(post.getIsPurchasable());
 
     }
 

@@ -80,6 +80,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.price,
                         Expressions.asBoolean(false),
                         Expressions.asBoolean(false),
+                        post.isPurchasable,
                         post.createdDate
                 ))
                 .from(post)
@@ -134,6 +135,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.price,
                         Expressions.asBoolean(false),
                         Expressions.asBoolean(false),
+                        post.isPurchasable,
                         post.createdDate
                 ))
                 .from(post)

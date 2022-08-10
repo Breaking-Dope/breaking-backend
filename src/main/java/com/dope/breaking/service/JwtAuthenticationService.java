@@ -61,9 +61,9 @@ public class JwtAuthenticationService {
             }
 
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(username, userAgentType));
+            httpHeaders.set("authorization", jwtTokenProvider.createAccessToken(username, userAgentType));
             String newRefrsehToken = jwtTokenProvider.createRefreshToken(username);
-            httpHeaders.set("Authorization-Refresh", newRefrsehToken);
+            httpHeaders.set("authorization-refresh", newRefrsehToken);
             redisService.setDataWithExpiration(userAgentType + "_" + username, newRefrsehToken, 2 * 604800L);
 
             return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();

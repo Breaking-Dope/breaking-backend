@@ -102,8 +102,8 @@ public class Oauth2LoginService {
             String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername(), userAgentType);
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", accessToken);
-            httpHeaders.set("Authorization-Refresh", refreshToken);
+            httpHeaders.set("authorization", accessToken);
+            httpHeaders.set("authorization-refresh", refreshToken);
             redisService.setDataWithExpiration(userAgentType + "_" +dto.getUsername(), refreshToken,2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
@@ -175,8 +175,8 @@ public class Oauth2LoginService {
             String accessToken = jwtTokenProvider.createAccessToken(dto.getUsername(), userAgentType);
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.set("Authorization", accessToken);
-            httpHeaders.set("Authorization-Refresh", refreshToken);
+            httpHeaders.set("authorization", accessToken);
+            httpHeaders.set("authorization-refresh", refreshToken);
             redisService.setDataWithExpiration(userAgentType + "_" + dto.getUsername(), refreshToken, 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()

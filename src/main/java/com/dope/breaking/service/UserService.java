@@ -89,9 +89,9 @@ public class UserService {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
-        httpHeaders.set("Authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername(), userAgentType));
+        httpHeaders.set("authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername(), userAgentType));
         String refreshjwt = jwtTokenProvider.createRefreshToken(signUpRequestDto.getUsername());
-        httpHeaders.set("Authorization-Refresh", refreshjwt);
+        httpHeaders.set("authorization-refresh", refreshjwt);
         redisService.setDataWithExpiration(userAgentType + "_" + signUpRequestDto.getUsername(), refreshjwt, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
 
         UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()

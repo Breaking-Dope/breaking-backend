@@ -24,8 +24,8 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secret;
 
-    private final String accessHeader = "Authorization";
-    private final String refreshHeader = "Authorization-Refresh";
+    private final String accessHeader = "authorization";
+    private final String refreshHeader = "authorization-Refresh";
 
     private static final String BEARER = "Bearer ";
 

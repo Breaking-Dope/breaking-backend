@@ -1,6 +1,7 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
@@ -22,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -72,7 +75,7 @@ public class FeedServiceTest {
         List<FeedResultPostDto> result = feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null);
 
         //then
-        Assertions.assertEquals(2, result.size());
+        assertEquals(2, result.size());
     }
 
     @DisplayName("다른 유저의 북마크 리스트를 조회할 때, 예외가 발생한다.")
@@ -186,6 +189,40 @@ public class FeedServiceTest {
 
         //when, then
         Assertions.assertThrows(LoginRequireException.class, ()->feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null));
+
+    }
+
+    @DisplayName("메인 피드에서 익명 게시글은, user 정보가 null로 표기된다.")
+    @Test
+    void setNullAnonymousPostInMainFeed() {
+
+        //given
+        User owner = new User();
+        owner.setRequestFields("URL", "URL", "owner", "01012345678", "email@naver.com", "Jinu", "msg", "username", Role.USER);
+
+        Post post = Post.builder()
+                .title("post1")
+                .build();
+        post.setUser(owner);
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.WRITE)
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+
+        List<FeedResultPostDto> dummy = new ArrayList<>();
+        FeedResultPostDto content = new FeedResultPostDto();
+        dummy.add(content);
+
+        given(feedRepository.searchUserPageBy(searchFeedConditionDto, owner, null, null)).willReturn(dummy);
+
+        //when
+        List<FeedResultPostDto> result = feedService.searchUserFeed(searchFeedConditionDto, 1L, null, null);
+
+        //then
+        assertEquals(1, result.size());
+        assertNull(result.get(0).getUser());
 
     }
 }

@@ -25,7 +25,7 @@ public class JwtTokenProvider {
     private String secret;
 
     private final String accessHeader = "authorization";
-    private final String refreshHeader = "authorization-Refresh";
+    private final String refreshHeader = "authorization-refresh";
 
     private static final String BEARER = "Bearer ";
 

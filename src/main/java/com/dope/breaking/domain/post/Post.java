@@ -95,14 +95,14 @@ public class Post extends BaseTimeEntity {
         this.viewCount = viewCount;
     }
 
-    public void UpdatePost(String title, String content, PostType postType, Location location, int price, Boolean isAnonymous, LocalDateTime eventTime){
+    public void UpdatePost(String title, String content, PostType postType, Location location, int price, Boolean isAnonymous, LocalDateTime eventDate){
         this.title = title;
         this.content = content;
         this.postType = postType;
         this.location = location;
         this.price = price;
         this.isAnonymous = isAnonymous;
-        this.eventDate = eventTime;
+        this.eventDate = eventDate;
     }
 
     public void setUser(User user){

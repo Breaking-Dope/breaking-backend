@@ -3,10 +3,7 @@ package com.dope.breaking.repository;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.dto.user.QForListInfoResponseDto;
-import com.dope.breaking.service.CommentTargetType;
-import com.dope.breaking.service.FollowTargetType;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
@@ -14,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-import static com.dope.breaking.domain.post.QPost.post;
 import static com.dope.breaking.domain.user.QFollow.follow;
 import static com.dope.breaking.domain.user.QUser.user;
 

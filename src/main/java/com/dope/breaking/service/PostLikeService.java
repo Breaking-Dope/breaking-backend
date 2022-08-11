@@ -83,7 +83,7 @@ public class PostLikeService {
         if(principal == null){
             for (PostLike postLike : postLikeList) {
                 User likedUser = postLike.getUser();
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),false ));
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null, likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),false ));
             }
         }
         else{
@@ -91,7 +91,7 @@ public class PostLikeService {
             for (PostLike postLike : postLikeList) {
                 User likedUser = postLike.getUser();
                 boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(likedUser,user);
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),isFollowing));
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null, likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),isFollowing));
             }
         }
 

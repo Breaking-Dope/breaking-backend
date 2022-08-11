@@ -71,7 +71,7 @@ public class CommentLikeService {
         if(principal == null){
             for (CommentLike commentLike : commentLikeList) {
                 User likedUser = commentLike.getUser();
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getCompressedProfileImgURL(),false));
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null,likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getCompressedProfileImgURL(),false));
             }
         }
         else{
@@ -79,7 +79,7 @@ public class CommentLikeService {
             for (CommentLike commentLike : commentLikeList) {
                 User likedUser = commentLike.getUser();
                 boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(likedUser,user);
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getCompressedProfileImgURL(),isFollowing));
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null,likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getCompressedProfileImgURL(),isFollowing));
             }
         }
 

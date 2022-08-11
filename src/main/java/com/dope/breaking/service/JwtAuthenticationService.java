@@ -68,7 +68,6 @@ public class JwtAuthenticationService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("authorization", jwtTokenProvider.createAccessToken(username, userAgentType));
             String newRefrsehToken = jwtTokenProvider.createRefreshToken(username);
-            httpHeaders.set("authorization-refresh", newRefrsehToken);
             if(userAgentType.equals("WEB")) {
                 Cookie cookie = new Cookie("authorization-refresh", newRefrsehToken);
                 cookie.setMaxAge(2 * 24 * 60 * 60); //2주

@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Transactional
@@ -54,55 +53,23 @@ public class FollowService {
         followRepository.deleteByFollowedAndFollowing(followedUser,followingUser);
     }
 
-    public List<ForListInfoResponseDto> followingUsers (Principal principal, Long userId){
 
+    public List<ForListInfoResponseDto> followUserList(Principal principal, Long userId, Long cursorId, int size, FollowTargetType followTargetType){
+
+        User me = null;
+        if(principal != null){
+            me = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
+        }
         User selectedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
-        List<Follow> followingList = followRepository.findAllByFollowing(selectedUser);
-        List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
-
-        if (principal == null) {
-            for (Follow follow : followingList) {
-                User followedUser = follow.getFollowed();
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(), followedUser.getNickname(), followedUser.getStatusMsg(), followedUser.getCompressedProfileImgURL(), false));
-            }
+        if(followTargetType == FollowTargetType.FOLLOWING) {
+            return followRepository.followingList(me, selectedUser, cursorId, size);
         }
-        else{
-            User user = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
-            for (Follow follow : followingList) {
-                User followedUser = follow.getFollowed();
-                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(followedUser, user);
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followedUser.getId(), followedUser.getNickname(), followedUser.getStatusMsg(), followedUser.getCompressedProfileImgURL(), isFollowing));
-            }
+        else if(followTargetType == FollowTargetType.FOLLOWED) {
+            return followRepository.followerList(me, selectedUser, cursorId, size);
         }
 
-        return forListInfoResponseDtoList;
-
-    }
-
-    public List<ForListInfoResponseDto> followerUsers (Principal principal, Long userId){
-
-        User selectedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
-
-        List<Follow> followerList = followRepository.findAllByFollowed(selectedUser);
-        List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
-
-        if (principal == null) {
-            for (Follow follow : followerList) {
-                User followingUser = follow.getFollowing();
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followingUser.getId(), followingUser.getNickname(), followingUser.getStatusMsg(), followingUser.getCompressedProfileImgURL(), false));
-            }
-        }
-        else{
-            User user = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
-            for (Follow follow : followerList) {
-                User followingUser = follow.getFollowing();
-                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(followingUser, user);
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(followingUser.getId(), followingUser.getNickname(), followingUser.getStatusMsg(), followingUser.getCompressedProfileImgURL(), isFollowing));
-            }
-        }
-
-        return forListInfoResponseDtoList;
+        return null;
 
     }
 

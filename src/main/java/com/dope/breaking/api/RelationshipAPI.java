@@ -2,6 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.service.FollowService;
+import com.dope.breaking.service.FollowTargetType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,16 +40,24 @@ public class RelationshipAPI {
     }
 
     @GetMapping("/follow/following/{userId}")
-    public ResponseEntity<List<ForListInfoResponseDto>>followingUsers (Principal principal, @PathVariable Long userId) {
+    public ResponseEntity<List<ForListInfoResponseDto>>followingUserList (
+            Principal principal,
+            @PathVariable Long userId,
+            @RequestParam(value = "cursor") Long cursorId,
+            @RequestParam(value = "size") int size) {
 
-        return ResponseEntity.ok().body(followService.followingUsers(principal, userId));
+        return ResponseEntity.ok().body(followService.followUserList(principal, userId, cursorId, size, FollowTargetType.FOLLOWING));
 
     }
 
     @GetMapping("/follow/follower/{userId}")
-    public ResponseEntity<List<ForListInfoResponseDto>> followerUsers (Principal principal, @PathVariable Long userId){
+    public ResponseEntity<List<ForListInfoResponseDto>>followerUserList (
+            Principal principal,
+            @PathVariable Long userId,
+            @RequestParam(value = "cursor") Long cursorId,
+            @RequestParam(value = "size") int size) {
 
-        return ResponseEntity.ok().body(followService.followerUsers(principal,userId));
+        return ResponseEntity.ok().body(followService.followUserList(principal, userId, cursorId, size, FollowTargetType.FOLLOWED));
 
     }
 

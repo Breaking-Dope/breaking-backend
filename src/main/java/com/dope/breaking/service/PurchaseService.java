@@ -112,7 +112,7 @@ public class PurchaseService {
             for (Purchase purchase : purchaseList) {
                 User purchasedUser = purchase.getUser();
                 boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(purchasedUser,user);
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(purchasedUser.getId(),purchasedUser.getNickname(),purchasedUser.getStatusMsg(),purchasedUser.getOriginalProfileImgURL(),isFollowing));
+                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null, purchasedUser.getId(),purchasedUser.getNickname(),purchasedUser.getStatusMsg(),purchasedUser.getOriginalProfileImgURL(),isFollowing));
             }
         }
 

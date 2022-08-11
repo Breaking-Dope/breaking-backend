@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
@@ -72,6 +73,19 @@ public class JwtTokenProvider {
 
     public Optional<String> extractAccessToken(String request) throws IOException {
         return Optional.ofNullable(request).filter(refreshToken -> refreshToken.startsWith(BEARER)).map(refreshToken -> refreshToken.replace(BEARER, ""));
+    }
+
+    public String extractRefreshTokenFromCookie(HttpServletRequest httpServletRequest) throws IOException{
+        Cookie[] cookies = httpServletRequest.getCookies();
+        if(cookies == null){
+            return null;
+        }
+        for(Cookie cookie : cookies){
+            if(cookie.getName().equals("authorization-refresh")){
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 
 

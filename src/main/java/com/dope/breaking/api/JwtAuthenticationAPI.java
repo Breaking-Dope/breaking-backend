@@ -44,10 +44,10 @@ public class JwtAuthenticationAPI {
 
     @GetMapping("/reissue") //토큰 재발행 부분.
     public ResponseEntity<?> refreshTokenReissue(@RequestHeader(value = "authorization", required = true) String accessToken,
-                                                 @RequestHeader(value = "authorization-refresh", required = true) String refreshToken,
-                                                 HttpServletRequest httpServletRequest) throws IOException, ServletException {
+                                                 @RequestHeader(value = "authorization-refresh", required = false) String refreshToken,
+                                                 HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
 
-        return jwtAuthenticationService.reissue(accessToken, refreshToken, httpServletRequest);
+        return jwtAuthenticationService.reissue(accessToken, refreshToken, httpServletRequest, httpServletResponse);
     }
 
     @PreAuthorize("isAuthenticated()")

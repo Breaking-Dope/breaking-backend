@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
@@ -26,19 +27,19 @@ public class Oauth2LoginAPI {
     private final Oauth2LoginService oauth2LoginService;
 
     @PostMapping("/kakao")
-    public ResponseEntity<?> kakaoOauthLogin(Principal principal, @RequestBody Map<String, String> accessToken, HttpServletRequest httpServletRequest) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
+    public ResponseEntity<?> kakaoOauthLogin(Principal principal, @RequestBody Map<String, String> accessToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
         if(principal != null) throw new AlreadyLoginException();
         String token = accessToken.get("accessToken");
         ResponseEntity<String> kakaoUserinfo = oauth2LoginService.kakaoUserInfo(token);
-        return oauth2LoginService.kakaoLogin(kakaoUserinfo, httpServletRequest);
+        return oauth2LoginService.kakaoLogin(kakaoUserinfo, httpServletRequest, httpServletResponse);
     }
 
     @PostMapping("/google")
-    public ResponseEntity<?> googleOauthLogin(Principal principal, @RequestBody Map<String, String> accessToken, HttpServletRequest httpServletRequest) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
+    public ResponseEntity<?> googleOauthLogin(Principal principal, @RequestBody Map<String, String> accessToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
         if(principal != null) throw new AlreadyLoginException();
         String token = accessToken.get("accessToken");
         String idtoken = accessToken.get("idToken");
         ResponseEntity<String> GoogleUserinfo = oauth2LoginService.googleUserInfo(token, idtoken);
-        return oauth2LoginService.googleLogin(GoogleUserinfo, httpServletRequest);
+        return oauth2LoginService.googleLogin(GoogleUserinfo, httpServletRequest, httpServletResponse);
     }
 }

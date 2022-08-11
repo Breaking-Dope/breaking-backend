@@ -95,7 +95,7 @@ public class UserService {
         String refreshjwt = jwtTokenProvider.createRefreshToken(signUpRequestDto.getUsername());
         if(userAgentType.equals("WEB")) {
             Cookie cookie = new Cookie("authorization-refresh", refreshjwt);
-            cookie.setMaxAge(2 * 24 * 60 * 60); //2주
+            cookie.setMaxAge(14 * 24 * 60 * 60); //2주
             cookie.setHttpOnly(true);
             cookie.setPath("/");
             httpServletResponse.addCookie(cookie);

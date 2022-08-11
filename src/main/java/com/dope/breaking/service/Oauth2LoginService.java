@@ -107,7 +107,7 @@ public class Oauth2LoginService {
             httpHeaders.set("authorization", accessToken);
             if(userAgentType.equals("WEB")) {
                 Cookie cookie = new Cookie("authorization-refresh", refreshToken);
-                cookie.setMaxAge(2 * 24 * 60 * 60); //2주
+                cookie.setMaxAge(14 * 24 * 60 * 60); //2주
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
                 httpServletResponse.addCookie(cookie);
@@ -193,7 +193,7 @@ public class Oauth2LoginService {
             httpHeaders.set("authorization-refresh", refreshToken);
             if(userAgentType.equals("WEB")) {
                 Cookie cookie = new Cookie("authorization-refresh", refreshToken);
-                cookie.setMaxAge(2 * 24 * 60 * 60); //2주
+                cookie.setMaxAge(14 * 24 * 60 * 60); //2주
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
                 httpServletResponse.addCookie(cookie);

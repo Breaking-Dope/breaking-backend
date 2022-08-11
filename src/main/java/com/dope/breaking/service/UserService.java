@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -55,7 +57,7 @@ public class UserService {
     private final RedisService redisService;
 
 
-    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg, HttpServletRequest httpServletRequest) throws ServletException, IOException {
+    public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
 
         String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow(() -> new NotFoundUserAgent());
 
@@ -91,7 +93,16 @@ public class UserService {
         String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
         httpHeaders.set("authorization", jwtTokenProvider.createAccessToken(signUpRequestDto.getUsername(), userAgentType));
         String refreshjwt = jwtTokenProvider.createRefreshToken(signUpRequestDto.getUsername());
-        httpHeaders.set("authorization-refresh", refreshjwt);
+        if(userAgentType.equals("WEB")) {
+            Cookie cookie = new Cookie("authorization-refresh", refreshjwt);
+            cookie.setMaxAge(2 * 24 * 60 * 60); //2주
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            httpServletResponse.addCookie(cookie);
+        }
+        else{
+            httpHeaders.set("authorization-refresh", refreshjwt);
+        }
         redisService.setDataWithExpiration(userAgentType + "_" + signUpRequestDto.getUsername(), refreshjwt, 2 * 604800L); //리플리쉬 토큰 redis에 저장.
 
         UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()

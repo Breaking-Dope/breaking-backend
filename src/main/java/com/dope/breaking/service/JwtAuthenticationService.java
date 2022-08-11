@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -32,12 +34,15 @@ public class JwtAuthenticationService {
 
     private final RedisService redisService;
 
-    public ResponseEntity<?> reissue(String accessToken, String refreshToken, HttpServletRequest httpServletRequest) throws IOException, ServletException {
+    public ResponseEntity<?> reissue(String accessToken, String refreshToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
 
         String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
 
+        String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
-        String getRefreshToken = jwtTokenProvider.extractRefreshToken(refreshToken).orElse(null);
+        String getRefreshToken = userAgentType.equals("WEB") ? jwtTokenProvider.extractRefreshTokenFromCookie(httpServletRequest) : jwtTokenProvider.extractRefreshToken(refreshToken).orElse(null);
+
+        log.info(getRefreshToken);
 
         if (refreshToken != null && jwtTokenProvider.validateToken(getRefreshToken) == false) {
             try {
@@ -49,7 +54,7 @@ public class JwtAuthenticationService {
             }
         } else if (getAccessToken != null && jwtTokenProvider.validateToken(getRefreshToken) == true) {
             String username = jwtTokenProvider.getUsername(getRefreshToken);
-            String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
+
             log.info(userAgentType);
             String redisRefreshToken = redisService.getData(userAgentType + "_" + username);
             if (!getRefreshToken.equals(redisRefreshToken)) { //Redis에 저장된 Refresh토큰이 존재하지 않을 때.
@@ -64,6 +69,16 @@ public class JwtAuthenticationService {
             httpHeaders.set("authorization", jwtTokenProvider.createAccessToken(username, userAgentType));
             String newRefrsehToken = jwtTokenProvider.createRefreshToken(username);
             httpHeaders.set("authorization-refresh", newRefrsehToken);
+            if(userAgentType.equals("WEB")) {
+                Cookie cookie = new Cookie("authorization-refresh", newRefrsehToken);
+                cookie.setMaxAge(2 * 24 * 60 * 60); //2주
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                httpServletResponse.addCookie(cookie);
+            }
+            else{
+                httpHeaders.set("authorization-refresh", newRefrsehToken);
+            }
             redisService.setDataWithExpiration(userAgentType + "_" + username, newRefrsehToken, 2 * 604800L);
 
             return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();

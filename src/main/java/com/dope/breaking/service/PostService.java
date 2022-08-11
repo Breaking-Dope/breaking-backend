@@ -219,7 +219,7 @@ public class PostService {
                 .isSold(post.isSold())
                 .soldCount(purchaseRepository.countByPost(post))
                 .isHidden(post.isHidden())
-                .totalCommentCount(commentRepository.countByPost(post))
+                .commentCount(commentRepository.countByPost(post))
                 .isMyPost(isMyPost)
                 .isPurchasable(post.getIsPurchasable())
                 .build();

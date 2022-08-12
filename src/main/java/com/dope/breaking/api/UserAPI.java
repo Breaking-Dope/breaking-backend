@@ -63,9 +63,9 @@ public class UserAPI {
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> signUp(Principal principal,
                                     @RequestPart String signUpRequest,
-                                    @RequestPart(required = false) List<MultipartFile> profileImg, HttpServletRequest httpServletRequest) throws ServletException, IOException {
+                                    @RequestPart(required = false) List<MultipartFile> profileImg, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         if (principal != null) throw new AlreadyLoginException();
-        return userService.signUp(signUpRequest, profileImg, httpServletRequest);
+        return userService.signUp(signUpRequest, profileImg, httpServletRequest, httpServletResponse);
     }
 
     @PreAuthorize("isAuthenticated()")

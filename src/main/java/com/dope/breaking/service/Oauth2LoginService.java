@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -59,7 +61,7 @@ public class Oauth2LoginService {
         return kakaoUserinfo;
     }
 
-    public ResponseEntity<?> kakaoLogin(ResponseEntity<String> kakaoUserinfo, HttpServletRequest httpServletRequest) throws ParseException, ServletException, IOException {
+    public ResponseEntity<?> kakaoLogin(ResponseEntity<String> kakaoUserinfo, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ParseException, ServletException, IOException {
         String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
         log.info(userAgent);
         JSONParser jsonParser = new JSONParser();
@@ -103,7 +105,19 @@ public class Oauth2LoginService {
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("authorization", accessToken);
-            httpHeaders.set("authorization-refresh", refreshToken);
+            if(userAgentType.equals("WEB")) {
+                Cookie cookie = new Cookie("authorization-refresh", refreshToken);
+                cookie.setMaxAge(14 * 24 * 60 * 60); //2주
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                httpServletResponse.addCookie(cookie);
+            }
+            else{
+                httpHeaders.set("authorization-refresh", refreshToken);
+            }
+
+
+
             redisService.setDataWithExpiration(userAgentType + "_" +dto.getUsername(), refreshToken,2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
@@ -138,7 +152,7 @@ public class Oauth2LoginService {
 
 
 
-    public ResponseEntity<?> googleLogin(ResponseEntity<String> GoogleUserinfo, HttpServletRequest httpServletRequest) throws ParseException, ServletException, IOException {
+    public ResponseEntity<?> googleLogin(ResponseEntity<String> GoogleUserinfo, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ParseException, ServletException, IOException {
         String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
 
         JSONParser jsonParser = new JSONParser();
@@ -177,6 +191,18 @@ public class Oauth2LoginService {
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("authorization", accessToken);
             httpHeaders.set("authorization-refresh", refreshToken);
+            if(userAgentType.equals("WEB")) {
+                Cookie cookie = new Cookie("authorization-refresh", refreshToken);
+                cookie.setMaxAge(14 * 24 * 60 * 60); //2주
+                cookie.setHttpOnly(true);
+                cookie.setPath("/");
+                httpServletResponse.addCookie(cookie);
+            }
+            else{
+                httpHeaders.set("authorization-refresh", refreshToken);
+            }
+
+
             redisService.setDataWithExpiration(userAgentType + "_" + dto.getUsername(), refreshToken, 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
             UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()

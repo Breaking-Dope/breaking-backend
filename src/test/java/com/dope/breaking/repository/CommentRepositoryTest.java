@@ -49,14 +49,14 @@ class CommentRepositoryTest {
             .targetId(post.getId())
             .targetType(CommentTargetType.POST)
             .size(4L)
-            .cursorId(null)
             .build();
 
-        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto);
-        searchCommentConditionDto.setCursorId(content1.get(content1.size() - 1).getCommentId());
-        List<CommentResponseDto> content2 = commentRepository.searchCommentList(me, searchCommentConditionDto);
-        searchCommentConditionDto.setCursorId(content2.get(content2.size() - 1).getCommentId());
-        List<CommentResponseDto> content3 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+        Comment cursorComment = null;
+        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
+        cursorComment = commentRepository.findById(content1.get(content1.size() - 1).getCommentId()).get();
+        List<CommentResponseDto> content2 = commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
+        cursorComment = commentRepository.findById(content2.get(content2.size() - 1).getCommentId()).get();
+        List<CommentResponseDto> content3 = commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
 
         assertEquals(4, content1.size());
         assertEquals(4, content2.size());
@@ -86,10 +86,9 @@ class CommentRepositoryTest {
                 .targetId(post.getId())
                 .targetType(CommentTargetType.POST)
                 .size(1L)
-                .cursorId(null)
                 .build();
 
-        List<CommentResponseDto> content = commentRepository.searchCommentList(me, searchCommentConditionDto);
+        List<CommentResponseDto> content = commentRepository.searchCommentList(me, searchCommentConditionDto, null);
 
         assertTrue(content.get(0).getIsLiked());
     }
@@ -118,14 +117,14 @@ class CommentRepositoryTest {
                 .targetId(parentComment.getId())
                 .targetType(CommentTargetType.COMMENT)
                 .size(4L)
-                .cursorId(null)
                 .build();
 
-        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto);
-        searchCommentConditionDto.setCursorId(content1.get(content1.size() - 1).getCommentId());
-        List<CommentResponseDto> content2 = commentRepository.searchCommentList(me, searchCommentConditionDto);
-        searchCommentConditionDto.setCursorId(content2.get(content2.size() - 1).getCommentId());
-        List<CommentResponseDto> content3 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+        Comment cursorComment = null;
+        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
+        cursorComment = commentRepository.findById(content1.get(content1.size() - 1).getCommentId()).get();
+        List<CommentResponseDto> content2 = commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
+        cursorComment = commentRepository.findById(content2.get(content2.size() - 1).getCommentId()).get();
+        List<CommentResponseDto> content3 = commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
 
         assertEquals(4, content1.size());
         assertEquals(4, content2.size());
@@ -154,10 +153,9 @@ class CommentRepositoryTest {
                 .targetId(post.getId())
                 .targetType(CommentTargetType.POST)
                 .size(4L)
-                .cursorId(null)
                 .build();
 
-        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto);
+        List<CommentResponseDto> content1 = commentRepository.searchCommentList(me, searchCommentConditionDto, null);
 
         assertEquals(1, content1.size());
         assertEquals(parentComment.getId(), content1.get(0).getCommentId());

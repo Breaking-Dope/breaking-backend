@@ -7,6 +7,7 @@ import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.like.AlreadyLikedException;
 import com.dope.breaking.exception.like.AlreadyUnlikedException;
+import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.PostLikeRepository;
@@ -73,29 +74,26 @@ public class PostLikeService {
     }
 
     @Transactional
-    public List<ForListInfoResponseDto> likedUserList (Principal principal, Long postId){
+    public List<ForListInfoResponseDto> postLikeList (String username, Long postId, Long cursorId, int size){
+
+        User me = null;
+        if(username != null){
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
 
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
-        List<PostLike> postLikeList = postLikeRepository.findAllByPost(post);
-        List<ForListInfoResponseDto> forListInfoResponseDtoList = new ArrayList<>();
+        if(cursorId != null && cursorId != 0L){
+           if(!postLikeRepository.existsById(cursorId)){
+               throw new InvalidCursorException();
+           }
+           if(postLikeRepository.getById(cursorId).getPost()!=post){
+               throw new InvalidCursorException();
+           }
+       }
 
-        if(principal == null){
-            for (PostLike postLike : postLikeList) {
-                User likedUser = postLike.getUser();
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null, likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),false ));
-            }
-        }
-        else{
-            User user = userRepository.findByUsername(principal.getName()).orElseThrow(InvalidAccessTokenException::new);
-            for (PostLike postLike : postLikeList) {
-                User likedUser = postLike.getUser();
-                boolean isFollowing = followRepository.existsFollowsByFollowedAndFollowing(likedUser,user);
-                forListInfoResponseDtoList.add(new ForListInfoResponseDto(null, likedUser.getId(),likedUser.getNickname(),likedUser.getStatusMsg(),likedUser.getOriginalProfileImgURL(),isFollowing));
-            }
-        }
+        return postLikeRepository.postLikeList(me,post,cursorId,size);
 
-        return forListInfoResponseDtoList;
     }
 
 }

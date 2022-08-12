@@ -208,4 +208,90 @@ public class FeedRepositoryTest {
         assertTrue(result.get(0).getIsMyPost());
     }
 
+    @DisplayName("문자열이 포함된 제목이나 본문을 가진 게시글을 검색한다")
+    @Test
+    void searchPostByString() {
+
+        User user = new User();
+        userRepository.save(user);
+
+        Post post = Post.builder()
+                .title("깻묵은 오늘도 맑음 뒤 흐림")
+                .content("본문 없음")
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        post = Post.builder()
+                .title("제목이 없음")
+                .content("안녕하세요 테스트 글입니다.")
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        post = Post.builder()
+                .title("제목이 없음")
+                .content("본문 없음")
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        em.flush();
+
+        List<String> immutableList = List.of("one", "two", "three");
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(3L)
+                .soldOption(SoldOption.ALL)
+                .searchKeywordList(immutableList)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+        assertEquals(2, result.size());
+    }
+
+    @DisplayName("띄어쓰기가 포함된 문자열은 그대로 검색된다.")
+    @Test
+    void searchPostByStringWithSpace() {
+
+        User user = new User();
+        userRepository.save(user);
+
+        Post post = Post.builder()
+                .title("깻묵은 오늘도 맑음 뒤 흐림")
+                .content("본문 없음")
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        post = Post.builder()
+                .title("제목이 없음")
+                .content("안녕하세요 테스트 글입니다.")
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        post = Post.builder()
+                .title("제목이 없음")
+                .content("본문 없음")
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        em.flush();
+
+        List<String> immutableList = List.of("one", "two", "three")
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(3L)
+                .soldOption(SoldOption.ALL)
+                .searchKeywordList(immutableList)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+        assertEquals(2, result.size());
+    }
+
 }

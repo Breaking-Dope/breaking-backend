@@ -225,4 +225,28 @@ public class FeedServiceTest {
         assertNull(result.get(0).getUser());
 
     }
+
+    @DisplayName("+로 입력받은 문자열을 공백으로 replace하여 피드를 검색한다.")
+    @Test
+    void searchWithString() {
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .userPageFeedOption(UserPageFeedOption.WRITE)
+                .searchKeyword("좋은+아침")
+                .build();
+
+        List<FeedResultPostDto> dummy = new ArrayList<>();
+        FeedResultPostDto content = new FeedResultPostDto();
+        content.setIsAnonymous(false);
+        dummy.add(content);
+
+        given(feedRepository.searchFeedBy(searchFeedConditionDto, null, null)).willReturn(dummy);
+
+        //when
+        feedService.searchMainFeed(searchFeedConditionDto, null, null);
+
+        //then
+        assertEquals("좋은 아침", searchFeedConditionDto.getSearchKeyword());
+
+    }
 }

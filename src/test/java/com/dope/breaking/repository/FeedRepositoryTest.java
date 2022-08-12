@@ -224,7 +224,7 @@ public class FeedRepositoryTest {
 
         post = Post.builder()
                 .title("제목이 없음")
-                .content("안녕하세요 테스트 글입니다.")
+                .content("안녕하세요? 깻묵입니다. 잘 지내시죠?")
                 .build();
         post.setUser(user);
         postRepository.save(post);
@@ -238,13 +238,11 @@ public class FeedRepositoryTest {
 
         em.flush();
 
-        List<String> immutableList = List.of("one", "two", "three");
-
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
                 .size(3L)
                 .soldOption(SoldOption.ALL)
-                .searchKeywordList(immutableList)
+                .searchKeyword("깻묵")
                 .build();
 
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
@@ -267,7 +265,7 @@ public class FeedRepositoryTest {
 
         post = Post.builder()
                 .title("제목이 없음")
-                .content("안녕하세요 테스트 글입니다.")
+                .content("본문 없음")
                 .build();
         post.setUser(user);
         postRepository.save(post);
@@ -281,17 +279,15 @@ public class FeedRepositoryTest {
 
         em.flush();
 
-        List<String> immutableList = List.of("one", "two", "three")
-
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
                 .size(3L)
                 .soldOption(SoldOption.ALL)
-                .searchKeywordList(immutableList)
+                .searchKeyword("오늘도 맑음")
                 .build();
 
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
     }
 
 }

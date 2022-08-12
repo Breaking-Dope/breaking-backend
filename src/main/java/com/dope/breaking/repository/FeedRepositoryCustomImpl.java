@@ -50,6 +50,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .leftJoin(post.postLikeList, postLike)
                 .where(
                         post.isHidden.eq(false),
+                        keyWordSearch(searchFeedConditionDto.getSearchKeyword()),
                         soldOption(searchFeedConditionDto.getSoldOption()),
                         period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
@@ -105,6 +106,15 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         }
 
         return content;
+    }
+
+    private Predicate keyWordSearch(String searchString) {
+
+        if(searchString == null) {
+            return null;
+        } else {
+            return ExpressionUtils.or(post.title.contains(searchString), post.content.contains(searchString));
+        }
     }
 
     @Override

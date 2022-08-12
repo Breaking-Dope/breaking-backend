@@ -120,4 +120,25 @@ public class PurchaseService {
 
     }
 
+    public List<ForListInfoResponseDto> purchaseList(String username, Long postId, Long cursorId, int size){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(user != post.getUser()){
+            throw new NoPermissionException();
+        }
+
+        if(cursorId != null && cursorId !=0L){
+            if(!postRepository.existsById(cursorId)){
+                throw new NoSuchPostException();
+            }
+        }
+
+        return purchaseRepository.purchaseList(user, post, cursorId, size);
+
+    }
+
+
+
 }

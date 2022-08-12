@@ -62,9 +62,9 @@ public class FinancialAPI {
 
     @PreAuthorize("isAuthenticated")
     @GetMapping("/post/{postId}/buy-list")
-    public ResponseEntity<List<ForListInfoResponseDto>> buyerList(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<List<ForListInfoResponseDto>> buyerList(Principal principal, @PathVariable Long postId, @RequestParam(value="cursor") Long cursorId, @RequestParam(value="size") int size){
 
-        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.purchaserList(principal.getName(), postId));
+        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.purchaseList(principal.getName(), postId, cursorId, size));
 
     }
 

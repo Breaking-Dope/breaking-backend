@@ -13,15 +13,12 @@ public class SearchCommentConditionDto {
 
     private Long targetId;
 
-    private Long cursorId;
-
     private Long size;
 
     @Builder
-    public SearchCommentConditionDto(CommentTargetType targetType, Long targetId, Long cursorId, Long size) {
+    public SearchCommentConditionDto(CommentTargetType targetType, Long targetId, Long size) {
         this.targetType = targetType;
         this.targetId = targetId;
-        this.cursorId = cursorId;
         this.size = size;
     }
 }

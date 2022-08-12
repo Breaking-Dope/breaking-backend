@@ -1,5 +1,8 @@
 package com.dope.breaking.repository;
 
+import com.dope.breaking.domain.comment.Comment;
+import com.dope.breaking.domain.hashtag.Hashtag;
+import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostLike;
 import com.dope.breaking.domain.user.Bookmark;
@@ -29,6 +32,8 @@ public class FeedRepositoryTest {
     @Autowired PostRepository postRepository;
     @Autowired PostLikeRepository postLikeRepository;
     @Autowired BookmarkRepository bookmarkRepository;
+    @Autowired HashtagRepository hashtagRepository;
+    @Autowired CommentRepository commentRepository;
 
     @Autowired EntityManager em;
 
@@ -288,6 +293,86 @@ public class FeedRepositoryTest {
 
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
         assertEquals(1, result.size());
+    }
+
+    @DisplayName("해시태그가 포함된 게시글을 검색한다.")
+    @Test
+    void SearchPostByHashtag() {
+
+        User user = new User();
+        userRepository.save(user);
+
+        Post postWithHashtag = Post.builder()
+                .build();
+        postWithHashtag.setUser(user);
+        postRepository.save(postWithHashtag);
+
+        Hashtag hashtag = new Hashtag(postWithHashtag, null, HashtagType.POST, "해시태그");
+        hashtagRepository.save(hashtag);
+
+        Post otherPost = Post.builder()
+                .title("제목이 없음")
+                .content("본문 없음")
+                .build();
+        otherPost.setUser(user);
+        postRepository.save(otherPost);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(3L)
+                .soldOption(SoldOption.ALL)
+                .searchHashtag("해시태그")
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+        assertEquals(1, result.size());
+        assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
+    }
+
+    @DisplayName("댓글에 해시태그가 포함된 게시글을 검색한다.")
+    @Test
+    void SearchPostByHashtagInComment() {
+
+        User user = new User();
+        userRepository.save(user);
+
+        Post postWithHashtag = new Post();
+        postWithHashtag.setUser(user);
+        postRepository.save(postWithHashtag);
+
+        Comment comment = Comment.builder()
+                .user(user)
+                .post(postWithHashtag)
+                .build();
+        commentRepository.save(comment);
+
+        Hashtag hashtag = new Hashtag(postWithHashtag, null, HashtagType.POST, "해시태그");
+        hashtagRepository.save(hashtag);
+
+        Post otherPost = new Post();
+        otherPost.setUser(user);
+        postRepository.save(otherPost);
+
+        Comment otherComment = Comment.builder()
+                .user(user)
+                .post(otherPost)
+                .build();
+        commentRepository.save(otherComment);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(3L)
+                .soldOption(SoldOption.ALL)
+                .searchHashtag("해시태그")
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+        assertEquals(1, result.size());
+        assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
     }
 
 }

@@ -43,6 +43,10 @@ public class SearchFeedService {
             searchFeedConditionDto.setDateTo(LocalDateTime.now());
         }
 
+        if(searchFeedConditionDto.getSearchKeyword() != null) {
+            searchFeedConditionDto.setSearchKeyword(searchFeedConditionDto.getSearchKeyword().replace('+', ' '));
+        }
+
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
         for(FeedResultPostDto dto: result) {
             if(dto.getIsAnonymous()) {

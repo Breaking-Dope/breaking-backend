@@ -34,7 +34,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     private final BookmarkRepository bookmarkRepository;
-
     private final PostLikeRepository postLikeRepository;
 
     public FeedRepositoryCustomImpl(EntityManager em, BookmarkRepository bookmarkRepository, PostLikeRepository postLikeRepository) {

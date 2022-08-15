@@ -104,26 +104,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
     @Override
     public List<FeedResultPostDto> searchUserPageBy(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost) {
 
-        List<Tuple> paginatedResult = queryFactory
-                .select(post.id, postLike.post.id.count())
-                .from(post)
-                .leftJoin(post.postLikeList, postLike)
-                .leftJoin(post.bookmarkList, bookmark)
-                .leftJoin(post.purchaseList, purchase)
-                .where(
-                        hiddenPostFilter(owner, me),
-                        anonymousPostFilter(owner, me),
-                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me),
-                        cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
-                        sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
-                )
-                .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
-                .groupBy(post.id, postLike.post.id)
-                .limit(searchFeedConditionDto.getSize())
-                .fetch();
-
-        List<Long> contentIdList = paginatedResult.stream().map(x -> x.get(post.id)).collect(Collectors.toList());
-
         List<FeedResultPostDto> content = queryFactory
                 .select(new QFeedResultPostDto(
                         post.id,
@@ -157,8 +137,18 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
-                .where(post.id.in(contentIdList))
+                .leftJoin(post.postLikeList, postLike)
+                .leftJoin(post.bookmarkList, bookmark)
+                .leftJoin(post.purchaseList, purchase)
+                .where(
+                        hiddenPostFilter(owner, me),
+                        anonymousPostFilter(owner, me),
+                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me),
+                        cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
+                        sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
+                )
                 .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
+                .limit(searchFeedConditionDto.getSize())
                 .fetch();
 
         for(FeedResultPostDto dto : content) {

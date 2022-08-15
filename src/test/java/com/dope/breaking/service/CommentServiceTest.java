@@ -340,7 +340,7 @@ class CommentServiceTest {
                 .targetId(999L)
                 .build();
         assertThrows(NoSuchPostException.class,
-                () -> commentService.getCommentList(searchCommentConditionDto, "12345g"));
+                () -> commentService.getCommentList(searchCommentConditionDto, "12345g", null));
 
     }
 
@@ -360,7 +360,20 @@ class CommentServiceTest {
                 .targetId(999L)
                 .build();
         assertThrows(NoSuchCommentException.class,
-                () -> commentService.getCommentList(searchCommentConditionDto, "12345g"));
+                () -> commentService.getCommentList(searchCommentConditionDto, "12345g", null));
+
+    }
+
+    @DisplayName("존재하지 않은 parent comment id가 입력되면, 예외가 발생한다.")
+    @Test
+    void getCursorCommentFailure() {
+
+        SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
+                .targetType(CommentTargetType.COMMENT)
+                .build();
+
+        assertThrows(NoSuchCommentException.class,
+                () -> commentService.getCommentList(searchCommentConditionDto, null, 999L));
 
     }
 

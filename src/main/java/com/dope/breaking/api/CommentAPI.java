@@ -25,7 +25,7 @@ public class CommentAPI {
     public ResponseEntity<List<CommentResponseDto>> getCommentListFromPost(
             Principal principal,
             @PathVariable Long postId,
-            @RequestParam(value="cursor") Long cursor,
+            @RequestParam(value="cursor") Long cursorId,
             @RequestParam(value="size") Long size
     ) {
 
@@ -37,11 +37,10 @@ public class CommentAPI {
         SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
                 .targetType(CommentTargetType.POST)
                 .targetId(postId)
-                .cursorId(cursor)
                 .size(size)
                 .build();
 
-        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username);
+        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username, cursorId);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
@@ -61,7 +60,7 @@ public class CommentAPI {
     public ResponseEntity<List<CommentResponseDto>> getReplyFromComment(
             Principal principal,
             @PathVariable Long commentId,
-            @RequestParam(value="cursor") Long cursor,
+            @RequestParam(value="cursor") Long cursorId,
             @RequestParam(value="size") Long size
     ) {
 
@@ -73,11 +72,10 @@ public class CommentAPI {
         SearchCommentConditionDto searchCommentConditionDto = SearchCommentConditionDto.builder()
                 .targetType(CommentTargetType.COMMENT)
                 .targetId(commentId)
-                .cursorId(cursor)
                 .size(size)
                 .build();
 
-        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username);
+        List<CommentResponseDto> result = commentService.getCommentList(searchCommentConditionDto, username, cursorId);
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }

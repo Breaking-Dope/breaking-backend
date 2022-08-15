@@ -1,5 +1,6 @@
 package com.dope.breaking.repository;
 
+import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.comment.CommentResponseDto;
 import com.dope.breaking.dto.comment.QCommentResponseDto;
@@ -30,7 +31,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
     }
 
     @Override
-    public List<CommentResponseDto> searchCommentList(User me, SearchCommentConditionDto searchCommentConditionDto) {
+    public List<CommentResponseDto> searchCommentList(User me, SearchCommentConditionDto searchCommentConditionDto, Comment cursorComment) {
 
         List<CommentResponseDto> content = queryFactory
                 .select(new QCommentResponseDto(
@@ -51,7 +52,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
                 .leftJoin(comment.user, user)
                 .where(
                         target(searchCommentConditionDto.getTargetType(), searchCommentConditionDto.getTargetId()),
-                        cursorPagination(searchCommentConditionDto.getCursorId())
+                        cursorPagination(cursorComment)
                 )
                 .limit(searchCommentConditionDto.getSize())
                 .fetch();
@@ -68,11 +69,11 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
         return content;
     }
 
-    private Predicate cursorPagination(Long cursorId) {
-        if(cursorId == null || cursorId == 0) {
+    private Predicate cursorPagination(Comment cursorComment) {
+        if(cursorComment == null) {
             return null;
         }
-        return comment.id.gt(cursorId);
+        return comment.id.gt(cursorComment.getId());
     }
 
     private Predicate target(CommentTargetType targetType, Long targetId) {

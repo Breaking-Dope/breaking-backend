@@ -95,11 +95,16 @@ public class CommentService {
 
     }
 
-    public List<CommentResponseDto> getCommentList(SearchCommentConditionDto searchCommentConditionDto, String username) {
+    public List<CommentResponseDto> getCommentList(SearchCommentConditionDto searchCommentConditionDto, String username, Long cursorId) {
 
         User me = null;
         if(username != null) {
             me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        Comment cursorComment = null;
+        if(cursorId != null && cursorId != 0) {
+            cursorComment = commentRepository.findById(cursorId).orElseThrow(NoSuchCommentException::new);
         }
 
         switch (searchCommentConditionDto.getTargetType()) {
@@ -116,6 +121,6 @@ public class CommentService {
                 break;
         }
 
-        return commentRepository.searchCommentList(me, searchCommentConditionDto);
+        return commentRepository.searchCommentList(me, searchCommentConditionDto, cursorComment);
     }
 }

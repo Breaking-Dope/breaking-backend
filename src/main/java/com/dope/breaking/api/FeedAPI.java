@@ -32,6 +32,7 @@ public class FeedAPI {
             @RequestParam(value="cursor") Long cursorId,
             @RequestParam(value="size") Long size,
             @RequestParam(value="search", required = false) String searchKeyword,
+            @RequestParam(value="hashtag", required = false) String hashtag,
             @RequestParam(value="sort", required = false) String sortStrategy,
             @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption,
             @RequestParam(value="date-from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
@@ -41,6 +42,7 @@ public class FeedAPI {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .searchKeyword(searchKeyword)
+                .searchHashtag(hashtag)
                 .size(size)
                 .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
                 .soldOption(SoldOption.findMatchedEnum(soldOption))

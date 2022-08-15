@@ -1,5 +1,6 @@
 package com.dope.breaking.repository;
 
+import com.dope.breaking.domain.hashtag.QHashtag;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.*;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.dope.breaking.domain.financial.QPurchase.purchase;
+import static com.dope.breaking.domain.hashtag.QHashtag.*;
 import static com.dope.breaking.domain.post.QPostLike.*;
 import static com.dope.breaking.domain.post.QPost.post;
 import static com.dope.breaking.domain.user.QBookmark.bookmark;
@@ -32,7 +34,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     private final BookmarkRepository bookmarkRepository;
-
     private final PostLikeRepository postLikeRepository;
 
     public FeedRepositoryCustomImpl(EntityManager em, BookmarkRepository bookmarkRepository, PostLikeRepository postLikeRepository) {
@@ -48,9 +49,11 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .select(post.id, postLike.post.id.count())
                 .from(post)
                 .leftJoin(post.postLikeList, postLike)
+                .leftJoin(post.hashtags, hashtag)
                 .where(
                         post.isHidden.eq(false),
                         keyWordSearch(searchFeedConditionDto.getSearchKeyword()),
+                        hashtagSearch(searchFeedConditionDto.getSearchHashtag()),
                         soldOption(searchFeedConditionDto.getSoldOption()),
                         period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
@@ -106,15 +109,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         }
 
         return content;
-    }
-
-    private Predicate keyWordSearch(String searchString) {
-
-        if(searchString == null) {
-            return null;
-        } else {
-            return ExpressionUtils.or(post.title.contains(searchString), post.content.contains(searchString));
-        }
     }
 
     @Override
@@ -183,6 +177,24 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         }
 
         return content;
+    }
+
+    private Predicate keyWordSearch(String searchString) {
+
+        if(searchString == null) {
+            return null;
+        } else {
+            return ExpressionUtils.or(post.title.contains(searchString), post.content.contains(searchString));
+        }
+    }
+
+    private Predicate hashtagSearch(String searchHashtag) {
+
+        if(searchHashtag == null) {
+            return null;
+        } else {
+            return hashtag.content.eq(searchHashtag);
+        }
     }
 
     private Predicate anonymousPostFilter(User owner, User me) {

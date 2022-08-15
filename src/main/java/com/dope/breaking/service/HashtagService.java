@@ -60,7 +60,7 @@ public class HashtagService {
 
                     Hashtag postCommentHashtag = Hashtag.builder()
                             .content(hashtag)
-                            .post(null)
+                            .post(comment.getPost())
                             .comment(comment)
                             .hashtagType(hashtagType)
                             .build();

@@ -45,27 +45,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
     @Override
     public List<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me) {
 
-        List<Tuple> paginatedResult = queryFactory
-                .select(post.id, postLike.post.id.count())
-                .from(post)
-                .leftJoin(post.postLikeList, postLike)
-                .leftJoin(post.hashtags, hashtag)
-                .where(
-                        post.isHidden.eq(false),
-                        keyWordSearch(searchFeedConditionDto.getSearchKeyword()),
-                        hashtagSearch(searchFeedConditionDto.getSearchHashtag()),
-                        soldOption(searchFeedConditionDto.getSoldOption()),
-                        period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo()),
-                        cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
-                        sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
-                )
-                .groupBy(post.id, postLike.post.id)
-                .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()), boardSort(SortStrategy.CHRONOLOGICAL))
-                .limit(searchFeedConditionDto.getSize())
-                .fetch();
-
-        List<Long> contentIdList = paginatedResult.stream().map(x -> x.get(post.id)).collect(Collectors.toList());
-
         List<FeedResultPostDto> content = queryFactory
                 .select(new QFeedResultPostDto(
                         post.id,
@@ -99,8 +78,19 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 ))
                 .from(post)
                 .leftJoin(post.user, user)
-                .where(post.id.in(contentIdList))
+                .leftJoin(post.postLikeList, postLike)
+                .leftJoin(post.hashtags, hashtag)
+                .where(
+                        post.isHidden.eq(false),
+                        keyWordSearch(searchFeedConditionDto.getSearchKeyword()),
+                        hashtagSearch(searchFeedConditionDto.getSearchHashtag()),
+                        soldOption(searchFeedConditionDto.getSoldOption()),
+                        period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo()),
+                        cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
+                        sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
+                )
                 .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()), boardSort(SortStrategy.CHRONOLOGICAL))
+                .limit(searchFeedConditionDto.getSize())
                 .fetch();
 
         for(FeedResultPostDto dto : content) {

@@ -32,6 +32,10 @@ public class Post extends BaseTimeEntity {
     @JoinColumn (name="USER_ID")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn (name="MISSION_ID")
+    private Mission mission;
+
     @OneToMany(mappedBy = "post")
     private List<Purchase> purchaseList = new ArrayList<Purchase>();
 

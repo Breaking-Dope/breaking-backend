@@ -5,10 +5,12 @@ import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.dto.user.SearchUserResponseDto;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.FeedRepository;
-import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -35,9 +36,6 @@ public class FeedServiceTest {
     private FeedRepository feedRepository;
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private PostRepository postRepository;
 
     @InjectMocks
     private SearchFeedService feedService;
@@ -248,5 +246,38 @@ public class FeedServiceTest {
         //then
         assertEquals("좋은 아침", searchFeedConditionDto.getSearchKeyword());
 
+    }
+
+    @DisplayName("유저 검색이 정상적으로 작동한다.")
+    @Test
+    void userSearchTest() {
+
+        String username = "username";
+        User user = User.builder().username(username).build();
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        List<SearchUserResponseDto> returnResult = new ArrayList<>();
+        returnResult.add(SearchUserResponseDto.builder().build());
+        when(userRepository.searchUserBy(user, username, null, 1L)).thenReturn(returnResult);
+
+        List<SearchUserResponseDto> result = feedService.searchUser(user.getUsername(), username, null, 1L);
+
+        assertEquals(1, result.size());
+    }
+
+    @DisplayName("유저 검색에서 유효하지 않은 username을 입력하면 예외가 발생한다.")
+    @Test
+    void userSearchInvalidUsername() {
+
+        Mockito.when(userRepository.findByUsername("wrongUsername")).thenThrow(InvalidAccessTokenException.class);
+        assertThrows(InvalidAccessTokenException.class, ()-> feedService.searchUser("wrongUsername", "someUser", null, 1L));
+    }
+
+    @DisplayName("유저 검색에서 유효하지 않은 cursorId을 입력하면 예외가 발생한다.")
+    @Test
+    void userSearchInvalidCursor() {
+
+        Mockito.when(userRepository.findById(100L)).thenThrow(InvalidCursorException.class);
+        assertThrows(InvalidCursorException.class, ()-> feedService.searchUser(null, "someUser", 100L, 1L));
     }
 }

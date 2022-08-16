@@ -467,8 +467,8 @@ class PurchaseServiceTest {
         followService.follow("seller", buyer1.getId());
 
         //Then
-        assertTrue(purchaseService.purchaserList("seller",postId).get(0).isFollowing());
-        assertFalse(purchaseService.purchaserList("seller",postId).get(1).isFollowing());
+        assertTrue(purchaseService.purchaseList("seller",postId,null,10).get(0).isFollowing());
+        assertFalse(purchaseService.purchaseList("seller",postId, null, 10).get(1).isFollowing());
 
     }
 
@@ -519,7 +519,59 @@ class PurchaseServiceTest {
         purchaseService.purchasePost("buyer2", postId);
 
         Assertions.assertThrows(NoPermissionException.class, ()
-                ->  purchaseService.purchaserList("buyer1",postId)); //When
+                ->  purchaseService.purchaseList("buyer1",postId, null, 20)); //When
+
+    }
+
+    @DisplayName("cursorId가 무효할 경우, 예외가 발생한다")
+    @Test
+    void purchaseListWithWrongCursorId() throws Exception {
+
+        //Given
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.USER);
+        buyer1.updateBalance(1000);
+        userRepository.save(buyer1);
+
+        User buyer2 = new User();
+        buyer2.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer2", Role.USER);
+        buyer2.updateBalance(2000);
+        userRepository.save(buyer2);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(2000);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 0," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"free\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"address\" : \"address\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        purchaseService.purchasePost("buyer1", postId);
+        purchaseService.purchasePost("buyer2", postId);
+
+        Assertions.assertThrows(NoSuchPostException.class, ()
+                ->  purchaseService.purchaseList("seller", postId, 100L, 10)); //When
+
     }
 
 }

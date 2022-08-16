@@ -314,9 +314,6 @@ class FollowRepositoryTest {
         //When
         List<ForListInfoResponseDto> followingList = followRepository.followerList(hero, hero,0L,10);
 
-        for (ForListInfoResponseDto forListInfoResponseDto : followingList) {
-            System.out.println(forListInfoResponseDto);
-        }
         //Then
         Assertions.assertEquals(3, followingList.size());
         Assertions.assertTrue(followingList.get(0).isFollowing());

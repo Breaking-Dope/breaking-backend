@@ -135,30 +135,4 @@ class PostLikeAPITest {
 
     }
 
-    @Test
-    @WithMockCustomUser
-    void likedUserList() throws Exception{
-
-        //Given
-        User user1 = new User();
-        User user2 = new User();
-        Post post = new Post();
-
-        userRepository.save(user1);
-        userRepository.save(user2);
-        postRepository.save(post);
-
-        postLikeService.likePost(user1,post);
-        postLikeService.likePost(user2,post);
-
-        followService.follow("12345g",user1.getId());
-
-        //When
-        this.mockMvc.perform(get("/post/{postId}/like-list",post.getId()))
-                .andExpect(status().isOk()) //Then
-                .andExpect(jsonPath("$[0].isFollowing").value(true))
-                .andExpect(jsonPath("$[1].isFollowing").value(false))
-                .andExpect(jsonPath("$", hasSize(2)));
-    }
-
 }

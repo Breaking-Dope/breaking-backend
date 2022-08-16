@@ -5,6 +5,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -35,7 +36,7 @@ public class SearchFeedService {
 
         Post cursorPost = null;
         if(cursorId != null && cursorId != 0) {
-            cursorPost = postRepository.findById(cursorId).orElseThrow(NoSuchPostException::new);
+            cursorPost = postRepository.findById(cursorId).orElseThrow(InvalidCursorException::new);
         }
 
         if(searchFeedConditionDto.getForLastMin() != null) {
@@ -79,7 +80,7 @@ public class SearchFeedService {
 
         Post cursorPost = null;
         if(cursorId != null && cursorId != 0) {
-            cursorPost = postRepository.findById(cursorId).orElseThrow(NoSuchPostException::new);
+            cursorPost = postRepository.findById(cursorId).orElseThrow(InvalidAccessTokenException::new);
         }
 
         return feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);

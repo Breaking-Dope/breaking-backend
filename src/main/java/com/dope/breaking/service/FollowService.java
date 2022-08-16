@@ -7,6 +7,7 @@ import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.follow.AlreadyFollowingException;
 import com.dope.breaking.exception.follow.AlreadyUnfollowingException;
+import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -62,10 +63,22 @@ public class FollowService {
         }
         User selectedUser = userRepository.findById(userId).orElseThrow(NoSuchUserException::new);
 
+        if(cursorId != null && cursorId != 0L){
+            if(!followRepository.existsById(cursorId)){
+                throw new InvalidCursorException();
+            }
+        }
+
         if(followTargetType == FollowTargetType.FOLLOWING) {
+            if(followRepository.getById(cursorId).getFollowing()!=selectedUser){
+                throw new InvalidCursorException();
+            }
             return followRepository.followingList(me, selectedUser, cursorId, size);
         }
         else if(followTargetType == FollowTargetType.FOLLOWED) {
+            if(followRepository.getById(cursorId).getFollowed()!=selectedUser){
+                throw new InvalidCursorException();
+            }
             return followRepository.followerList(me, selectedUser, cursorId, size);
         }
 

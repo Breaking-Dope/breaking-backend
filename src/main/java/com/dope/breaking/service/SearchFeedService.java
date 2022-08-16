@@ -4,6 +4,8 @@ import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.dto.user.ProfileInformationResponseDto;
+import com.dope.breaking.dto.user.SearchUserResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.post.NoSuchPostException;
@@ -87,4 +89,18 @@ public class SearchFeedService {
 
     }
 
+    public List<SearchUserResponseDto> searchUser(String username, String searchKeyword, Long cursorId, Long size) {
+
+        User me = null;
+        if (username != null) {
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        User cursorUser = null;
+        if(cursorId != null && cursorId != 0L) {
+            cursorUser = userRepository.findById(cursorId).orElseThrow(InvalidCursorException::new);
+        }
+
+        return userRepository.searchUserBy(me, searchKeyword, cursorUser, size);
+    }
 }

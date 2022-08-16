@@ -92,9 +92,9 @@ public class FeedAPI {
     @GetMapping("/search/user")
     public ResponseEntity<List<SearchUserResponseDto>> searchUser(
             Principal principal,
-            @PathVariable(value = "search") String searchKeyword,
-            @PathVariable(value = "cursor") Long cursorId,
-            @PathVariable(value = "size") Long size
+            @RequestParam(value = "search") String searchKeyword,
+            @RequestParam(value = "cursor") Long cursorId,
+            @RequestParam(value = "size") Long size
     ) {
 
         String username = null;

@@ -2,6 +2,8 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.dto.user.ProfileInformationResponseDto;
+import com.dope.breaking.dto.user.SearchUserResponseDto;
 import com.dope.breaking.service.SoldOption;
 import com.dope.breaking.service.SearchFeedService;
 import com.dope.breaking.service.SortStrategy;
@@ -85,6 +87,21 @@ public class FeedAPI {
 
         return ResponseEntity.ok().body(searchFeedService.searchUserFeed(searchFeedConditionDto, ownerId, username, cursorId));
 
+    }
+
+    @GetMapping("/search/user")
+    public ResponseEntity<List<SearchUserResponseDto>> searchUser(
+            Principal principal,
+            @RequestParam(value = "search") String searchKeyword,
+            @RequestParam(value = "cursor") Long cursorId,
+            @RequestParam(value = "size") Long size
+    ) {
+
+        String username = null;
+        if (principal != null) {
+            username = principal.getName();
+        }
+        return ResponseEntity.ok().body(searchFeedService.searchUser(username, searchKeyword, cursorId, size));
     }
 
 }

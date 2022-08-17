@@ -6,13 +6,10 @@ import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.pagination.InvalidCursorException;
-import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.exception.user.NoSuchUserException;
-import com.dope.breaking.repository.FeedRepository;
-import com.dope.breaking.repository.PostRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +23,8 @@ public class SearchFeedService {
     private final FeedRepository feedRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
+    private final PostLikeRepository postLikeRepository;
 
     public List<FeedResultPostDto> searchMainFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
 
@@ -48,10 +47,21 @@ public class SearchFeedService {
             searchFeedConditionDto.setSearchKeyword(searchFeedConditionDto.getSearchKeyword().replace('+', ' '));
         }
 
-        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
-        for(FeedResultPostDto dto: result) {
-            if(dto.getIsAnonymous()) {
-                dto.setUser(null);
+        List<FeedResultPostDto> result;
+
+        if(searchFeedConditionDto.getSearchHashtag() != null) {
+            result = feedRepository.searchFeedByHashtag(searchFeedConditionDto, cursorPost, me);
+        } else {
+            result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
+        }
+
+        if(me != null) {
+            for (FeedResultPostDto dto : result) {
+                if (dto.getIsAnonymous()) {
+                    dto.setUser(null);
+                }
+                dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
+                dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
             }
         }
 
@@ -83,7 +93,27 @@ public class SearchFeedService {
             cursorPost = postRepository.findById(cursorId).orElseThrow(InvalidAccessTokenException::new);
         }
 
-        return feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
+        List<FeedResultPostDto> result;
+
+        switch (searchFeedConditionDto.getUserPageFeedOption()) {
+            case BOOKMARK:
+                result = feedRepository.searchUserPageByBookmark(searchFeedConditionDto, owner, me, cursorPost);
+            case BUY:
+                result = feedRepository.searchUserPageByPurchase(searchFeedConditionDto, owner, me, cursorPost);
+            case WRITE:
+            default:
+                result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
+
+        }
+
+        if(me != null) {
+            for (FeedResultPostDto dto : result) {
+                dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
+                dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
+            }
+        }
+
+        return result;
 
     }
 

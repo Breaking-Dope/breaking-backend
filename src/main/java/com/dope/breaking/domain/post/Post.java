@@ -74,7 +74,7 @@ public class Post extends BaseTimeEntity {
 
     private boolean isSold;
 
-    private boolean isHidden;
+    private boolean isHidden = false;
 
     private Boolean isPurchasable = true;
 
@@ -125,6 +125,8 @@ public class Post extends BaseTimeEntity {
 
     public void updateIsPurchasable (boolean isPurchasable) { this.isPurchasable = isPurchasable; }
 
-    public void updateMission(Mission mission) {this.mission = mission;}
+    public void updateMission(Mission mission) { this.mission = mission; }
+
+    public void updateIsHidden (boolean isHidden) { this.isHidden = isHidden; }
 
 }

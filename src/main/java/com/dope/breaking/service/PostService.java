@@ -13,10 +13,7 @@ import com.dope.breaking.dto.post.WriterDto;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.exception.NotValidRequestBodyException;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
-import com.dope.breaking.exception.post.AlreadyNotPurchasableException;
-import com.dope.breaking.exception.post.AlreadyPurchasableException;
-import com.dope.breaking.exception.post.NoSuchPostException;
-import com.dope.breaking.exception.post.PurchasedPostException;
+import com.dope.breaking.exception.post.*;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -285,6 +282,42 @@ public class PostService {
         }
 
         post.updateIsPurchasable(true);
+
+    }
+
+    @Transactional
+    public void hidePost(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(post.getUser() != user){
+            throw new NoPermissionException();
+        }
+
+        if(post.isHidden()){
+            throw new AlreadyHiddenException();
+        }
+
+        post.updateIsHidden(true);
+
+    }
+
+    @Transactional
+    public void cancelHidePost(String username, Long postId){
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
+
+        if(post.getUser() != user){
+            throw new NoPermissionException();
+        }
+
+        if(!post.isHidden()){
+            throw new AlreadyNotHiddenException();
+        }
+
+        post.updateIsHidden(false);
 
     }
 

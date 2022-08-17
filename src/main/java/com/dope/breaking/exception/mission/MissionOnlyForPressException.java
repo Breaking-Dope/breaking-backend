@@ -1,4 +1,4 @@
-package com.dope.breaking.exception.post;
+package com.dope.breaking.exception.mission;
 
 import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.ErrorCode;

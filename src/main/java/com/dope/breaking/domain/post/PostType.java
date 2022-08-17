@@ -8,7 +8,9 @@ import lombok.*;
 public enum PostType {
     EXCLUSIVE("EXCLUSIVE"),
     CHARGED("CHARGED"),
-    FREE("FREE");
+    FREE("FREE"),
+    MISSION("MISSION");
+
 
     private final String title;
 }

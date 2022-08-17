@@ -66,7 +66,7 @@ public class PostService {
 
     @Transactional
     public Long create(String username, String contentData, List<MultipartFile> files) throws Exception {
-        User user = userRepository.findByUsername(username).get();
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
 
         PostRequestDto postRequestDto = transferPostRequestToObject(contentData);
 
@@ -328,6 +328,8 @@ public class PostService {
             postType = PostType.CHARGED;
         } else if (PostType.FREE.getTitle().equalsIgnoreCase(requestPostType)) {
             postType = PostType.FREE;
+        } else if (PostType.MISSION.getTitle().equalsIgnoreCase(requestPostType)) {
+            postType = PostType.MISSION;
         }
         return postType;
     }

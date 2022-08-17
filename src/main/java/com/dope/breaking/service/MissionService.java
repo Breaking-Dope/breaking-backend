@@ -6,12 +6,21 @@ import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionRequestDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
-import com.dope.breaking.exception.post.MissionOnlyForPressException;
+import com.dope.breaking.exception.mission.MissionOnlyForPressException;
+import com.dope.breaking.exception.mission.NoSuchBreakingMissionException;
 import com.dope.breaking.repository.MissionRepository;
+import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +28,8 @@ public class MissionService {
 
     private final MissionRepository missionRepository;
     private final UserRepository userRepository;
+    private final PostService postService;
+    private final PostRepository postRepository;
 
     @Transactional
     public void createMission(MissionRequestDto missionRequestDto, String username){
@@ -45,6 +56,18 @@ public class MissionService {
                 location);
 
         missionRepository.save(mission);
+
+    }
+
+    @Transactional
+    public Map<String, Long> postSubmission(String username, String contentData, List<MultipartFile> files, Long missionId) throws Exception {
+
+        Mission mission = missionRepository.findById(missionId).orElseThrow(NoSuchBreakingMissionException::new);
+        Long postId = postService.create(username,contentData,files);
+        postRepository.findById(postId).get().updateMission(mission);
+        Map<String, Long> result = new LinkedHashMap<>();
+        result.put("postId", postId);
+        return result;
 
     }
 

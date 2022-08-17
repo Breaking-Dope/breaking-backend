@@ -42,8 +42,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
                             new QWriterDto(
                                 user.id,
                                 user.compressedProfileImgURL,
-                                user.nickname,
-                                Expressions.asString("")
+                                user.nickname
                             ),
                             Expressions.asBoolean(false),
                             comment.createdDate

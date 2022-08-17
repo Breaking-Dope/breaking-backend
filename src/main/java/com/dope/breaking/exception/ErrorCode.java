@@ -44,6 +44,10 @@ public enum ErrorCode {
     NOT_PURCHASABLE_POST("BSE460", "구매 제한이 된 포스트입니다."),
     SOLD_EXCLUSIVE_POST("BSE461", "이미 판매 된 단독제보입니다."),
 
+    NO_SUCH_BREAKING_MISSION("BSE480", "존재하지 않는 브레이킹미션입니다."),
+    MISSION_ONLY_FOR_PRESS("BSE481", "브레이킹 미션은 언론사만 게시 가능합니다."),
+
+
     INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패."),
 
     NOT_ENOUGH_BALANCE("BSE601", "금액이 부족합니다.");

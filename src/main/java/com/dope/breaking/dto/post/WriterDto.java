@@ -16,14 +16,11 @@ public class WriterDto {
 
     private String nickname;
 
-    private String phoneNumber;
-
     @Builder
     @QueryProjection
-    public WriterDto(Long userId, String profileImgURL, String nickname, String phoneNumber){
+    public WriterDto(Long userId, String profileImgURL, String nickname){
         this.userId = userId;
         this.profileImgURL = profileImgURL;
         this.nickname = nickname;
-        this.phoneNumber = phoneNumber;
     }
 }

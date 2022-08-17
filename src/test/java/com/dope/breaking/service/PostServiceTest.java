@@ -284,7 +284,7 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isBookmarked());
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
-        Assertions.assertFalse(detailPostResponseDto.isMyPost());
+        Assertions.assertFalse(detailPostResponseDto.getIsMyPost());
     }
 
     @DisplayName(value = "로그인을 하지 않은 유저가 익명 게시글을 조회하려고 할 시, 제보자 정보가 null로 반환된다.")
@@ -319,7 +319,7 @@ class PostServiceTest {
         DetailPostResponseDto detailPostResponseDto = postService.read(postId, null);
 
         //Then
-        Assertions.assertFalse(detailPostResponseDto.isMyPost());
+        Assertions.assertFalse(detailPostResponseDto.getIsMyPost());
         Assertions.assertNull(detailPostResponseDto.getUser());
 
     }
@@ -360,7 +360,7 @@ class PostServiceTest {
         Assertions.assertFalse(detailPostResponseDto.isBookmarked());
         Assertions.assertFalse(detailPostResponseDto.isLiked());
         Assertions.assertFalse(detailPostResponseDto.isPurchased());
-        Assertions.assertTrue(detailPostResponseDto.isMyPost());
+        Assertions.assertTrue(detailPostResponseDto.getIsMyPost());
     }
 
     @DisplayName(value = "다른 사용자가 익명 게시글을 조회할 시, 사용자 정보는 null로 반환된다.")
@@ -433,7 +433,7 @@ class PostServiceTest {
 
         //Then
         Assertions.assertNotNull(detailPostResponseDto.getUser().getUserId());
-        Assertions.assertTrue(detailPostResponseDto.isMyPost());
+        Assertions.assertTrue(detailPostResponseDto.getIsMyPost());
 
     }
 

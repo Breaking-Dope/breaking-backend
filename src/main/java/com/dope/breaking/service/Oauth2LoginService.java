@@ -38,7 +38,7 @@ public class Oauth2LoginService {
 
     private final RedisService redisService;
 
-    public ResponseEntity<String> kakaoUserInfo(String accessToken){
+    public ResponseEntity<String> kakaoUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
 
@@ -62,7 +62,7 @@ public class Oauth2LoginService {
     }
 
     public ResponseEntity<?> kakaoLogin(ResponseEntity<String> kakaoUserinfo, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ParseException, ServletException, IOException {
-        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow(() -> new NotFoundUserAgent());
         log.info(userAgent);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(kakaoUserinfo.getBody());
@@ -72,26 +72,30 @@ public class Oauth2LoginService {
         String kakao_account = jsonObject.get("kakao_account").toString();
         JSONObject infoObject = (JSONObject) jsonParser.parse(kakao_account);
         log.info(infoObject.toJSONString());
-        if(infoObject.containsKey("email")){
+        if (infoObject.containsKey("email")) {
             dto.setEmail(infoObject.get("email").toString());
-        }else {
+        } else {
             log.info("이메일 정보를 불러올 수 없음");
             dto.setEmail(null);
         }
-        String profile = infoObject.get("profile").toString();
-        infoObject = (JSONObject) jsonParser.parse(profile);
-        if(infoObject.containsKey("nickname")){
-            dto.setFullname(infoObject.get("nickname").toString());
-        } else {
-            log.info("유저 이름을 불러올 수 없음");
+        if (!infoObject.containsKey("profile")) {
             dto.setFullname(null);
-        }
-
-        if(infoObject.containsKey("profile_image_url")){
-            dto.setProfileImgURL(infoObject.get("profile_image_url").toString());
-        } else {
-            log.info("기존 프로필 사진을 불러올 수 없음");
             dto.setProfileImgURL(null);
+        } else {
+            String profile = infoObject.get("profile").toString();
+            infoObject = (JSONObject) jsonParser.parse(profile);
+            if (infoObject.containsKey("nickname")) {
+                dto.setFullname(infoObject.get("nickname").toString());
+            } else {
+                log.info("유저 이름을 불러올 수 없음");
+                dto.setFullname(null);
+            }
+            if (infoObject.containsKey("profile_image_url")) {
+                dto.setProfileImgURL(infoObject.get("profile_image_url").toString());
+            } else {
+                log.info("기존 프로필 사진을 불러올 수 없음");
+                dto.setProfileImgURL(null);
+            }
         }
 
         if (!userRepository.existsByUsername(dto.getUsername())) {
@@ -105,22 +109,20 @@ public class Oauth2LoginService {
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("authorization", accessToken);
-            if(userAgentType.equals("WEB")) {
+            if (userAgentType.equals("WEB")) {
                 Cookie cookie = new Cookie("authorization-refresh", refreshToken);
                 cookie.setMaxAge(14 * 24 * 60 * 60); //2주
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
                 httpServletResponse.addCookie(cookie);
-            }
-            else{
+            } else {
                 httpHeaders.set("authorization-refresh", refreshToken);
             }
 
 
-
-            redisService.setDataWithExpiration(userAgentType + "_" +dto.getUsername(), refreshToken,2 * 604800L);
+            redisService.setDataWithExpiration(userAgentType + "_" + dto.getUsername(), refreshToken, 2 * 604800L);
             User user = userRepository.findByUsername(dto.getUsername()).get();
-            UserBriefInformationResponseDto userBriefInformationResponseDto  = UserBriefInformationResponseDto.builder()
+            UserBriefInformationResponseDto userBriefInformationResponseDto = UserBriefInformationResponseDto.builder()
                     .userId(user.getId())
                     .nickname(user.getNickname())
                     .profileImgURL(user.getOriginalProfileImgURL())
@@ -130,7 +132,7 @@ public class Oauth2LoginService {
         }
     }
 
-    public ResponseEntity<String> googleUserInfo(String accessToken, String idToken){
+    public ResponseEntity<String> googleUserInfo(String accessToken, String idToken) {
         HttpHeaders headers = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -151,9 +153,8 @@ public class Oauth2LoginService {
     }
 
 
-
     public ResponseEntity<?> googleLogin(ResponseEntity<String> GoogleUserinfo, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ParseException, ServletException, IOException {
-        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow(() -> new NotFoundUserAgent());
 
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(GoogleUserinfo.getBody());
@@ -161,22 +162,22 @@ public class Oauth2LoginService {
         UserDto dto = new UserDto();
         dto.setUsername(jsonObject.get("sub").toString() + "g");
 
-        if(jsonObject.containsKey("email")){
+        if (jsonObject.containsKey("email")) {
             dto.setEmail(jsonObject.get("email").toString());
-        }else{
+        } else {
             log.info("유저 이메일을 불러올 수 없음");
             dto.setEmail(null);
         }
-        if(jsonObject.containsKey("given_name")) {
+        if (jsonObject.containsKey("given_name")) {
             dto.setFullname(jsonObject.get("given_name").toString());
-        }else{
+        } else {
             log.info("유저 이름을 불러올 수 없음");
             dto.setFullname(null);
         }
-        if(jsonObject.containsKey("picture")){
+        if (jsonObject.containsKey("picture")) {
 
             dto.setProfileImgURL(jsonObject.get("picture").toString());
-        }else{
+        } else {
             log.info("기존 프로필 사진을 불러올 수 없음");
             dto.setProfileImgURL(null);
         }
@@ -190,15 +191,13 @@ public class Oauth2LoginService {
             String refreshToken = jwtTokenProvider.createRefreshToken(dto.getUsername());
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.set("authorization", accessToken);
-            httpHeaders.set("authorization-refresh", refreshToken);
-            if(userAgentType.equals("WEB")) {
+            if (userAgentType.equals("WEB")) {
                 Cookie cookie = new Cookie("authorization-refresh", refreshToken);
                 cookie.setMaxAge(14 * 24 * 60 * 60); //2주
                 cookie.setHttpOnly(true);
                 cookie.setPath("/");
                 httpServletResponse.addCookie(cookie);
-            }
-            else{
+            } else {
                 httpHeaders.set("authorization-refresh", refreshToken);
             }
 

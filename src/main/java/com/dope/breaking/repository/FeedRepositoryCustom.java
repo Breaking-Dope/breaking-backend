@@ -11,6 +11,12 @@ public interface FeedRepositoryCustom {
 
     List<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me);
 
+    List<FeedResultPostDto> searchFeedByHashtag(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me);
+
+    List<FeedResultPostDto> searchUserPageByBookmark(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost);
+
+    List<FeedResultPostDto> searchUserPageByPurchase(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost);
+
     List<FeedResultPostDto> searchUserPageBy(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost);
 
 }

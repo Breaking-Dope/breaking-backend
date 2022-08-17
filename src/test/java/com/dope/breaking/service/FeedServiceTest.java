@@ -1,6 +1,8 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.post.PostLike;
+import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
@@ -10,6 +12,7 @@ import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
+import com.dope.breaking.repository.*;
 import com.dope.breaking.repository.FeedRepository;
 import com.dope.breaking.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -36,6 +39,12 @@ public class FeedServiceTest {
     private FeedRepository feedRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private PostRepository postRepository;
+    @Mock
+    private BookmarkRepository bookmarkRepository;
+    @Mock
+    private PostLikeRepository postLikeRepository;
 
     @InjectMocks
     private SearchFeedService feedService;
@@ -245,6 +254,74 @@ public class FeedServiceTest {
 
         //then
         assertEquals("좋은 아침", searchFeedConditionDto.getSearchKeyword());
+
+    }
+
+    @DisplayName("유저가 bookmark한 게시글은, isBookmarked가 true로 반환된다.")
+    @Test
+    void feedIsBookmarked() {
+
+        //given
+        User me = new User();
+        me.setRequestFields("URL", "URL", "owner", "01012345678", "email@naver.com", "Jinu", "msg", "username", Role.USER);
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+
+        when(userRepository.findByUsername(me.getUsername())).thenReturn(Optional.of(me));
+
+        List<FeedResultPostDto> dummy = new ArrayList<>();
+        FeedResultPostDto content = FeedResultPostDto.builder()
+                .isAnonymous(false)
+                .build();
+        dummy.add(content);
+        given(feedRepository.searchFeedBy(searchFeedConditionDto, null, me)).willReturn(dummy);
+        given(bookmarkRepository.existsByUserAndPostId(me, null)).willReturn(true);
+        given(postLikeRepository.existsByUserAndPostId(me, null)).willReturn(false);
+
+        //when
+        List<FeedResultPostDto> result = feedService.searchMainFeed(searchFeedConditionDto, me.getUsername(), null);
+
+        //then
+        assertTrue(result.get(0).getIsBookmarked());
+
+    }
+
+    @DisplayName("유저가 like한 게시글은, isLiked가 true로 반환된다.")
+    @Test
+    void feedIsLiked() {
+
+        //given
+        User me = new User();
+        me.setRequestFields("URL", "URL", "owner", "01012345678", "email@naver.com", "Jinu", "msg", "username", Role.USER);
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+
+        when(userRepository.findByUsername(me.getUsername())).thenReturn(Optional.of(me));
+
+        List<FeedResultPostDto> dummy = new ArrayList<>();
+        FeedResultPostDto content = FeedResultPostDto.builder()
+                .isAnonymous(false)
+                .build();
+        dummy.add(content);
+        given(feedRepository.searchFeedBy(searchFeedConditionDto, null, me)).willReturn(dummy);
+        given(bookmarkRepository.existsByUserAndPostId(me, null)).willReturn(false);
+        given(postLikeRepository.existsByUserAndPostId(me, null)).willReturn(true);
+
+        //when
+        List<FeedResultPostDto> result = feedService.searchMainFeed(searchFeedConditionDto, me.getUsername(), null);
+
+        //then
+        assertTrue(result.get(0).getIsLiked());
 
     }
 

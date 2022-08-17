@@ -112,4 +112,26 @@ class UserRepositoryTest {
 
     }
 
+    @DisplayName("유저 검색 시, 팔로워중인 사람의 수가 표시된다.")
+    @Test
+    void SearchedUserFollowerCount() {
+
+        User user = new User();
+        user.setRequestFields("URL", "anyURL", "닉네임", "01012345678", "abc.google.com", "realname", "msg", "username", Role.USER);
+        userRepository.save(user);
+
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+
+        em.flush();
+
+        List<SearchUserResponseDto> result = userRepository.searchUserBy(null, "닉네임", null, 5L);
+
+        assertEquals(5, result.get(0).getFollowingCount());
+
+    }
+
 }

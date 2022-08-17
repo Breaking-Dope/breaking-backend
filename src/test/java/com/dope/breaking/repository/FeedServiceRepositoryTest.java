@@ -349,7 +349,7 @@ public class FeedServiceRepositoryTest {
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, owner, null);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageByBookmark(searchFeedConditionDto, owner, owner, null);
 
         assertEquals(3, result.size());
     }
@@ -389,7 +389,7 @@ public class FeedServiceRepositoryTest {
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, owner, null);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageByPurchase(searchFeedConditionDto, owner, owner, null);
 
         assertEquals(3, result.size());
     }

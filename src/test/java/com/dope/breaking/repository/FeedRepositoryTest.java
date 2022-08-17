@@ -37,55 +37,6 @@ public class FeedRepositoryTest {
 
     @Autowired EntityManager em;
 
-    @DisplayName("유저가 like한 게시글은, isLiked가 true로 반환된다.")
-    @Test
-    void feedIsLike() {
-
-        User user = new User();
-        userRepository.save(user);
-        Post post = new Post();
-        postRepository.save(post);
-        PostLike postLike = new PostLike(user, post);
-        postLikeRepository.save(postLike);
-
-        em.flush();
-
-        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
-                .builder()
-                .size(1L)
-                .soldOption(SoldOption.ALL)
-                .build();
-
-        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
-
-        assertTrue(result.get(0).getIsLiked());
-        assertEquals(1, result.get(0).getLikeCount());
-    }
-
-    @DisplayName("유저가 bookmark한 게시글은, isBookmarked가 true로 반환된다.")
-    @Test
-    void feedIsBookmarked() {
-
-        User user = new User();
-        userRepository.save(user);
-        Post post = new Post();
-        postRepository.save(post);
-        Bookmark bookmark = new Bookmark(user, post);
-        bookmarkRepository.save(bookmark);
-
-        em.flush();
-
-        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
-                .builder()
-                .size(1L)
-                .soldOption(SoldOption.ALL)
-                .build();
-
-        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
-
-        assertTrue(result.get(0).getIsBookmarked());
-    }
-
     @DisplayName("다른 사람이 숨긴 게시글은, 유저 페이지에 나타나지 않는다.")
     @Test
     void hideHiddenPostInOtherUserPage() {
@@ -326,7 +277,7 @@ public class FeedRepositoryTest {
                 .searchHashtag("해시태그")
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+        List<FeedResultPostDto> result = feedRepository.searchFeedByHashtag(searchFeedConditionDto, null, user);
         assertEquals(1, result.size());
         assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
     }
@@ -370,7 +321,7 @@ public class FeedRepositoryTest {
                 .searchHashtag("해시태그")
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+        List<FeedResultPostDto> result = feedRepository.searchFeedByHashtag(searchFeedConditionDto, null, user);
         assertEquals(1, result.size());
         assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
     }

@@ -2,6 +2,7 @@ package com.dope.breaking.dto.post;
 
 import com.dope.breaking.domain.post.PostType;
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,6 +32,7 @@ public class FeedResultPostDto {
     private Boolean isBookmarked;
 
     @QueryProjection
+    @Builder
     public FeedResultPostDto(Long postId, String title, LocationDto location, String thumbnailImgURL, int likeCount, int commentCount, PostType postType, int viewCount, WriterDto user, int price, LocalDateTime createdDate, Boolean isPurchasable, Boolean isSold, Boolean isAnonymous, Boolean isMyPost, Boolean isLiked, Boolean isBookmarked) {
         this.postId = postId;
         this.title = title;

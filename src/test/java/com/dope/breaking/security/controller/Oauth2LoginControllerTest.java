@@ -4,12 +4,11 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.repository.UserRepository;
 import com.dope.breaking.security.jwt.JwtTokenProvider;
 import com.dope.breaking.service.RedisService;
-import com.dope.breaking.service.UserService;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -20,9 +19,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.AuthenticatedPrincipal;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,13 +26,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 
 @Disabled
@@ -50,9 +42,6 @@ class Oauth2LoginControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -61,10 +50,13 @@ class Oauth2LoginControllerTest {
     @Autowired
     private RedisService redisService;
 
+    private final String GOOGLE_ACCESSTOKEN = "";
+    private final String GOOGLE_ID_TOKEN = "";
+    private final String GOOGLE_USERNAME = "";
 
-    private final String accesstoken = "";
-    private final String idtoken = "";
-    private final String USERNAME = "";
+    private final String KAKAO_ACCESSTOKEN = "";
+
+    private final String KAKAO_USERNAME = "";
 
     @DisplayName("유효한 엑스스토큰으로 구글 Oauth2 로그인을 시도 시, 정상적으로 유저 정보가 반환된다.")
     @Test
@@ -72,8 +64,8 @@ class Oauth2LoginControllerTest {
 
         Map<String, String> info = new LinkedHashMap<>();
 
-        info.put("accessToken", accesstoken);
-        info.put("idToken", idtoken);
+        info.put("accessToken", GOOGLE_ACCESSTOKEN);
+        info.put("idToken", GOOGLE_ID_TOKEN);
 
         String content = objectMapper.writeValueAsString(info);
         System.out.println(content);
@@ -84,7 +76,6 @@ class Oauth2LoginControllerTest {
                         .header("User-Agent", "test"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.fullname").value("최현영[학생](소프트웨어융합대학 컴퓨터공학부)"))
                 .andReturn();
 
         MockHttpServletResponse response = result.getResponse();
@@ -93,18 +84,17 @@ class Oauth2LoginControllerTest {
         ObjectNode objectNode = (ObjectNode) jsonNode;
         System.out.println(objectNode.toPrettyString());
     }
-
-    @DisplayName("이미 가입한 유저가 유효한 엑스스토큰으로 구글 Oauth2 로그인을 시도 시, 예외를 반환한다.")
+    @DisplayName("유효하지 않은 엑세스 토큰으로 구글 로그인을 시도 할 시, 예외를 반환한다.")
     @Test
     void googleOauthLoginWithSignUpUser() throws Exception {
         User user = User.builder()
-                .username(USERNAME).build();
+                .username(GOOGLE_USERNAME).build();
 
         userRepository.save(user);
 
         Map<String, String> info = new LinkedHashMap<>();
-        info.put("accessToken", accesstoken);
-        info.put("idToken", idtoken);
+        info.put("accessToken", GOOGLE_ACCESSTOKEN + 1234);
+        info.put("idToken", GOOGLE_ID_TOKEN);
         String content = objectMapper.writeValueAsString(info);
         System.out.println(content);
         MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders
@@ -113,46 +103,27 @@ class Oauth2LoginControllerTest {
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized())
                 .andReturn();
-
-
-        MockHttpServletResponse response = result.getResponse();
-        System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
-        String accessjwt = (String) response.getHeaderValue("Authorization");
-        System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
-        String refreshjwt = (String) response.getHeaderValue("Authorization-refresh");
-
-        this.mockMvc.perform(MockMvcRequestBuilders
-                        .post("/oauth2/sign-in/google").header("Authorization","Bearer " + accessjwt)
-                        .content(content)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andReturn();
-
-        redisService.deleteValues("OTHER_104431269882060562135g");
-
-
     }
 
 
-    @DisplayName("두개의 다른 플랫폼이 동시에 로그인을 시도하면, 각각 정상적으로 처리된다.")
+    @DisplayName("두개의 다른 플랫폼이 동시에 구글 로그인을 시도하면, 각각 정상적으로 처리된다.")
     @Test
     void googleOauthLoginWithEachOtherPlatfom() throws Exception {
         User user = User.builder()
-                .username(USERNAME).build();
+                .username(GOOGLE_USERNAME).build();
 
         userRepository.save(user);
 
         Map<String, String> info = new LinkedHashMap<>();
-        info.put("accessToken", accesstoken);
-        info.put("idToken", idtoken);
+        info.put("accessToken", GOOGLE_ACCESSTOKEN);
+        info.put("idToken", GOOGLE_ID_TOKEN);
         String content = objectMapper.writeValueAsString(info);
         System.out.println(content);
         MvcResult result1 = this.mockMvc.perform(MockMvcRequestBuilders
                         .post("/oauth2/sign-in/google")
-                        .header("User-Agent", "Mozilla/5.0 (Linux; Android 4.4.2; sdk Build/KK) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36")
+                        .header("User-Agent", "PostmanRuntime")
                         .content(content)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
@@ -184,11 +155,124 @@ class Oauth2LoginControllerTest {
 
         Assertions.assertTrue(!accessjwt1.equals(accessjwt2));
         Assertions.assertTrue(!refreshjwt1.equals(refreshjwt2));
-        Assertions.assertTrue(redisService.hasKey("WEB_104431269882060562135g"));
-        Assertions.assertTrue(redisService.hasKey("ANDROID_104431269882060562135g"));
+        Assertions.assertTrue(redisService.hasKey("POSTMAN_"+ GOOGLE_USERNAME));
+        Assertions.assertTrue(redisService.hasKey("ANDROID_"+ GOOGLE_USERNAME));
 
-        redisService.deleteValues("ANDROID_104431269882060562135g");
-        redisService.deleteValues("WEB_104431269882060562135g");
+        redisService.deleteValues("ANDROID_"+ GOOGLE_USERNAME);
+        redisService.deleteValues("POSTMAN_"+ GOOGLE_USERNAME);
+    }
+
+
+
+
+    @DisplayName("유효한 엑스스토큰으로 카카오 Oauth2 로그인을 시도 시, 정상적으로 유저 정보가 반환된다.")
+    @Test
+    void kakaoOauthLogin() throws Exception {
+
+        Map<String, String> info = new LinkedHashMap<>();
+
+        info.put("accessToken", KAKAO_ACCESSTOKEN);
+
+        String content = objectMapper.writeValueAsString(info);
+        System.out.println(content);
+        MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/oauth2/sign-in/kakao")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("User-Agent", "test"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = result.getResponse();
+        String rescontent = response.getContentAsString();
+        JsonNode jsonNode = objectMapper.readTree(rescontent);
+        ObjectNode objectNode = (ObjectNode) jsonNode;
+        System.out.println(objectNode.toPrettyString());
+    }
+
+    @DisplayName("유효하지 않은 엑세스 토큰으로 구글 로그인을 시도 할 시, 예외를 반환한다.")
+    @Test
+    void kakaoOauthLoginWithSignUpUser() throws Exception {
+        User user = User.builder()
+                .username(KAKAO_USERNAME).build();
+
+        userRepository.save(user);
+
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("accessToken", KAKAO_ACCESSTOKEN);
+        String content = objectMapper.writeValueAsString(info);
+        System.out.println(content);
+        MvcResult result = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/oauth2/sign-in/kakao")
+                        .header("User-Agent", "test")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+
+        MockHttpServletResponse response = result.getResponse();
+        System.out.println("accessToken : " + response.getHeaderValue("Authorization"));
+        String accessjwt = (String) response.getHeaderValue("Authorization");
+        System.out.println("refreshToken : " + response.getHeaderValue("Authorization-refresh"));
+        String refreshjwt = (String) response.getHeaderValue("Authorization-refresh");
+
+    }
+
+
+    @DisplayName("두개의 다른 플랫폼이 동시에 카카오 로그인을 시도하면, 각각 정상적으로 처리된다.")
+    @Test
+    void kakaoOauthLoginWithEachOtherPlatfom() throws Exception {
+        User user = User.builder()
+                .username(KAKAO_USERNAME).build();
+
+        userRepository.save(user);
+
+        Map<String, String> info = new LinkedHashMap<>();
+        info.put("accessToken", KAKAO_ACCESSTOKEN);
+        String content = objectMapper.writeValueAsString(info);
+        System.out.println(content);
+        MvcResult result1 = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/oauth2/sign-in/kakao")
+                        .header("User-Agent", "PostmanRuntime")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+        Thread.sleep(1000);
+
+        MvcResult result2 = this.mockMvc.perform(MockMvcRequestBuilders
+                        .post("/oauth2/sign-in/kakao")
+                        .header("User-Agent", "Dalvik/2.1.0 (Linux; U; Android 11; SM-A908N Build/RP1A.200720.012)")
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+
+        MockHttpServletResponse response1 = result1.getResponse();
+        System.out.println("accessToken : " + response1.getHeaderValue("Authorization"));
+        String accessjwt1 = (String) response1.getHeaderValue("Authorization");
+        System.out.println("refreshToken : " + response1.getHeaderValue("Authorization-refresh"));
+        String refreshjwt1 = (String) response1.getHeaderValue("Authorization-refresh");
+
+        MockHttpServletResponse response2 = result2.getResponse();
+        System.out.println("accessToken : " + response2.getHeaderValue("Authorization"));
+        String accessjwt2 = (String) response2.getHeaderValue("Authorization");
+        System.out.println("refreshToken : " + response2.getHeaderValue("Authorization-refresh"));
+        String refreshjwt2 = (String) response2.getHeaderValue("Authorization-refresh");
+
+        Assertions.assertTrue(!accessjwt1.equals(accessjwt2));
+        Assertions.assertTrue(!refreshjwt1.equals(refreshjwt2));
+        Assertions.assertTrue(redisService.hasKey("POSTMAN_"+ KAKAO_USERNAME));
+        Assertions.assertTrue(redisService.hasKey("ANDROID_"+ KAKAO_USERNAME));
+
+        redisService.deleteValues("ANDROID_"+ KAKAO_USERNAME);
+        redisService.deleteValues("POSTMAN_"+ KAKAO_USERNAME);
     }
 
 

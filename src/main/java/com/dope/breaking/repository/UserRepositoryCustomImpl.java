@@ -35,6 +35,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.email,
                         user.statusMsg,
                         user.role,
+                        user.followerList.size(),
                         isFollowing(me)
                 ))
                 .from(user)

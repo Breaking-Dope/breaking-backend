@@ -5,7 +5,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionRequestDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
-import com.dope.breaking.exception.post.MissionOnlyForPressException;
+import com.dope.breaking.exception.mission.MissionOnlyForPressException;
 import com.dope.breaking.repository.MissionRepository;
 import com.dope.breaking.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

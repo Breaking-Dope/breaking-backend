@@ -85,8 +85,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         new QWriterDto(
                                 user.id,
                                 user.compressedProfileImgURL,
-                                user.nickname,
-                                Expressions.asString("")
+                                user.nickname
                         ),
                         post.price,
                         post.createdDate,
@@ -153,8 +152,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         new QWriterDto(
                                 user.id,
                                 user.compressedProfileImgURL,
-                                user.nickname,
-                                Expressions.asString("")
+                                user.nickname
                         ),
                         post.price,
                         post.createdDate,

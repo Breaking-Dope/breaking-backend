@@ -10,10 +10,8 @@ import com.dope.breaking.dto.post.DetailPostResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.exception.NotValidRequestBodyException;
-import com.dope.breaking.exception.post.AlreadyNotPurchasableException;
-import com.dope.breaking.exception.post.AlreadyPurchasableException;
-import com.dope.breaking.exception.post.NoSuchPostException;
-import com.dope.breaking.exception.post.PurchasedPostException;
+import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.post.*;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.*;
 import org.junit.jupiter.api.*;
@@ -601,6 +599,145 @@ class PostServiceTest {
         //Then
         Assertions.assertThrows(AlreadyNotPurchasableException.class, ()
                 -> postService.deactivatePurchase("12345g", postId)); //When
+
+    }
+
+    @DisplayName("숨김 처리 되지 않은 제보를 숨길 경우, 정상적으로 숨김 처리 된다.")
+    @Test
+    void hideNotHiddenPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //When
+        postService.hidePost("12345g",postId);
+
+        //Then
+        Assertions.assertTrue(postRepository.getById(postId).isHidden());
+
+    }
+
+    @DisplayName("이미 숨겨진 제보를 숨길 경우, 예외가 발생한다.")
+    @Test
+    void hideHiddenPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsHidden(true);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(AlreadyHiddenException.class, ()
+                -> postService.hidePost("12345g", postId)); //When
+
+    }
+
+    @DisplayName("숨겨진 제보를 공개 처리할 경우, 정상적으로 공개 처리 된다.")
+    @Test
+    void cancelHideHiddenPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsHidden(true);
+        long postId = postRepository.save(post).getId();
+
+        //When
+        postService.cancelHidePost("12345g",postId);
+
+        //Then
+        Assertions.assertFalse(postRepository.getById(postId).isHidden());
+
+    }
+
+    @DisplayName("공개가 된 제보를 공개 처리할 경우할 경우, 예외가 발생한다.")
+    @Test
+    void cancelHideNotHiddenPost(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(AlreadyNotHiddenException.class, ()
+                -> postService.cancelHidePost("12345g", postId)); //When
+
+    }
+
+    @DisplayName("유저네임이 유효하지 않을 경우, 예외가 발생한다.")
+    @Test
+    void hideAndCancelHidePostWithInvalidUsername(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(InvalidAccessTokenException.class, ()
+                -> postService.hidePost("wrongUsername", postId)); //When
+
+        post.updateIsHidden(true);
+
+        //Then
+        Assertions.assertThrows(InvalidAccessTokenException.class, ()
+                -> postService.cancelHidePost("wrongUsername", postId)); //When
+
+    }
+
+    @DisplayName("postId가 유효하지 않을 경우, 예외가 발생한다.")
+    @Test
+    void hideAndCancelHidePostWithInvalidPostId(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        Post post = new Post();
+        post.setUser(user);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(NoSuchPostException.class, ()
+                -> postService.hidePost("12345g", 100L)); //When
+
+        post.updateIsHidden(true);
+
+        //Then
+        Assertions.assertThrows(NoSuchPostException.class, ()
+                -> postService.cancelHidePost("12345g", 100L)); //When
+
+    }
+
+    @DisplayName("제보 작성자가 아닌 다른 유저가 숨기거나 공개할 경우, 예외가 발생한다.")
+    @Test
+    void hideAndCancelHidePostByOtherUser(){
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        User user2 = new User();
+        userRepository.save(user2);
+
+        Post post = new Post();
+        post.setUser(user2);
+        long postId = postRepository.save(post).getId();
+
+        //Then
+        Assertions.assertThrows(NoPermissionException.class, ()
+                -> postService.hidePost("12345g", postId)); //When
+
+        post.updateIsHidden(true);
+
+        //Then
+        Assertions.assertThrows(NoPermissionException.class, ()
+                -> postService.cancelHidePost("12345g", postId)); //When
 
     }
 

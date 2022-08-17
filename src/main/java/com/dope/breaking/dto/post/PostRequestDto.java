@@ -1,6 +1,5 @@
 package com.dope.breaking.dto.post;
 
-import com.dope.breaking.domain.post.Post;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

@@ -12,11 +12,15 @@ import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.*;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.dsl.Expressions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.dope.breaking.domain.user.QFollow.follow;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class SearchFeedService {
     private final UserRepository userRepository;
     private final BookmarkRepository bookmarkRepository;
     private final PostLikeRepository postLikeRepository;
+    private final FollowRepository followRepository;
 
     public List<FeedResultPostDto> searchMainFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
 
@@ -127,10 +132,19 @@ public class SearchFeedService {
         }
 
         User cursorUser = null;
-        if(cursorId != null && cursorId != 0L) {
+        if (cursorId != null && cursorId != 0L) {
             cursorUser = userRepository.findById(cursorId).orElseThrow(InvalidCursorException::new);
         }
 
-        return userRepository.searchUserBy(me, searchKeyword, cursorUser, size);
+        List<SearchUserResponseDto> result = userRepository.searchUserBy(me, searchKeyword, cursorUser, size);
+
+        if(me != null) {
+            for (SearchUserResponseDto dto : result) {
+                if(followRepository.existsFollowsByFollowedIdAndFollowingId(me.getId(), dto.getUserId()))
+                dto.setIsFollowing(true);
+            }
+        }
+
+        return result;
     }
 }

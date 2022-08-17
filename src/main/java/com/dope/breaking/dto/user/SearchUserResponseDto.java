@@ -22,20 +22,20 @@ public class SearchUserResponseDto {
 
     Role role;
 
-    int followingCount;
+    int followerCount;
 
     Boolean isFollowing;
 
     @Builder
     @QueryProjection
-    public SearchUserResponseDto(Long userId, String profileImgURL, String nickname, String email, String statusMsg, Role role, int followingCount, Boolean isFollowing) {
+    public SearchUserResponseDto(Long userId, String profileImgURL, String nickname, String email, String statusMsg, Role role, int followerCount, Boolean isFollowing) {
         this.userId = userId;
         this.profileImgURL = profileImgURL;
         this.nickname = nickname;
         this.email = email;
         this.statusMsg = statusMsg;
         this.role = role;
-        this.followingCount = followingCount;
+        this.followerCount = followerCount;
         this.isFollowing = isFollowing;
     }
 }

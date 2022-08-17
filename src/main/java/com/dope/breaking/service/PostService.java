@@ -180,7 +180,6 @@ public class PostService {
         if(!(!isMyPost && post.isAnonymous())){
             writerDto = WriterDto.builder()
                     .nickname(post.getUser().getNickname())
-                    .phoneNumber(post.getUser().getPhoneNumber())
                     .profileImgURL(post.getUser().getOriginalProfileImgURL())
                     .userId(post.getUser().getId()).build();
         }

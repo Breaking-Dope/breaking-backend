@@ -23,14 +23,15 @@ public class DetailPostResponseDto {
 	@JsonProperty(value = "isBookmarked")
 	private boolean isBookmarked;
 
-
 	@JsonProperty(value = "isPurchased")
 	private boolean isPurchased;
 
 	private WriterDto user;
 
 	private String title;
+
 	private String content;
+
 	private List<String> hashtagList = new LinkedList<>();
 
 	private List<String> mediaList = new LinkedList<>();
@@ -69,12 +70,12 @@ public class DetailPostResponseDto {
 
 	private int commentCount;
 
-	private boolean isMyPost = false;
+	private Boolean isMyPost = false;
 
 	private Boolean isPurchasable = true;
 
 	@Builder
-	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventDate, LocalDateTime createdDate, LocalDateTime modifiedDate, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int commentCount, boolean isMyPost, Boolean isPurchasable) {
+	public DetailPostResponseDto(boolean isLiked, boolean isBookmarked,boolean isPurchased ,WriterDto user, String title, String content, List<String> hashtagList, List<String> mediaList, LocationDto location, int price, String postType, boolean isAnonymous, LocalDateTime eventDate, LocalDateTime createdDate, LocalDateTime modifiedDate, int viewCount, boolean isSold, int soldCount, int bookmarkedCount, boolean isHidden, int likeCount, int commentCount, Boolean isMyPost, Boolean isPurchasable) {
 		this.isLiked = isLiked;
 		this.isBookmarked = isBookmarked;
 		this.isPurchased = isPurchased;

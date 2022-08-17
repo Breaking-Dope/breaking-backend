@@ -1,6 +1,8 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.dto.mission.MissionRequestDto;
+import com.dope.breaking.dto.mission.MissionResponseDto;
+import com.dope.breaking.dto.post.DetailPostResponseDto;
 import com.dope.breaking.service.MissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,17 @@ public class MissionAPI {
     @PostMapping(value = "/breaking-mission/{missionId}", consumes = {"multipart/form-data"})
     public ResponseEntity<Map<String, Long>> submitPostForMission(Principal principal, @PathVariable Long missionId, @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(missionService.postSubmission(principal.getName(),contentData,files,missionId));
+    }
+
+
+
+    @GetMapping("/breaking-mission/{missionId}")
+    public ResponseEntity<MissionResponseDto> readMission(@PathVariable("missionId") long missionId, Principal principal){
+        String crntUsername = null;
+        if(principal != null){
+            crntUsername = principal.getName();
+        }
+        return missionService.readMission(missionId, crntUsername);
     }
 
 }

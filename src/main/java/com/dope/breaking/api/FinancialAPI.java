@@ -2,7 +2,7 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.domain.financial.TransactionType;
 import com.dope.breaking.dto.financial.AmountRequestDto;
-import com.dope.breaking.dto.financial.TransactionResponseDto;
+import com.dope.breaking.dto.financial.TransactionInfoResponseDto;
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.service.PurchaseService;
 import com.dope.breaking.service.StatementService;
@@ -53,18 +53,18 @@ public class FinancialAPI {
     }
 
     @PreAuthorize("isAuthenticated")
-    @GetMapping("/profile/transaction")
-    public ResponseEntity<List<TransactionResponseDto>> transactionList(Principal principal){
-
-        return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionList(principal.getName()));
-
-    }
-
-    @PreAuthorize("isAuthenticated")
     @GetMapping("/post/{postId}/buy-list")
     public ResponseEntity<List<ForListInfoResponseDto>> buyerList(Principal principal, @PathVariable Long postId, @RequestParam(value="cursor") Long cursorId, @RequestParam(value="size") int size){
 
         return ResponseEntity.status(HttpStatus.OK).body(purchaseService.purchaseList(principal.getName(), postId, cursorId, size));
+
+    }
+
+    @PreAuthorize("isAuthenticated")
+    @GetMapping("/profile/transaction")
+    public ResponseEntity<List<TransactionInfoResponseDto>> transactionList(Principal principal, @RequestParam(value="cursor") Long cursorId, @RequestParam(value="size") int size){
+
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionInfoList(principal.getName(), cursorId, size));
 
     }
 

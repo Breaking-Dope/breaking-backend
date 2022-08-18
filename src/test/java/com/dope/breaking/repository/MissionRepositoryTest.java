@@ -86,7 +86,7 @@ class MissionRepositoryTest {
             missionRepository.save(mission);
         }
 
-        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20);
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
 
         assertEquals(10, result.size());
 
@@ -103,7 +103,7 @@ class MissionRepositoryTest {
         Mission mission = new Mission(me, "title", "content", null, null, location);
         missionRepository.save(mission);
 
-        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(me, null, 20);
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(me, null, 20L);
 
         assertEquals(1, result.size());
         assertTrue(result.get(0).getIsMyMission());

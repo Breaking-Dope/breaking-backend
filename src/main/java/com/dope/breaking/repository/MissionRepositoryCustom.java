@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface MissionRepositoryCustom {
 
-    List<MissionFeedResponseDto> searchMissionFeed(User me, Mission cursorMission, int size);
+    List<MissionFeedResponseDto> searchMissionFeed(User me, Mission cursorMission, Long size);
 
 }

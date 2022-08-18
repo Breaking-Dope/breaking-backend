@@ -4,6 +4,7 @@ import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.mission.MissionFeedResponseDto;
 import com.dope.breaking.dto.mission.MissionRequestDto;
 import com.dope.breaking.dto.mission.MissionResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
@@ -13,12 +14,11 @@ import com.dope.breaking.exception.ErrorCode;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.mission.MissionOnlyForPressException;
 import com.dope.breaking.exception.mission.NoSuchBreakingMissionException;
+import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.repository.MissionRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,4 +116,20 @@ public class MissionService {
         return new ResponseEntity<MissionResponseDto>(missionResponseDto, HttpStatus.OK);
 
     }
+    
+    public List<MissionFeedResponseDto> searchMissionFeed(String username, Long cursorMissionId, Long size) {
+
+        User me = null;
+        if(username != null) {
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        Mission cursorMission = null;
+        if(cursorMissionId != null && cursorMissionId != 0) {
+            cursorMission = missionRepository.findById(cursorMissionId).orElseThrow(InvalidCursorException::new);
+        }
+
+        return missionRepository.searchMissionFeed(me, cursorMission, size);
+    }
+
 }

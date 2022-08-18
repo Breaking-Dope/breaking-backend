@@ -26,7 +26,7 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
     }
 
     @Override
-    public List<MissionFeedResponseDto> searchMissionFeed(User me, Mission cursorMission, int size){
+    public List<MissionFeedResponseDto> searchMissionFeed(User me, Mission cursorMission, Long size){
 
         return queryFactory
                 .select(new QMissionFeedResponseDto(
@@ -53,6 +53,7 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
                 .where(
                         cursorPagination(cursorMission)
                 )
+                .orderBy(mission.id.desc())
                 .limit(size)
                 .fetch();
     }

@@ -18,10 +18,8 @@ import java.util.List;
 
 import static com.dope.breaking.domain.financial.QPurchase.purchase;
 import static com.dope.breaking.domain.hashtag.QHashtag.*;
-import static com.dope.breaking.domain.post.QPostLike.*;
 import static com.dope.breaking.domain.post.QPost.post;
 import static com.dope.breaking.domain.user.QBookmark.bookmark;
-import static com.dope.breaking.domain.user.QUser.user;
 
 @Repository
 public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
@@ -50,9 +48,9 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         post.postType,
                         post.viewCount,
                         Projections.constructor(WriterDto.class,
-                                user.id,
-                                user.compressedProfileImgURL,
-                                user.nickname
+                                post.user.id,
+                                post.user.compressedProfileImgURL,
+                                post.user.nickname
                         ),
                         post.price,
                         post.createdDate,
@@ -64,8 +62,6 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         Expressions.asBoolean(false) //isBookmarked
                         ))
                 .from(post)
-                .leftJoin(post.user, user)
-                .leftJoin(post.postLikeList, postLike)
                 .where(
                         soldOption(searchFeedConditionDto.getSoldOption()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
@@ -74,26 +70,12 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .limit(searchFeedConditionDto.getSize());
     }
 
-//
-
     @Override
     public List<FeedResultPostDto> searchFeedBy(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me) {
         return getBaseQuery(searchFeedConditionDto, cursorPost, me)
                 .where(
                         post.isHidden.eq(false),
-                        keyWordSearch(searchFeedConditionDto.getSearchKeyword()),
-                        period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo())
-                )
-                .orderBy(boardSort(searchFeedConditionDto.getSortStrategy()), boardSort(SortStrategy.CHRONOLOGICAL))
-                .fetch();
-    }
-
-    @Override
-    public List<FeedResultPostDto> searchFeedByHashtag(SearchFeedConditionDto searchFeedConditionDto, Post cursorPost, User me) {
-        return getBaseQuery(searchFeedConditionDto, cursorPost, me)
-                .leftJoin(post.hashtags, hashtag)
-                .where(
-                        post.isHidden.eq(false),
+                        keywordSearch(searchFeedConditionDto.getSearchKeyword()),
                         hashtagSearch(searchFeedConditionDto.getSearchHashtag()),
                         period(searchFeedConditionDto.getDateFrom(), searchFeedConditionDto.getDateTo())
                 )
@@ -113,33 +95,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .fetch();
     }
 
-    @Override
-    public List<FeedResultPostDto> searchUserPageByBookmark(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost) {
-        return getBaseQuery(searchFeedConditionDto, cursorPost, me)
-                .leftJoin(post.bookmarkList, bookmark)
-                .where(
-                        hiddenPostFilter(owner, me),
-                        anonymousPostFilter(owner, me),
-                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me)
-                )
-                .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
-                .fetch();
-    }
-
-    @Override
-    public List<FeedResultPostDto> searchUserPageByPurchase(SearchFeedConditionDto searchFeedConditionDto, User owner, User me, Post cursorPost) {
-        return getBaseQuery(searchFeedConditionDto, cursorPost, me)
-                .leftJoin(post.purchaseList, purchase)
-                .where(
-                        hiddenPostFilter(owner, me),
-                        anonymousPostFilter(owner, me),
-                        userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me)
-                )
-                .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
-                .fetch();
-    }
-
-    private Predicate keyWordSearch(String searchString) {
+    private Predicate keywordSearch(String searchString) {
 
         if(searchString == null) {
             return null;
@@ -153,7 +109,15 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
         if(searchHashtag == null) {
             return null;
         } else {
-            return hashtag.content.eq(searchHashtag);
+            List<Long> postIdList = queryFactory
+                    .select(hashtag.post.id)
+                    .from(hashtag)
+                    .where(
+                            hashtag.content.eq(searchHashtag)
+                    )
+                    .groupBy(hashtag.post.id)
+                    .fetch();
+            return post.id.in(postIdList);
         }
     }
 
@@ -183,9 +147,27 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
 
         switch (userPageFeedOption) {
             case BUY:
-                return purchase.user.eq(me);
+                List<Long> purchaseIdList = queryFactory
+                        .select(purchase.post.id)
+                        .from(purchase)
+                        .where(
+                                purchase.user.eq(me)
+                        )
+                        .groupBy(purchase.post.id)
+                        .fetch();
+                return post.id.in(purchaseIdList);
+
             case BOOKMARK:
-                return bookmark.user.eq(me);
+                List<Long> bookmarkIdList = queryFactory
+                        .select(bookmark.post.id)
+                        .from(bookmark)
+                        .where(
+                                bookmark.user.eq(me)
+                        )
+                        .groupBy(bookmark.post.id)
+                        .fetch();
+                return post.id.in(bookmarkIdList);
+
             case WRITE:
             default:
                 return post.user.eq(owner);
@@ -193,6 +175,10 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
     }
 
     private Predicate soldOption(SoldOption soldOption) {
+
+        if(soldOption == null) {
+            return null;
+        }
 
         switch (soldOption) {
             case SOLD:

@@ -79,7 +79,7 @@ public class MissionService {
     public ResponseEntity<MissionResponseDto> readMission(long missionId, String crntUsername){
 
         //예외처리 수정 필요
-        Mission mission = missionRepository.findById(missionId).orElseThrow(() -> new BreakingException(ErrorCode.INTERNAL_SERVER_ERROR, HttpStatus.BAD_REQUEST));
+        Mission mission = missionRepository.findById(missionId).orElseThrow(() -> new NoSuchBreakingMissionException());
 
 
         boolean isMyMission = false;

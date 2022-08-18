@@ -38,7 +38,7 @@ public class Transaction extends BaseTimeEntity {
     private int balance;
 
     @CreatedDate
-    private LocalDateTime transactionTime;
+    private LocalDateTime transactionDate;
 
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;

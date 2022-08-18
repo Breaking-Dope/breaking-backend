@@ -52,7 +52,7 @@ public class SearchFeedService {
         List<FeedResultPostDto> result;
 
         if(searchFeedConditionDto.getSearchHashtag() != null) {
-            result = feedRepository.searchFeedByHashtag(searchFeedConditionDto, cursorPost, me);
+            result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
         } else {
             result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
         }
@@ -99,9 +99,9 @@ public class SearchFeedService {
 
         switch (searchFeedConditionDto.getUserPageFeedOption()) {
             case BOOKMARK:
-                result = feedRepository.searchUserPageByBookmark(searchFeedConditionDto, owner, me, cursorPost);
+                result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
             case BUY:
-                result = feedRepository.searchUserPageByPurchase(searchFeedConditionDto, owner, me, cursorPost);
+                result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
             case WRITE:
             default:
                 result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);

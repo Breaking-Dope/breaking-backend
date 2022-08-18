@@ -13,7 +13,6 @@ import com.dope.breaking.exception.mission.MissionOnlyForPressException;
 import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.repository.MissionRepository;
 import com.dope.breaking.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -170,7 +169,7 @@ class MissionServiceTest {
         assertEquals(3, result.size());
     }
 
-    @DisplayName("미션 피드가 정상 작동한다.")
+    @DisplayName("커서 id가 잘못되었을 경우, 예외가 발생한다.")
     @Test
     void searchMissionFeedInvalidCursor() {
 

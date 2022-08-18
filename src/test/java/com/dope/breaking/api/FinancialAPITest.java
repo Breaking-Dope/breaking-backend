@@ -1,7 +1,6 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.domain.financial.TransactionType;
-import com.dope.breaking.domain.user.Follow;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.financial.AmountRequestDto;
@@ -375,7 +374,7 @@ class FinancialAPITest {
         purchaseService.purchasePost("seller",postId2);
 
         //Then
-        this.mockMvc.perform(get("/profile/transaction"))
+        this.mockMvc.perform(get("/profile/transaction?cursor=0&size=10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].transactionType").value("sell_post"))
                 .andExpect(jsonPath("$[1].transactionType").value("buy_post"))

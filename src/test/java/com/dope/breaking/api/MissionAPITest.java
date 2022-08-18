@@ -1,5 +1,6 @@
 package com.dope.breaking.api;
 
+import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.Role;
@@ -279,6 +280,51 @@ class MissionAPITest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isBadRequest()); //Then
 
+    }
+
+    @DisplayName("로그인 없이 브레이킹 미션을 조회 시, 정상적으로 처리된다.")
+    @Transactional
+    @Test
+    void readMissionWithAnonymous() throws Exception {
+
+        //Given
+        User press = new User("12345g",passwordEncoder.encode(UUID.randomUUID().toString()), Role.PRESS);
+        userRepository.save(press);
+
+        Location location = new Location("full address",10.0,10.0,"depth1","depth2");
+
+        Mission mission = new Mission(press,"title","content",null,null,location);
+        long missionId = missionRepository.save(mission).getId();
+
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/breaking-mission/" + missionId)
+                        .characterEncoding("UTF-8"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk()); //Then
+    }
+
+    @DisplayName("언론사가 작성한 브레이킹 미션을 직접 조회 시, 정상적으로 처리된다.")
+    @Transactional
+    @Test
+    void readMissionWithWriterOfPress() throws Exception {
+
+        //Given
+        User press = new User("12345g",passwordEncoder.encode(UUID.randomUUID().toString()), Role.PRESS);
+        userRepository.save(press);
+
+
+        Location location = new Location("full address",10.0,10.0,"depth1","depth2");
+
+        Mission mission = new Mission(press,"title","content",null,null,location);
+        long missionId = missionRepository.save(mission).getId();
+
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.get("/breaking-mission/" + missionId)
+                        .characterEncoding("UTF-8"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk()); //Then
     }
 
 }

@@ -1,8 +1,11 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.post.Location;
+import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionRequestDto;
+import com.dope.breaking.dto.mission.MissionResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.mission.MissionOnlyForPressException;
@@ -16,11 +19,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class MissionServiceTest {
@@ -39,19 +45,19 @@ class MissionServiceTest {
     void createMissionByPress() {
 
         //Given
-        User user = new User("username","password", Role.PRESS);
+        User user = new User("username", "password", Role.PRESS);
 
         LocalDateTime startTime = LocalDateTime.of(2022, Month.AUGUST, 16, 19, 30, 40);
         LocalDateTime endTime = LocalDateTime.of(2022, Month.AUGUST, 20, 19, 30, 40);
 
-        LocationDto locationDto = new LocationDto("full address",10.0,10.0,"depth1","depth2");
-        MissionRequestDto missionRequestDto = new MissionRequestDto("title","content", startTime, endTime, locationDto);
+        LocationDto locationDto = new LocationDto("full address", 10.0, 10.0, "depth1", "depth2");
+        MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", startTime, endTime, locationDto);
 
         //When
         when(userRepository.findByUsername("username")).thenReturn(Optional.of(user));
 
         //Then
-        missionService.createMission(missionRequestDto,"username");
+        missionService.createMission(missionRequestDto, "username");
 
     }
 
@@ -60,20 +66,20 @@ class MissionServiceTest {
     void createMissionNotByPress() {
 
         //Given
-        User user = new User("username","password", Role.USER);
+        User user = new User("username", "password", Role.USER);
 
         LocalDateTime startTime = LocalDateTime.of(2022, Month.AUGUST, 16, 19, 30, 40);
         LocalDateTime endTime = LocalDateTime.of(2022, Month.AUGUST, 20, 19, 30, 40);
 
-        LocationDto locationDto = new LocationDto("full address",10.0,10.0,"depth1","depth2");
-        MissionRequestDto missionRequestDto = new MissionRequestDto("title","content",startTime,endTime, locationDto);
+        LocationDto locationDto = new LocationDto("full address", 10.0, 10.0, "depth1", "depth2");
+        MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", startTime, endTime, locationDto);
 
         //When
         when(userRepository.findByUsername("username")).thenReturn(Optional.of(user));
 
         //Then
         Assertions.assertThrows(MissionOnlyForPressException.class,
-                () -> missionService.createMission(missionRequestDto,"username"));
+                () -> missionService.createMission(missionRequestDto, "username"));
 
     }
 
@@ -82,17 +88,63 @@ class MissionServiceTest {
     void createMissionWithInvalidUsername() {
 
         //Given
-        User user = new User("username","password", Role.USER);
+        User user = new User("username", "password", Role.USER);
 
         LocalDateTime startTime = LocalDateTime.of(2022, Month.AUGUST, 16, 19, 30, 40);
         LocalDateTime endTime = LocalDateTime.of(2022, Month.AUGUST, 20, 19, 30, 40);
 
-        LocationDto locationDto = new LocationDto("full address",10.0,10.0,"depth1","depth2");
-        MissionRequestDto missionRequestDto = new MissionRequestDto("title","content",null,null, locationDto);
+        LocationDto locationDto = new LocationDto("full address", 10.0, 10.0, "depth1", "depth2");
+        MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", null, null, locationDto);
 
         //Then
         Assertions.assertThrows(InvalidAccessTokenException.class,
-                () -> missionService.createMission(missionRequestDto,"username1")); //When
+                () -> missionService.createMission(missionRequestDto, "username1")); //When
+
+    }
+
+    @DisplayName("게시글이 존재하지 않을 때, 예외를 반환한다.")
+    @Test
+    void readMissionButNoExistMissionId() {
+        User user = new User("username", "password", Role.USER);
+
+        LocalDateTime startTime = LocalDateTime.parse("2016-10-31 23:59:59", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime endTime = LocalDateTime.parse("2016-11-31 23:59:59", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        LocationDto locationDto = new LocationDto("full address", 10.0, 10.0, "depth1", "depth2");
+        MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", null, null, locationDto);
+
+        //Then
+        Assertions.assertThrows(InvalidAccessTokenException.class,
+                () -> missionService.createMission(missionRequestDto, "username1")); //When
+    }
+
+    @DisplayName("작성자가 자신의 미션을 조회 시, 정상적으로 조회된다.")
+    @Test
+    void isMyMissionIsTrueWhenWriter(){
+        User user = new User("username", "password", Role.PRESS);
+
+        when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.findByUsername("username")).thenReturn(Optional.of(user));
+        userRepository.save(user);
+
+        LocalDateTime startTime = LocalDateTime.of(2022, Month.AUGUST, 16, 19, 30, 40);
+        LocalDateTime endTime = LocalDateTime.of(2022, Month.AUGUST, 20, 19, 30, 40);
+
+        Location location = new Location("full address", 10.0, 10.0, "depth1", "depth2");
+        Mission mission = Mission.builder()
+                .content("content")
+                .title("title")
+                .user(user)
+                .endTime(endTime)
+                .startTime(startTime)
+                .location(location)
+                .build();
+
+        given(missionRepository.save(mission)).willReturn(mission);
+        missionRepository.save(mission);
+        given(missionRepository.findById(1L)).willReturn(Optional.of(mission));
+
+        missionService.readMission(1L, "username");
 
     }
 

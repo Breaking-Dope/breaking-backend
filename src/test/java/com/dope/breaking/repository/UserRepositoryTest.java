@@ -89,26 +89,25 @@ class UserRepositoryTest {
 
     }
 
-    @DisplayName("유저 검색 시, 팔로잉 중인 유저는 isFolowing이 true로 반환된다.")
+    @DisplayName("유저 검색 시, 팔로워중인 사람의 수가 표시된다.")
     @Test
-    void isFollowingSearchedUser() {
+    void SearchedUserFollowerCount() {
 
-        User me = new User();
-        me.setRequestFields("URL", "anyURL", "테스트닉네임1", "01012345678", "abc.google.com", "realname", "msg", "username", Role.USER);
-        userRepository.save(me);
+        User user = new User();
+        user.setRequestFields("URL", "anyURL", "닉네임", "01012345678", "abc.google.com", "realname", "msg", "username", Role.USER);
+        userRepository.save(user);
 
-        User followingUser = new User();
-        followingUser.setRequestFields("URL", "anyURL", "테스트닉네임2", "01012345678", "abc.google.com", "realname", "msg", "username", Role.USER);
-        userRepository.save(followingUser);
-
-        Follow follow = new Follow(me, followingUser);
-        followRepository.save(follow);
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
+        followRepository.save(new Follow(user, user));
 
         em.flush();
 
-        List<SearchUserResponseDto> result = userRepository.searchUserBy(me, "테스트닉네임2", null, 2L);
+        List<SearchUserResponseDto> result = userRepository.searchUserBy(null, "닉네임", null, 5L);
 
-        assertTrue(result.get(0).getIsFollowing());
+        assertEquals(5, result.get(0).getFollowerCount());
 
     }
 

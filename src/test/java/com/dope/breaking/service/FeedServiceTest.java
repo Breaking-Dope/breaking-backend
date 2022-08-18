@@ -1,8 +1,6 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.post.Post;
-import com.dope.breaking.domain.post.PostLike;
-import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
@@ -45,6 +43,8 @@ public class FeedServiceTest {
     private BookmarkRepository bookmarkRepository;
     @Mock
     private PostLikeRepository postLikeRepository;
+    @Mock
+    private FollowRepository followRepository;
 
     @InjectMocks
     private SearchFeedService feedService;
@@ -356,5 +356,25 @@ public class FeedServiceTest {
 
         Mockito.when(userRepository.findById(100L)).thenThrow(InvalidCursorException.class);
         assertThrows(InvalidCursorException.class, ()-> feedService.searchUser(null, "someUser", 100L, 1L));
+    }
+
+    @DisplayName("유저 검색 시, 팔로잉 중인 유저는 isFolowing이 true로 반환된다.")
+    @Test
+    void isFollowingSearchedUser() {
+
+        User me = User.builder().username("meUserName").build();
+        User searchedUser = User.builder().username("searchedUserUserName").build();
+
+        when(userRepository.findByUsername(me.getUsername())).thenReturn(Optional.of(me));
+        when(followRepository.existsFollowsByFollowedIdAndFollowingId(me.getId(), searchedUser.getId())).thenReturn(true);
+
+        List<SearchUserResponseDto> returnResult = new ArrayList<>();
+        returnResult.add(SearchUserResponseDto.builder().build());
+        when(userRepository.searchUserBy(me, "searchedUserUserName", null, 1L)).thenReturn(returnResult);
+
+        List<SearchUserResponseDto> result = feedService.searchUser(me.getUsername(), "searchedUserUserName", null, 1L);
+
+        assertTrue(result.get(0).getIsFollowing());
+
     }
 }

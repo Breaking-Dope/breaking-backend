@@ -35,25 +35,16 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.email,
                         user.statusMsg,
                         user.role,
-                        isFollowing(me)
+                        user.followerList.size(),
+                        Expressions.asBoolean(false)
                 ))
                 .from(user)
-                .leftJoin(user.followerList, follow)
                 .where(
                         cursorPagination(cursorUser),
                         user.nickname.contains(searchKeyword)
                 )
                 .limit(size)
                 .fetch();
-    }
-
-    private Predicate isFollowing(User me) {
-
-        if(me == null) {
-            return Expressions.asBoolean(false);
-        } else {
-            return follow.following.eq(me);
-        }
     }
 
     private Predicate cursorPagination(User cursorUser) {

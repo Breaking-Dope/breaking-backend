@@ -1,5 +1,6 @@
 package com.dope.breaking.dto.post;
 
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.service.SoldOption;
 import com.dope.breaking.service.SortStrategy;
 import com.dope.breaking.service.UserPageFeedOption;
@@ -23,6 +24,8 @@ public class SearchFeedConditionDto {
 
     private SoldOption soldOption;
 
+    private PostType postType;
+
     private UserPageFeedOption userPageFeedOption;
 
     private LocalDateTime dateFrom;
@@ -32,12 +35,13 @@ public class SearchFeedConditionDto {
     private Integer forLastMin;
 
     @Builder
-    public SearchFeedConditionDto(String searchKeyword, String searchHashtag, Long size, SortStrategy sortStrategy, SoldOption soldOption, UserPageFeedOption userPageFeedOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
+    public SearchFeedConditionDto(String searchKeyword, String searchHashtag, Long size, SortStrategy sortStrategy, SoldOption soldOption, PostType postType, UserPageFeedOption userPageFeedOption, LocalDateTime dateFrom, LocalDateTime dateTo, Integer forLastMin) {
         this.searchKeyword = searchKeyword;
         this.searchHashtag = searchHashtag;
         this.size = size;
         this.sortStrategy = sortStrategy;
         this.soldOption = soldOption;
+        this.postType = postType;
         this.userPageFeedOption = userPageFeedOption;
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;

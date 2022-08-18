@@ -1,26 +1,24 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
-import com.dope.breaking.dto.user.ProfileInformationResponseDto;
 import com.dope.breaking.dto.user.SearchUserResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.mission.NoSuchBreakingMissionException;
 import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.exception.user.NoSuchUserException;
 import com.dope.breaking.repository.*;
-import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.Expressions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.dope.breaking.domain.user.QFollow.follow;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +30,7 @@ public class SearchFeedService {
     private final BookmarkRepository bookmarkRepository;
     private final PostLikeRepository postLikeRepository;
     private final FollowRepository followRepository;
+    private final MissionRepository missionRepository;
 
     public List<FeedResultPostDto> searchMainFeed(SearchFeedConditionDto searchFeedConditionDto, String username, Long cursorId) {
 
@@ -54,13 +53,7 @@ public class SearchFeedService {
             searchFeedConditionDto.setSearchKeyword(searchFeedConditionDto.getSearchKeyword().replace('+', ' '));
         }
 
-        List<FeedResultPostDto> result;
-
-        if(searchFeedConditionDto.getSearchHashtag() != null) {
-            result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
-        } else {
-            result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
-        }
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
 
         if(me != null) {
             for (FeedResultPostDto dto : result) {
@@ -100,16 +93,18 @@ public class SearchFeedService {
             cursorPost = postRepository.findById(cursorId).orElseThrow(InvalidAccessTokenException::new);
         }
 
-        List<FeedResultPostDto> result;
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
 
-        switch (searchFeedConditionDto.getUserPageFeedOption()) {
-            case BOOKMARK:
-                result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
-            case BUY:
-                result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
-            case WRITE:
-            default:
-                result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, cursorPost);
+        if(me != null) {
+            for (FeedResultPostDto dto : result) {
+                dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
+                dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
+            }
+        }
+
+        return result;
+
+    }
 
         }
 

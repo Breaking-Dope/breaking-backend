@@ -64,6 +64,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .from(post)
                 .where(
                         soldOption(searchFeedConditionDto.getSoldOption()),
+                        postTypeFilter(searchFeedConditionDto.getPostType()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
                         sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
                 )
@@ -136,6 +137,15 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
             return null;
         } else {
             return post.isHidden.eq(false);
+        }
+    }
+
+    private Predicate postTypeFilter(PostType postType) {
+
+        if(postType == null) {
+            return null;
+        } else {
+            return post.postType.eq(postType);
         }
     }
 

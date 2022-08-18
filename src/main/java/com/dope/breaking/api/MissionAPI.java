@@ -2,10 +2,13 @@ package com.dope.breaking.api;
 
 import com.dope.breaking.dto.comment.CommentResponseDto;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.dto.mission.MissionRequestDto;
 import com.dope.breaking.dto.mission.MissionResponseDto;
-import com.dope.breaking.dto.post.DetailPostResponseDto;
+import com.dope.breaking.dto.post.FeedResultPostDto;
+import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.service.MissionService;
+import com.dope.breaking.service.SearchFeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +27,7 @@ import java.util.Map;
 public class MissionAPI {
 
     private final MissionService missionService;
+    private final SearchFeedService searchFeedService;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/breaking-mission")
@@ -58,6 +63,27 @@ public class MissionAPI {
             crntUsername = principal.getName();
         }
         return missionService.readMission(missionId, crntUsername);
+    }
+
+    @GetMapping("/breaking-mission/{missionId}/feed")
+    public ResponseEntity<List<FeedResultPostDto>> searchFeed(
+            Principal principal,
+            @PathParam(value="missionId") Long missionId,
+            @RequestParam(value="cursor") Long cursorId,
+            @RequestParam(value="size") Long size
+    ) {
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
+                .size(size)
+                .postType(PostType.MISSION)
+                .build();
+
+        String username = null;
+        if(principal!=null) {
+            username = principal.getName();
+        }
+
+        return ResponseEntity.ok().body(searchFeedService.searchFeedForMission(searchFeedConditionDto, missionId, username, cursorId));
     }
 
 }

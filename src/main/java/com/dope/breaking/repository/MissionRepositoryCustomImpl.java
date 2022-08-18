@@ -14,7 +14,6 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.dope.breaking.domain.post.QMission.mission;
-import static com.dope.breaking.domain.post.QPost.post;
 import static com.dope.breaking.domain.user.QUser.user;
 
 public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{

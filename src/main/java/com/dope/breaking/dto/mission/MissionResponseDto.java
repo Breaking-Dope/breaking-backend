@@ -28,7 +28,7 @@ public class MissionResponseDto {
     LocalDateTime endTime;
 
 
-    LocationDto locationDto;
+    LocationDto location;
 
     WriterDto user;
 
@@ -39,7 +39,7 @@ public class MissionResponseDto {
         this.content = content;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.locationDto = locationDto;
+        this.location = locationDto;
         this.user = writerDto;
     }
 

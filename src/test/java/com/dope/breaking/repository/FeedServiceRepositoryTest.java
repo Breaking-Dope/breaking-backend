@@ -52,6 +52,35 @@ public class FeedServiceRepositoryTest {
         assertEquals(0, result.size());
     }
 
+    @DisplayName("디버그")
+    @Test
+    void debug() {
+        User owner = User.builder()
+                .username("username")
+                .password("password")
+                .role(PRESS)
+                .build();
+        userRepository.save(owner);
+
+        Post post = Post.builder()
+                .isHidden(false)
+                .isAnonymous(false)
+                .build();
+        post.setUser(owner);
+        postRepository.save(post);
+
+//        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(10L)
+                .userPageFeedOption(UserPageFeedOption.WRITE)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> content = feedRepository.searchUserPageBy(searchFeedConditionDto, owner,null, null);
+        assertEquals(1, content.size());
+    }
 
     @DisplayName("좋아요 정렬 옵션은 좋아요가 많은 포스트를 먼저 조회한다.")
     @Test
@@ -65,6 +94,7 @@ public class FeedServiceRepositoryTest {
                 .isHidden(false)
                 .isAnonymous(false)
                 .build();
+        firstPost.setUser(user);
         postRepository.save(firstPost);
         postLikeRepository.save(new PostLike(user, firstPost));
 
@@ -74,6 +104,7 @@ public class FeedServiceRepositoryTest {
                 .isHidden(false)
                 .isAnonymous(false)
                 .build();
+        secondPost.setUser(user);
         postRepository.save(secondPost);
 
         //좋아요 없는 포스트 생성
@@ -82,6 +113,7 @@ public class FeedServiceRepositoryTest {
                 .isHidden(false)
                 .isAnonymous(false)
                 .build();
+        thirdPost.setUser(user);
         postRepository.save(thirdPost);
         postLikeRepository.save(new PostLike(user, thirdPost));
 
@@ -124,6 +156,7 @@ public class FeedServiceRepositoryTest {
                 .isAnonymous(false)
                 .viewCount(2)
                 .build();
+        firstPost.setUser(user);
         postRepository.save(firstPost);
 
         Post secondPost = Post.builder()
@@ -132,6 +165,7 @@ public class FeedServiceRepositoryTest {
                 .isAnonymous(false)
                 .viewCount(3)
                 .build();
+        secondPost.setUser(user);
         postRepository.save(secondPost);
 
         Post thirdPost = Post.builder()
@@ -140,6 +174,7 @@ public class FeedServiceRepositoryTest {
                 .isAnonymous(false)
                 .viewCount(1)
                 .build();
+        thirdPost.setUser(user);
         postRepository.save(thirdPost);
 
         Post fourthPost = Post.builder()
@@ -148,6 +183,7 @@ public class FeedServiceRepositoryTest {
                 .isAnonymous(false)
                 .viewCount(2)
                 .build();
+        fourthPost.setUser(user);
         postRepository.save(fourthPost);
 
         em.flush();
@@ -186,6 +222,9 @@ public class FeedServiceRepositoryTest {
     @Test
     void get15postsWithoutFilterFrom100Dummy() {
 
+        User user = new User();
+        userRepository.save(user);
+
         for(int i = 0; i<30; i++) {
             Post post = Post.builder()
                     .title("title"+i)
@@ -197,6 +236,7 @@ public class FeedServiceRepositoryTest {
                     .isAnonymous(false)
                     .viewCount(i)
                     .build();
+            post.setUser(user);
             postRepository.save(post);
         }
 
@@ -211,6 +251,7 @@ public class FeedServiceRepositoryTest {
                     .isAnonymous(false)
                     .viewCount(i)
                     .build();
+            post.setUser(user);
             postRepository.save(post);
         }
 
@@ -225,6 +266,7 @@ public class FeedServiceRepositoryTest {
                     .isAnonymous(false)
                     .viewCount(i)
                     .build();
+            post.setUser(user);
             postRepository.save(post);
         }
 
@@ -239,6 +281,7 @@ public class FeedServiceRepositoryTest {
                     .isHidden(true)
                     .isAnonymous(false)
                     .build();
+            post.setUser(user);
             postRepository.save(post);
         }
 
@@ -318,38 +361,40 @@ public class FeedServiceRepositoryTest {
     @Test
     void bookmarkFeedSearch() {
 
-        User owner = User.builder()
-                .username("username")
-                .password("password")
-                .role(PRESS)
-                .build();
+        User me = new User();
+        userRepository.save(me);
+
+        User owner = new User();
         userRepository.save(owner);
 
+        //not bookmarked post
         Post post = Post.builder()
                 .isHidden(false)
                 .isAnonymous(false)
                 .build();
+        post.setUser(owner);
         postRepository.save(post);
 
-        //3 not owner's posts
         for(int i=0;i<3;i++) {
             post = Post.builder()
                     .isHidden(false)
                     .isAnonymous(false)
                     .build();
+            post.setUser(owner);
             postRepository.save(post);
-            Bookmark bookmark = new Bookmark(owner, post);
+
+            Bookmark bookmark = new Bookmark(me, post);
             bookmarkRepository.save(bookmark);
         }
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .size(3L)
+                .size(4L)
                 .userPageFeedOption(UserPageFeedOption.BOOKMARK)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageByBookmark(searchFeedConditionDto, owner, owner, null);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, me, null);
 
         assertEquals(3, result.size());
     }
@@ -358,38 +403,39 @@ public class FeedServiceRepositoryTest {
     @Test
     void purchasedFeedSearch() {
 
-        User owner = User.builder()
-                .username("username")
-                .password("password")
-                .role(PRESS)
-                .build();
+        User owner = new User();
         userRepository.save(owner);
+
+        User me = new User();
+        userRepository.save(me);
 
         Post post = Post.builder()
                 .isHidden(false)
                 .isAnonymous(false)
                 .build();
+        post.setUser(owner);
         postRepository.save(post);
 
-        //3 not owner's posts
+        //3 purchased post
         for(int i=0;i<3;i++) {
             post = Post.builder()
                     .isHidden(false)
                     .isAnonymous(false)
                     .build();
+            post.setUser(owner);
             postRepository.save(post);
-            Purchase purchase = new Purchase(owner, post, 1000);
+            Purchase purchase = new Purchase(me, post, 1000);
             purchaseRepository.save(purchase);
         }
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
                 .builder()
-                .size(3L)
+                .size(5L)
                 .userPageFeedOption(UserPageFeedOption.BUY)
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageByPurchase(searchFeedConditionDto, owner, owner, null);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, me, me, null);
 
         assertEquals(3, result.size());
     }

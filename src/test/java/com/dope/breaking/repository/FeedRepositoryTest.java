@@ -46,6 +46,7 @@ public class FeedRepositoryTest {
         Post post = Post.builder()
                 .isHidden(true)
                 .build();
+        post.setUser(owner);
         postRepository.save(post);
         Bookmark bookmark = new Bookmark(owner, post);
         bookmarkRepository.save(bookmark);
@@ -67,13 +68,14 @@ public class FeedRepositoryTest {
     @Test
     void displayHiddenPostInMyPage() {
 
-        User user = new User();
-        userRepository.save(user);
+        User owner = new User();
+        userRepository.save(owner);
         Post post = Post.builder()
                 .isHidden(true)
                 .build();
+        post.setUser(owner);
         postRepository.save(post);
-        Bookmark bookmark = new Bookmark(user, post);
+        Bookmark bookmark = new Bookmark(owner, post);
         bookmarkRepository.save(bookmark);
 
         em.flush();
@@ -84,7 +86,7 @@ public class FeedRepositoryTest {
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, user, null);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, owner, owner, null);
 
         assertEquals(result.get(0).getPostId(), post.getId());
     }
@@ -93,11 +95,15 @@ public class FeedRepositoryTest {
     @Test
     void hideAnonymousPostInOtherUsersPage() {
 
+        User me = new User();
+        userRepository.save(me);
+
         User user = new User();
         userRepository.save(user);
         Post post = Post.builder()
                 .isAnonymous(true)
                 .build();
+        post.setUser(user);
         postRepository.save(post);
 
         em.flush();
@@ -108,7 +114,7 @@ public class FeedRepositoryTest {
                 .soldOption(SoldOption.ALL)
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, null, null);
+        List<FeedResultPostDto> result = feedRepository.searchUserPageBy(searchFeedConditionDto, user, me, null);
 
         assertEquals(0, result.size());
     }
@@ -122,6 +128,7 @@ public class FeedRepositoryTest {
         Post post = Post.builder()
                 .isAnonymous(true)
                 .build();
+        post.setUser(user);
         postRepository.save(post);
 
         em.flush();
@@ -277,7 +284,7 @@ public class FeedRepositoryTest {
                 .searchHashtag("해시태그")
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchFeedByHashtag(searchFeedConditionDto, null, user);
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
         assertEquals(1, result.size());
         assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
     }
@@ -321,7 +328,7 @@ public class FeedRepositoryTest {
                 .searchHashtag("해시태그")
                 .build();
 
-        List<FeedResultPostDto> result = feedRepository.searchFeedByHashtag(searchFeedConditionDto, null, user);
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
         assertEquals(1, result.size());
         assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
     }

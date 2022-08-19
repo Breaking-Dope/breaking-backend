@@ -70,4 +70,18 @@ public class PostAPI {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/post/{postId}/hide")
+    public ResponseEntity hidePost(Principal principal, @PathVariable Long postId){
+        postService.hidePost(principal.getName(),postId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/post/{postId}/hide")
+    public ResponseEntity cancelHidePost(Principal principal, @PathVariable Long postId) {
+        postService.cancelHidePost(principal.getName(), postId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

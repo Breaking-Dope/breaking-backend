@@ -28,6 +28,8 @@ public enum ErrorCode {
     ALREADY_FOLLOWING("BSE420", "이미 팔로우 중인 유저입니다."),
     ALREADY_UNFOLLOWING("BSE421", "이미 언팔로우 중인 유저입니다."),
     INVALID_CURSOR("BSE440", "유효하지 않은 cursor입니다."),
+    ALREADY_HIDDEN("BSE441","이미 숨김 처리 된 제보입니다."),
+    ALREADY_NOT_HIDDEN("BSE442","이미 공개 처리 된 제보입니다."),
 
     NO_SUCH_POST("BSE450", "해당 제보를 찾을 수 없습니다."),
     NO_SUCH_COMMENT("BSE451", "해당 댓글을 찾을 수 없습니다."),

@@ -657,7 +657,7 @@ class PostAPITest {
 
     }
 
-    @DisplayName("이미 구매 비활성화가 된 제보를 구매 비활성화 할 경우, 예외가 발생한다..")
+    @DisplayName("이미 구매 비활성화가 된 제보를 구매 비활성화 할 경우, 예외가 발생한다.")
     @WithMockCustomUser
     @Test
     void deactivatePurchaseDeactivatedPost() throws Exception {
@@ -679,6 +679,62 @@ class PostAPITest {
         //When
         this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/deactivate-purchase",postId))
                 .andExpect(status().isBadRequest()); //Then
+
+    }
+
+    @DisplayName("공개 된 제보를 숨길 경우, 정상적으로 숨김처리 된다.")
+    @WithMockCustomUser
+    @Test
+    void hideNotHiddenPost() throws Exception {
+
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        userRepository.save(user);
+
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsHidden(false);
+        Long postId = postRepository.save(post).getId();
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/hide",postId))
+                .andExpect(status().isOk()); //Then
+
+        //Then
+        Assertions.assertTrue(postRepository.getById(postId).isHidden());
+
+    }
+
+    @DisplayName("숨김 처리 된 제보를 공개할 경우, 정상적으로 공개처리 된다.")
+    @WithMockCustomUser
+    @Test
+    void cancelHideHiddenPost() throws Exception {
+
+        //Given
+        User user = User.builder()
+                .username("12345g")
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .role(Role.PRESS) // 최초 가입시 USER 로 설정
+                .build();
+
+        userRepository.save(user);
+
+        Post post = new Post();
+        post.setUser(user);
+        post.updateIsHidden(true);
+        Long postId = postRepository.save(post).getId();
+
+        //When
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/{postId}/hide",postId))
+                .andExpect(status().isOk()); //Then
+
+        //Then
+        Assertions.assertFalse(postRepository.getById(postId).isHidden());
 
     }
 

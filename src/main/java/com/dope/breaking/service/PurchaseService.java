@@ -50,6 +50,8 @@ public class PurchaseService {
             purchaseRepository.save(purchase);
             post.updateIsSold(true);
 
+            transactionService.purchasePostTransaction(buyer, seller, purchase);
+
         }
 
         else if (post.getPostType() ==PostType.CHARGED) {

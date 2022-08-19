@@ -54,7 +54,7 @@ class PurchaseServiceTest {
     @Autowired
     private FollowService followService;
 
-    @DisplayName("무료제보를 구매할 경우, 1. 제보가 정상적으로 구매 된다. 2. Transaction 이 생성되지 않는다. 3. balance 가 변하지 않는다.")
+    @DisplayName("무료제보를 구매할 경우, 1. 제보가 정상적으로 구매 된다. 2. balance 가 변하지 않는다.")
     @Test
     void purchaseFreePost() throws Exception {
 
@@ -97,7 +97,7 @@ class PurchaseServiceTest {
 
         //Then
         Assertions.assertEquals(1, purchaseRepository.findAll().size());
-        Assertions.assertEquals(0, transactionRepository.findAll().size());
+        Assertions.assertEquals(2, transactionRepository.findAll().size());
         Assertions.assertEquals(1000, buyer.getBalance());
         Assertions.assertEquals(2000, seller.getBalance());
         Assertions.assertTrue(postRepository.getById(postId).isSold());

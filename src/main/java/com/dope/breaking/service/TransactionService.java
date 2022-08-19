@@ -5,19 +5,15 @@ import com.dope.breaking.domain.financial.Statement;
 import com.dope.breaking.domain.financial.Transaction;
 import com.dope.breaking.domain.financial.TransactionType;
 import com.dope.breaking.domain.user.User;
-import com.dope.breaking.dto.financial.TransactionResponseDto;
+import com.dope.breaking.dto.financial.TransactionInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
-import com.dope.breaking.exception.user.NoPermissionException;
 import com.dope.breaking.repository.TransactionRepository;
 import com.dope.breaking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,17 +39,11 @@ public class TransactionService {
 
     }
 
-    public List<TransactionResponseDto> transactionList(String username){
-        
-        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+    public List<TransactionInfoResponseDto> transactionInfoList(String username, Long cursorId, int size){
 
-        List<Transaction> transactionList = transactionRepository.findAllByUserOrderByTransactionTimeDesc(user);
-        List<TransactionResponseDto> transactionResponseDtoList= new ArrayList<>();
-        
-        if(transactionList!=null){
-            transactionResponseDtoList = transactionList.stream().map(transaction -> new TransactionResponseDto(transaction)).collect(Collectors.toList());
-        }
-        return transactionResponseDtoList;
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        return transactionRepository.transactionList(user,cursorId,size);
+
     }
 
 }

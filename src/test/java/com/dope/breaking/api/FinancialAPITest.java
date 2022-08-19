@@ -1,12 +1,11 @@
 package com.dope.breaking.api;
 
 import com.dope.breaking.domain.financial.TransactionType;
+import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.financial.AmountRequestDto;
-import com.dope.breaking.repository.StatementRepository;
-import com.dope.breaking.repository.TransactionRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.repository.*;
 import com.dope.breaking.service.FollowService;
 import com.dope.breaking.service.PostService;
 import com.dope.breaking.service.PurchaseService;
@@ -75,6 +74,15 @@ class FinancialAPITest {
     @Autowired
     private FollowService followService;
 
+    @Autowired
+    private MissionRepository missionRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private PurchaseRepository purchaseRepository;
+
 
     @BeforeEach
     public void createUserInfo() {
@@ -82,7 +90,7 @@ class FinancialAPITest {
         User user = User.builder()
                 .username("12345g")
                 .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                .role(Role.USER) // 최초 가입시 USER 로 설정
+                .role(Role.PRESS)
                 .build();
 
         userRepository.save(user);
@@ -243,7 +251,7 @@ class FinancialAPITest {
     @Test
     @WithMockCustomUser
     @Transactional
-    void purchaseWhenPrice() throws Exception {
+    void purchaseWhenPriceBiggerThanBalance() throws Exception {
 
         //Given
         User user = userRepository.findByUsername("12345g").get();
@@ -328,6 +336,110 @@ class FinancialAPITest {
         //When
         this.mockMvc.perform(post("/post/{postId}/purchase", postId))
                 .andExpect(status().isBadRequest()); //Then
+
+    }
+
+    @DisplayName("브레이킹 미션에 제출 된 제보를 미션을 게시한 언론사가 게시할 경우, 제보가 정상적으로 구매된다.")
+    @WithMockCustomUser
+    @Transactional
+    @Test
+    void purchaseMissionPostByMissionOwner() throws Exception {
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        user.updateBalance(2000);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(0);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 1000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"mission\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"address\" : \"address\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+        Mission mission  = new Mission(user,"title","content",null,null,null);
+        missionRepository.save(mission);
+
+        postRepository.getById(postId).updateMission(mission);
+
+        //When
+        this.mockMvc.perform(post("/post/{postId}/purchase", postId))
+                .andExpect(status().isOk()); //Then
+
+        //Then
+        Assertions.assertEquals(1,purchaseRepository.findAll().size());
+
+    }
+
+    @DisplayName("브레이킹 미션에 제출 된 제보를 미션을 게시한 언론사가 게시할 경우, 제보가 정상적으로 구매된다.")
+    @WithMockCustomUser
+    @Transactional
+    @Test
+    void purchaseMissionPostByOtherUser() throws Exception {
+
+        //Given
+        User user = userRepository.findByUsername("12345g").get();
+        user.updateBalance(2000);
+
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.USER);
+        buyer1.updateBalance(2000);
+        userRepository.save(buyer1);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(0);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 1000," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"mission\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"address\" : \"address\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+        Mission mission  = new Mission(buyer1,"title","content",null,null,null);
+        missionRepository.save(mission);
+
+        postRepository.getById(postId).updateMission(mission);
+
+        //When
+        this.mockMvc.perform(post("/post/{postId}/purchase", postId))
+                .andExpect(status().isNotAcceptable()); //Then
 
     }
 

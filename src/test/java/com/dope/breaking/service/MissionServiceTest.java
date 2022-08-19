@@ -4,14 +4,15 @@ import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
+import com.dope.breaking.dto.mission.MissionFeedResponseDto;
 import com.dope.breaking.dto.mission.MissionRequestDto;
 import com.dope.breaking.dto.mission.MissionResponseDto;
 import com.dope.breaking.dto.post.LocationDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.mission.MissionOnlyForPressException;
+import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.repository.MissionRepository;
 import com.dope.breaking.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +24,12 @@ import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.mockito.BDDMockito.given;
 
@@ -78,8 +83,8 @@ class MissionServiceTest {
         when(userRepository.findByUsername("username")).thenReturn(Optional.of(user));
 
         //Then
-        Assertions.assertThrows(MissionOnlyForPressException.class,
-                () -> missionService.createMission(missionRequestDto, "username"));
+        assertThrows(MissionOnlyForPressException.class,
+                () -> missionService.createMission(missionRequestDto,"username"));
 
     }
 
@@ -97,8 +102,8 @@ class MissionServiceTest {
         MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", null, null, locationDto);
 
         //Then
-        Assertions.assertThrows(InvalidAccessTokenException.class,
-                () -> missionService.createMission(missionRequestDto, "username1")); //When
+        assertThrows(InvalidAccessTokenException.class,
+                () -> missionService.createMission(missionRequestDto,"username1")); //When
 
     }
 
@@ -114,7 +119,7 @@ class MissionServiceTest {
         MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", null, null, locationDto);
 
         //Then
-        Assertions.assertThrows(InvalidAccessTokenException.class,
+        assertThrows(InvalidAccessTokenException.class,
                 () -> missionService.createMission(missionRequestDto, "username1")); //When
     }
 
@@ -146,6 +151,32 @@ class MissionServiceTest {
 
         missionService.readMission(1L, "username");
 
+    }
+
+    @DisplayName("미션 피드가 정상 작동한다.")
+    @Test
+    void searchMissionFeed() {
+
+        List<MissionFeedResponseDto> dummy = new ArrayList<>();
+
+        dummy.add(new MissionFeedResponseDto());
+        dummy.add(new MissionFeedResponseDto());
+        dummy.add(new MissionFeedResponseDto());
+
+        when(missionRepository.searchMissionFeed(null, null, 10L)).thenReturn(dummy);
+
+        List<MissionFeedResponseDto> result = missionService.searchMissionFeed(null, null, 10L);
+        assertEquals(3, result.size());
+    }
+
+    @DisplayName("커서 id가 잘못되었을 경우, 예외가 발생한다.")
+    @Test
+    void searchMissionFeedInvalidCursor() {
+
+        when(missionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(InvalidCursorException.class,
+                () -> missionService.searchMissionFeed(null, 999L, 10L));
     }
 
 }

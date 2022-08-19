@@ -1,5 +1,7 @@
 package com.dope.breaking.api;
 
+import com.dope.breaking.dto.comment.CommentResponseDto;
+import com.dope.breaking.dto.mission.MissionFeedResponseDto;
 import com.dope.breaking.dto.mission.MissionRequestDto;
 import com.dope.breaking.dto.mission.MissionResponseDto;
 import com.dope.breaking.dto.post.DetailPostResponseDto;
@@ -35,7 +37,19 @@ public class MissionAPI {
         return ResponseEntity.status(HttpStatus.OK).body(missionService.postSubmission(principal.getName(),contentData,files,missionId));
     }
 
+    @GetMapping("/breaking-mission/feed")
+    public ResponseEntity<List<MissionFeedResponseDto>> getMissionFeed(
+            Principal principal,
+            @RequestParam(value="cursor") Long cursorMissionId,
+            @RequestParam(value="size") Long size) {
 
+        String username = null;
+        if(principal!=null) {
+            username = principal.getName();
+        }
+
+        return ResponseEntity.ok().body(missionService.searchMissionFeed(username, cursorMissionId, size));
+    }
 
     @GetMapping("/breaking-mission/{missionId}")
     public ResponseEntity<MissionResponseDto> readMission(@PathVariable("missionId") long missionId, Principal principal){

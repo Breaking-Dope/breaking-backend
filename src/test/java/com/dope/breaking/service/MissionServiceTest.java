@@ -173,10 +173,10 @@ class MissionServiceTest {
     @Test
     void searchMissionFeedInvalidCursor() {
 
-        when(missionRepository.findById(0L)).thenReturn(Optional.empty());
+        when(missionRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(InvalidCursorException.class,
-                () -> missionService.searchMissionFeed(null, 0L, 10L));
+                () -> missionService.searchMissionFeed(null, 999L, 10L));
     }
 
 }

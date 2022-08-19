@@ -7,6 +7,7 @@ import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.dto.user.SearchUserResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
+import com.dope.breaking.exception.mission.NoSuchBreakingMissionException;
 import com.dope.breaking.exception.pagination.InvalidCursorException;
 import com.dope.breaking.exception.user.LoginRequireException;
 import com.dope.breaking.exception.user.NoPermissionException;
@@ -45,6 +46,8 @@ public class FeedServiceTest {
     private PostLikeRepository postLikeRepository;
     @Mock
     private FollowRepository followRepository;
+    @Mock
+    private MissionRepository missionRepository;
 
     @InjectMocks
     private SearchFeedService feedService;
@@ -376,5 +379,15 @@ public class FeedServiceTest {
 
         assertTrue(result.get(0).getIsFollowing());
 
+    }
+
+    @DisplayName("존재하지 않는 미션일 경우, 예외가 발생한다.")
+    @Test
+    void searchMissionPostNoSuchMission() {
+
+        when(missionRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchBreakingMissionException.class,
+                () -> feedService.searchFeedForMission(SearchFeedConditionDto.builder().build(), 999L, null, null));
     }
 }

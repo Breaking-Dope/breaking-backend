@@ -119,7 +119,7 @@ class MissionServiceTest {
         MissionRequestDto missionRequestDto = new MissionRequestDto("title", "content", null, null, locationDto);
 
         //Then
-        Assertions.assertThrows(InvalidAccessTokenException.class,
+        assertThrows(InvalidAccessTokenException.class,
                 () -> missionService.createMission(missionRequestDto, "username1")); //When
     }
 

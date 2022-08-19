@@ -106,18 +106,7 @@ public class SearchFeedService {
 
     }
 
-        }
 
-        if(me != null) {
-            for (FeedResultPostDto dto : result) {
-                dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
-                dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
-            }
-        }
-
-        return result;
-
-    }
 
     public List<SearchUserResponseDto> searchUser(String username, String searchKeyword, Long cursorId, Long size) {
 
@@ -137,6 +126,32 @@ public class SearchFeedService {
             for (SearchUserResponseDto dto : result) {
                 if(followRepository.existsFollowsByFollowedIdAndFollowingId(me.getId(), dto.getUserId()))
                 dto.setIsFollowing(true);
+            }
+        }
+
+        return result;
+    }
+
+    public List<FeedResultPostDto> searchFeedForMission(SearchFeedConditionDto searchFeedConditionDto, Long missionId, String username, Long cursorId) {
+
+        Mission mission = missionRepository.findById(missionId).orElseThrow(NoSuchBreakingMissionException::new);
+
+        User me = null;
+        if(username != null) {
+            me = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        Post cursorPost = null;
+        if(cursorId != null && cursorId != 0) {
+            cursorPost = postRepository.findById(cursorId).orElseThrow(InvalidAccessTokenException::new);
+        }
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedByMission(searchFeedConditionDto, mission, cursorPost, me);
+
+        if(me != null) {
+            for (FeedResultPostDto dto : result) {
+                dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
+                dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
             }
         }
 

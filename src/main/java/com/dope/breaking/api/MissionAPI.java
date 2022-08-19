@@ -1,6 +1,5 @@
 package com.dope.breaking.api;
 
-import com.dope.breaking.dto.comment.CommentResponseDto;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.dto.mission.MissionRequestDto;
@@ -9,6 +8,7 @@ import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.service.MissionService;
 import com.dope.breaking.service.SearchFeedService;
+import com.dope.breaking.service.SortStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import javax.websocket.server.PathParam;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -66,15 +65,16 @@ public class MissionAPI {
     }
 
     @GetMapping("/breaking-mission/{missionId}/feed")
-    public ResponseEntity<List<FeedResultPostDto>> searchFeed(
+    public ResponseEntity<List<FeedResultPostDto>> searchMissionPostFeed(
             Principal principal,
-            @PathParam(value="missionId") Long missionId,
-            @RequestParam(value="cursor") Long cursorId,
-            @RequestParam(value="size") Long size
-    ) {
+            @PathVariable Long missionId,
+            @RequestParam(value = "cursor") Long cursorId,
+            @RequestParam(value = "size") Long size
+            ) {
 
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .size(size)
+                .sortStrategy(SortStrategy.CHRONOLOGICAL)
                 .postType(PostType.MISSION)
                 .build();
 

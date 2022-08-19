@@ -64,7 +64,11 @@ public class FinancialAPI {
     @GetMapping("/profile/transaction")
     public ResponseEntity<List<TransactionInfoResponseDto>> transactionList(Principal principal, @RequestParam(value="cursor") Long cursorId, @RequestParam(value="size") int size){
 
-        return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionInfoList(principal.getName(), cursorId, size));
+        String username = null;
+        if(principal!=null) {
+            username = principal.getName();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionInfoList(username, cursorId, size));
 
     }
 

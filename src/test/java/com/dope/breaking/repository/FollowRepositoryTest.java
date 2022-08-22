@@ -312,13 +312,30 @@ class FollowRepositoryTest {
         followRepository.save(follow4);
 
         //When
-        List<ForListInfoResponseDto> followingList = followRepository.followerList(hero, hero,0L,10);
+        List<ForListInfoResponseDto> followerList = followRepository.followerList(hero, hero,0L,10);
 
         //Then
-        Assertions.assertEquals(3, followingList.size());
-        Assertions.assertTrue(followingList.get(0).isFollowing());
-        Assertions.assertTrue(followingList.get(1).isFollowing());
-        Assertions.assertFalse(followingList.get(2).isFollowing());
+        Assertions.assertEquals(3, followerList.size());
+        Assertions.assertTrue(followerList.get(0).isFollowing());
+        Assertions.assertTrue(followerList.get(1).isFollowing());
+        Assertions.assertFalse(followerList.get(2).isFollowing());
+
+    }
+
+    @DisplayName("아무도 팔로우 하지 않는 유저의 팔로잉 리스트를 조회할 경우, 팔로잉 여부가 정확히 반환된다.")
+    @Test
+    void readEmptyFollowingList(){
+
+        //Given
+        User user = new User();
+        userRepository.save(user);
+        User hero = userRepository.findByNickname("hero").get();
+
+        //when
+        List<ForListInfoResponseDto> followingList = followRepository.followingList(hero, user,0L,10);
+
+        //Then
+        Assertions.assertEquals(0,followingList.size());
 
     }
 

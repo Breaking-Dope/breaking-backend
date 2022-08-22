@@ -133,5 +133,22 @@ class RelationshipAPITest {
 
     }
 
+    @DisplayName("cursorId가 0인 경우, 팔로워/팔로잉 조회가 정상적으로 작동한다.")
+    @Test
+    void emptyFollowerList() throws Exception {
+
+        //Given
+        User user = new User("newUsername", "password", Role.USER);
+        userRepository.save(user);
+
+        //When
+        this.mockMvc.perform(get("/follow/follower/{userId}?cursor=0&size=10",user.getId()))
+                .andExpect(status().isOk());//Then
+
+        //When
+        this.mockMvc.perform(get("/follow/following/{userId}?cursor=0&size=10",user.getId()))
+                .andExpect(status().isOk());//Then
+
+    }
 
 }

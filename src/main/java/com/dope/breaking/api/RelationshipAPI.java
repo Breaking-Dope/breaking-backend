@@ -40,7 +40,7 @@ public class RelationshipAPI {
     }
 
     @GetMapping("/follow/following/{userId}")
-    public ResponseEntity<List<ForListInfoResponseDto>>followingUserList (
+    public ResponseEntity<List<ForListInfoResponseDto>> followingUserList (
             Principal principal,
             @PathVariable Long userId,
             @RequestParam(value = "cursor") Long cursorId,
@@ -51,7 +51,7 @@ public class RelationshipAPI {
     }
 
     @GetMapping("/follow/follower/{userId}")
-    public ResponseEntity<List<ForListInfoResponseDto>>followerUserList (
+    public ResponseEntity<List<ForListInfoResponseDto>> followerUserList (
             Principal principal,
             @PathVariable Long userId,
             @RequestParam(value = "cursor") Long cursorId,

@@ -90,7 +90,7 @@ public class FollowRepositoryCustomImpl implements FollowRepositoryCustom{
     }
 
     private Predicate cursorPagination(Long cursorId) {
-        if(cursorId == null || cursorId == 0) {
+        if(cursorId == null || cursorId == 0L) {
             return null;
         }
         return follow.id.gt(cursorId);

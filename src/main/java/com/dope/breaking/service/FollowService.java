@@ -70,15 +70,9 @@ public class FollowService {
         }
 
         if(followTargetType == FollowTargetType.FOLLOWING) {
-            if(followRepository.getById(cursorId).getFollowing()!=selectedUser){
-                throw new InvalidCursorException();
-            }
             return followRepository.followingList(me, selectedUser, cursorId, size);
         }
         else if(followTargetType == FollowTargetType.FOLLOWED) {
-            if(followRepository.getById(cursorId).getFollowed()!=selectedUser){
-                throw new InvalidCursorException();
-            }
             return followRepository.followerList(me, selectedUser, cursorId, size);
         }
 

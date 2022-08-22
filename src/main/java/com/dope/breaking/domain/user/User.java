@@ -90,6 +90,19 @@ public class User {
         this.password = UUID.randomUUID().toString();
     }
 
+    public void removeUserInformation () {
+
+        this.originalProfileImgURL = null;
+        this.compressedProfileImgURL = null;
+        this.nickname = "탈퇴한 유저";
+        this.realName = "탈퇴한 유저";
+        this.password = "탈퇴한 유저";
+        this.statusMsg = null;
+        this.email = null;
+        this.phoneNumber = null;
+        this.username = null;
+    }
+
     @Enumerated(EnumType.STRING)
     private Role role; //권한 종류
 

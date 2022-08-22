@@ -11,6 +11,7 @@ import com.dope.breaking.exception.auth.NotFoundUserAgent;
 import com.dope.breaking.exception.user.DuplicatedUserInformationException;
 import com.dope.breaking.exception.user.InvalidUserInformationFormatException;
 import com.dope.breaking.exception.user.NoSuchUserException;
+import com.dope.breaking.repository.BookmarkRepository;
 import com.dope.breaking.repository.FollowRepository;
 import com.dope.breaking.repository.PostRepository;
 import com.dope.breaking.repository.UserRepository;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletException;
@@ -47,8 +49,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final MediaService mediaService;
     private final FollowRepository followRepository;
-    private final FollowService followService;
     private final PostRepository postRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -57,6 +59,7 @@ public class UserService {
     private final RedisService redisService;
 
 
+    @Transactional
     public ResponseEntity<?> signUp(String signUpRequest, List<MultipartFile> profileImg, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
 
         String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow(() -> new NotFoundUserAgent());
@@ -372,5 +375,22 @@ public class UserService {
                 .statusMsg(user.getStatusMsg())
                 .profileImgURL(user.getOriginalProfileImgURL())
                 .build();
+    }
+
+    @Transactional
+    public void signOut(String username) {
+
+        User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
+        followRepository.deleteAllByFollowing(user);
+        followRepository.deleteAllByFollowed(user);
+        bookmarkRepository.deleteAllByUser(user);
+
+        ArrayList<String> profileImageList = new ArrayList<>();
+        profileImageList.add(user.getOriginalProfileImgURL());
+        profileImageList.add(user.getCompressedProfileImgURL());
+
+        user.removeUserInformation();
+
+        mediaService.deleteMedias(profileImageList);
     }
 }

@@ -69,6 +69,14 @@ public class UserAPI {
     }
 
     @PreAuthorize("isAuthenticated()")
+    @PostMapping("/oauth2/sign-out")
+    public ResponseEntity<FullUserInformationResponse> signOut(Principal principal) {
+
+        userService.signOut(principal.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/profile", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> profileUpdateConfirm(
             Principal principal,
@@ -93,4 +101,5 @@ public class UserAPI {
     public ResponseEntity<FullUserInformationResponse> fullUserInformation(Principal principal) {
         return ResponseEntity.ok().body(userService.getFullUserInformation(principal.getName()));
     }
+
 }

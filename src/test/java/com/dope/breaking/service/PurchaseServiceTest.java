@@ -1,5 +1,6 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
@@ -9,10 +10,7 @@ import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.NotPurchasablePostException;
 import com.dope.breaking.exception.post.SoldExclusivePostException;
 import com.dope.breaking.exception.user.NoPermissionException;
-import com.dope.breaking.repository.PostRepository;
-import com.dope.breaking.repository.PurchaseRepository;
-import com.dope.breaking.repository.TransactionRepository;
-import com.dope.breaking.repository.UserRepository;
+import com.dope.breaking.repository.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,6 +51,9 @@ class PurchaseServiceTest {
 
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private MissionRepository missionRepository;
 
     @DisplayName("무료제보를 구매할 경우, 1. 제보가 정상적으로 구매 된다. 2. balance 가 변하지 않는다.")
     @Test
@@ -571,6 +572,116 @@ class PurchaseServiceTest {
 
         Assertions.assertThrows(NoSuchPostException.class, ()
                 ->  purchaseService.purchaseList("seller", postId, 100L, 10)); //When
+
+    }
+
+    @DisplayName("브레이킹 미션에 제출 된 제보를 다른 유저가 구매를 시도할 경우, 예외가 발생한다.")
+    @Test
+    void purchaseBreakingMissionPostByOtherPress() throws Exception {
+
+        //Given
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.PRESS);
+        buyer1.updateBalance(1000);
+        userRepository.save(buyer1);
+
+        User buyer2 = new User();
+        buyer2.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer2", Role.PRESS);
+        buyer2.updateBalance(2000);
+        userRepository.save(buyer2);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(2000);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 500," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"mission\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"address\" : \"address\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        Mission mission = new Mission(buyer1, "title","content",null,null,null);
+        missionRepository.save(mission);
+
+        postRepository.getById(postId).updateMission(mission);
+
+        Assertions.assertThrows(NoPermissionException.class, ()
+                ->  purchaseService.purchasePost ("buyer2",postId)); //When
+
+    }
+    @DisplayName("브레이킹 미션에 제출 된 제보를 미션을 올린 언론사가 구매를 할 경우, 제보가 정상적으로 구매된다.")
+    @Test
+    void purchaseBreakingMissionPostByMissionOwner() throws Exception {
+
+        //Given
+        User buyer1 = new User();
+        buyer1.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer1", Role.PRESS);
+        buyer1.updateBalance(1000);
+        userRepository.save(buyer1);
+
+        User buyer2 = new User();
+        buyer2.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer2", Role.PRESS);
+        buyer2.updateBalance(2000);
+        userRepository.save(buyer2);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(2000);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 500," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"mission\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"address\" : \"address\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        Mission mission = new Mission(buyer1, "title","content",null,null,null);
+        missionRepository.save(mission);
+
+        postRepository.getById(postId).updateMission(mission);
+
+        //When
+        purchaseService.purchasePost ("buyer1",postId);
+
+        //Then
+        Assertions.assertEquals(1,purchaseRepository.findAll().size());
+        Assertions.assertEquals(500,buyer1.getBalance());
+        Assertions.assertEquals(2500,seller.getBalance());
 
     }
 

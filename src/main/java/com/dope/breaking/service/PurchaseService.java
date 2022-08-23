@@ -48,13 +48,16 @@ public class PurchaseService {
 
             Purchase purchase = new Purchase(buyer, post, post.getPrice());
             purchaseRepository.save(purchase);
-            post.updateIsSold(true);
+
+            if(!post.isSold()) {
+                post.updateIsSold(true);
+            }
 
             transactionService.purchasePostTransaction(buyer, seller, purchase);
 
         }
 
-        else if (post.getPostType() ==PostType.CHARGED) {
+        else if (post.getPostType() == PostType.CHARGED) {
 
             if (buyer.getBalance() < post.getPrice()) {
                 throw new NotEnoughBalanceException();
@@ -64,11 +67,36 @@ public class PurchaseService {
             Purchase purchase = new Purchase(buyer, post, post.getPrice());
             purchaseRepository.save(purchase);
 
-            post.updateIsSold(true);
+            if(!post.isSold()) {
+                post.updateIsSold(true);
+            }
 
             transactionService.purchasePostTransaction(buyer, seller, purchase);
 
         }
+
+        else if (post.getPostType() == PostType.MISSION) {
+
+            if (post.getMission().getUser() != buyer) {
+                throw new NoPermissionException();
+            }
+
+            if (buyer.getBalance() < post.getPrice()) {
+                throw new NotEnoughBalanceException();
+            }
+
+            moneyTransfer (buyer, seller, post.getPrice());
+            Purchase purchase = new Purchase(buyer, post, post.getPrice());
+            purchaseRepository.save(purchase);
+
+            if(!post.isSold()) {
+                post.updateIsSold(true);
+            }
+
+            transactionService.purchasePostTransaction(buyer, seller, purchase);
+
+        }
+
         else if (post.getPostType() == PostType.EXCLUSIVE) {
 
             if (post.isSold()) {

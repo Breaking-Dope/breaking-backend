@@ -2,6 +2,8 @@ package com.dope.breaking.service;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
+import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
@@ -23,9 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -69,7 +69,25 @@ public class MissionService {
 
         Mission mission = missionRepository.findById(missionId).orElseThrow(NoSuchBreakingMissionException::new);
         Long postId = postService.create(username,contentData,files);
-        postRepository.findById(postId).get().updateMission(mission);
+        Post post = postRepository.findById(postId).get();
+        post.updateMission(mission);
+
+        if(!post.isSold()) {
+            Timer timer = new Timer();
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if (post.getPrice() == 0) {
+                        post.updatePostType(PostType.FREE);
+                    }
+                    else{
+                        post.updatePostType(PostType.CHARGED);
+                    }
+                }
+            };
+            timer.schedule(timerTask, java.sql.Timestamp.valueOf(mission.getEndTime()));
+        }
+
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("postId", postId);
         return result;

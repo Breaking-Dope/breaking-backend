@@ -129,4 +129,6 @@ public class Post extends BaseTimeEntity {
 
     public void updateIsHidden (boolean isHidden) { this.isHidden = isHidden; }
 
+    public void updatePostType (PostType postType) { this.postType = postType; }
+
 }

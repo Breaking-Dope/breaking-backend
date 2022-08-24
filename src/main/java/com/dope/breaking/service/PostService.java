@@ -1,5 +1,6 @@
 package com.dope.breaking.service;
 
+import com.dope.breaking.domain.financial.Purchase;
 import com.dope.breaking.domain.hashtag.HashtagType;
 import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.UploadType;
@@ -23,16 +24,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,7 +97,7 @@ public class PostService {
 
             post.setUser(user);
             postId = postRepository.save(post).getId();
-            if(postRequestDto.getHashtagList() != null) {
+            if (postRequestDto.getHashtagList() != null) {
                 hashtagService.saveHashtag(postRequestDto.getHashtagList(), postId, HashtagType.POST);
             }
 
@@ -103,7 +107,7 @@ public class PostService {
 
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
         List<String> mediaWatermarkedURL = new LinkedList<>();
-        if (files != null && files.size() != 0 &&files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
+        if (files != null && files.size() != 0 && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
             //1. 우선, 닉네임 워터마크를 생성
             String watermarkImageURL = mediaService.makeWatermarkNickname(user.getNickname());
             //2. 원본을 저장
@@ -168,7 +172,7 @@ public class PostService {
     public DetailPostResponseDto read(Long postId, String crntUsername) {
 
         //1. 없다면 예외반환.
-        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException:: new);
+        Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
         //2. 현재 사용자 게시글 좋아요 했는지 판별
         boolean isLiked = false;
@@ -185,7 +189,7 @@ public class PostService {
 
         WriterDto writerDto = null;
 
-        if(!(!isMyPost && post.isAnonymous())){
+        if (!(!isMyPost && post.isAnonymous())) {
             writerDto = WriterDto.builder()
                     .nickname(post.getUser().getNickname())
                     .profileImgURL(post.getUser().getOriginalProfileImgURL())
@@ -205,11 +209,11 @@ public class PostService {
                 .build();
 
 
-        List<String> mediaURLList= new LinkedList<>();
+        List<String> mediaURLList = new LinkedList<>();
         List<Media> MediaList = postRepository.findById(postId).get().getMediaList();
-        for(Media path : MediaList){
+        for (Media path : MediaList) {
             String[] pathArray = path.getMediaURL().split("/");
-            if(pathArray[pathArray.length -1].startsWith("w_")){
+            if (pathArray[pathArray.length - 1].startsWith("w_")) {
                 mediaURLList.add(path.getMediaURL());
             }
         }
@@ -247,8 +251,51 @@ public class PostService {
     }
 
 
+    public ResponseEntity<FileSystemResource> downloadSelectedMedia(long postId, String mediaURL, String username) throws IOException {
+        //1. 게시글이 없다면 예외 반환
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchPostException());
+
+        //2. 구매하지 않았다면 예외 반환
+        User user = userRepository.findByUsername(username).get();
+
+        if (!purchaseRepository.existsByPostAndUser(post, user)) {
+            throw new NoPermissionException();
+        }
+
+        String[] pathArray = mediaURL.split("/");
+        String watermarkedMediaFileName = pathArray[pathArray.length - 1];
+        String originalMediaFileName = watermarkedMediaFileName.substring(2);
+
+        return mediaService.responseMediaFile(originalMediaFileName);
+    }
+
+
+    public void downloadAllMedia(long postId, String username, HttpServletResponse httpServletResponse) throws IOException {
+        //1. 게시글이 없다면 예외 반환
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchPostException());
+
+        //2. 구매하지 않았다면 예외 반환
+        User user = userRepository.findByUsername(username).get();
+
+        if (!purchaseRepository.existsByPostAndUser(post, user)) {
+            throw new NoPermissionException();
+        }
+
+        List<Media> mediaList = post.getMediaList();
+        List<String> mediaURLList = new LinkedList<>();
+        for (Media mediaURL : mediaList) {
+            String[] pathArray = mediaURL.getMediaURL().split("/");
+            String watermarkedMediaFileName = pathArray[pathArray.length - 1];
+            String originalMediaFileName = watermarkedMediaFileName.replace("w_", "");
+            mediaURLList.add(originalMediaFileName);
+        }
+
+        mediaService.responseAllMediaFile(mediaURLList, httpServletResponse);
+    }
+
+
     @Transactional
-    public ResponseEntity delete(long postId, String username){
+    public ResponseEntity delete(long postId, String username) {
         if (!postRepository.findById(postId).isPresent()) {
             throw new NoSuchPostException();
         }
@@ -259,7 +306,7 @@ public class PostService {
 
 
         Post post = postRepository.getById(postId);
-        if(purchaseRepository.existsByPost(post)){
+        if (purchaseRepository.existsByPost(post)) {
             throw new PurchasedPostException();
         }
 
@@ -272,16 +319,16 @@ public class PostService {
     }
 
     @Transactional
-    public void deactivatePurchase(String username, Long postId){
+    public void deactivatePurchase(String username, Long postId) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
-        if(post.getUser() != user){
+        if (post.getUser() != user) {
             throw new NoPermissionException();
         }
 
-        if(!post.getIsPurchasable()){
+        if (!post.getIsPurchasable()) {
             throw new AlreadyNotPurchasableException();
         }
 
@@ -290,16 +337,16 @@ public class PostService {
     }
 
     @Transactional
-    public void activatePurchase(String username, Long postId){
+    public void activatePurchase(String username, Long postId) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
-        if(post.getUser() != user){
+        if (post.getUser() != user) {
             throw new NoPermissionException();
         }
 
-        if(post.getIsPurchasable()){
+        if (post.getIsPurchasable()) {
             throw new AlreadyPurchasableException();
         }
 
@@ -308,16 +355,16 @@ public class PostService {
     }
 
     @Transactional
-    public void hidePost(String username, Long postId){
+    public void hidePost(String username, Long postId) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
-        if(post.getUser() != user){
+        if (post.getUser() != user) {
             throw new NoPermissionException();
         }
 
-        if(post.isHidden()){
+        if (post.isHidden()) {
             throw new AlreadyHiddenException();
         }
 
@@ -326,16 +373,16 @@ public class PostService {
     }
 
     @Transactional
-    public void cancelHidePost(String username, Long postId){
+    public void cancelHidePost(String username, Long postId) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         Post post = postRepository.findById(postId).orElseThrow(NoSuchPostException::new);
 
-        if(post.getUser() != user){
+        if (post.getUser() != user) {
             throw new NoPermissionException();
         }
 
-        if(!post.isHidden()){
+        if (!post.isHidden()) {
             throw new AlreadyNotHiddenException();
         }
 

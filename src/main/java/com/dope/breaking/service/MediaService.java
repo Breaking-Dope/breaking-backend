@@ -4,8 +4,10 @@ import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.MediaType;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.repository.MediaRepository;
+import io.jsonwebtoken.Header;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,27 +17,34 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
+import org.apache.coyote.Response;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MimeType;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -156,7 +165,7 @@ public class MediaService {
         }
     }
 
-    public void deleteWatermarkNickname(String fileName){
+    public void deleteWatermarkNickname(String fileName) {
         File nicknameTextImagePath = new File(fileName);
         if (nicknameTextImagePath.exists()) {
             if (nicknameTextImagePath.delete()) {
@@ -238,18 +247,21 @@ public class MediaService {
 
         BufferedImage nicknameTextImage = ImageIO.read(new File(watermarkImageURL));
 
+
         for (String mediaURL : mediaURLList) {
 
             String extension = mediaURL.substring(mediaURL.lastIndexOf(".") + 1);
             MediaType mediaType = findMediaType(extension);
 
 
+            String[] pathArray = mediaURL.split("/");
+
             String FullPath = MAIN_DIR_NAME + mediaURL;
             File originalMediaPath = new File(FullPath); //전체 주소 경로를 받음
             try {
                 if (mediaType.equals(MediaType.PHOTO)) {
 
-                    String generateWatermarkName = "w_" + UUID.randomUUID().toString() + "." + extension; //w_ 접두사로 이미지파일 생성
+                    String generateWatermarkName = "w_" + pathArray[pathArray.length - 1]; //w_ 접두사로 이미지파일 생성
                     watermarkDestinationPath = SUB_DIR_NAME + UploadType.ORIGINAL_POST_MEDIA.getDirName() + File.separator + generateWatermarkName;
                     File thumbDestination = new File(MAIN_DIR_NAME + watermarkDestinationPath);
                     BufferedImage oImage = ImageIO.read(originalMediaPath);
@@ -274,7 +286,7 @@ public class MediaService {
 
 
                     String videofile = originalMediaPath.getPath();
-                    String generateWatermarkName = "w_" + UUID.randomUUID().toString() + ".mp4";
+                    String generateWatermarkName = "w_" + pathArray[pathArray.length - 1];
                     watermarkDestinationPath = SUB_DIR_NAME + UploadType.ORIGINAL_POST_MEDIA.getDirName() + File.separator + generateWatermarkName;
                     FFmpegBuilder fFmpegBuilder = new FFmpegBuilder()
                             .setInput(videofile)
@@ -387,7 +399,6 @@ public class MediaService {
     }
 
 
-
     public String makeWatermarkNickname(String nickname) throws IOException {
         try {
             //워터마크 이미지 생성
@@ -415,7 +426,7 @@ public class MediaService {
 
             ImageIO.write(nicknameTextImage, "PNG", nicknameTextImagePath);
             return nicknameTextImagePath.getPath();
-        }catch(IOException e){
+        } catch (IOException e) {
             log.info(e.getMessage());
         }
         throw new CustomInternalErrorException("워터마크를 생성할 수 없습니다.");
@@ -424,15 +435,39 @@ public class MediaService {
 
     public ResponseEntity<FileSystemResource> responseMediaFile(String fileName) throws IOException {
 
-        String directory = MAIN_DIR_NAME + "/" + fileName;
+        String directory = MAIN_DIR_NAME + SUB_DIR_NAME + UploadType.POST_MEDIA_DOWNLOAD.getDirName() + File.separator + fileName;
         FileSystemResource fsr = new FileSystemResource(directory);
         HttpHeaders header = new HttpHeaders();
         Path filePath = Paths.get(fileName);
         header.add("Content-Type", Files.probeContentType(filePath));
+        header.setContentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM);
+        header.add("Content-Disposition", "attachment; filename=" + fsr.getFilename());
 
         return new ResponseEntity<FileSystemResource>(fsr, header, HttpStatus.OK);
 
     }
 
+
+    public void responseAllMediaFile(List<String> mediaURL, HttpServletResponse httpServletResponse) throws IOException {
+
+        httpServletResponse.setContentType("application/zip");
+        httpServletResponse.setHeader("Content-Disposition", "attachment; filename=download.zip");
+
+
+        for (String fileName : mediaURL) {
+            ZipOutputStream zipOutputStream = new ZipOutputStream(httpServletResponse.getOutputStream());
+            FileSystemResource fileSystemResource = new FileSystemResource(MAIN_DIR_NAME + SUB_DIR_NAME + UploadType.POST_MEDIA_DOWNLOAD.getDirName() + File.separator + fileName);
+            ZipEntry zipEntry = new ZipEntry(fileSystemResource.getFilename());
+            zipEntry.setSize(fileSystemResource.contentLength());
+            zipEntry.setTime(System.currentTimeMillis());
+
+            zipOutputStream.putNextEntry(zipEntry);
+
+            StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+            zipOutputStream.closeEntry();
+            zipOutputStream.finish();
+
+        }
+    }
 
 }

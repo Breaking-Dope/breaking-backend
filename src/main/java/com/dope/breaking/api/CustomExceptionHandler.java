@@ -34,6 +34,7 @@ public class CustomExceptionHandler {
         e.printStackTrace(new PrintWriter(sw));
         String stacktraceAsString = sw.toString();
 
+        log.error("e.getMessage() = " + e.getMessage());
         log.error(stacktraceAsString);
 
         return ResponseEntity

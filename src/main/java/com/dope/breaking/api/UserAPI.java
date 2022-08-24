@@ -60,7 +60,7 @@ public class UserAPI {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "/oauth2/delete-user", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> signUp(Principal principal,
                                     @RequestPart String signUpRequest,
                                     @RequestPart(required = false) List<MultipartFile> profileImg, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {

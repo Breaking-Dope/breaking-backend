@@ -35,3 +35,7 @@ logging:
   level:
     org.hibernate.SQL: debug
 
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/plain,text/css,application/javascript,application/json, application/zip, application/octet-stream

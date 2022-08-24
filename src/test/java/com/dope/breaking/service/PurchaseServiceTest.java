@@ -6,6 +6,7 @@ import com.dope.breaking.domain.user.Role;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.financial.NotEnoughBalanceException;
+import com.dope.breaking.exception.post.AlreadyPurchasedPostException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.NotPurchasablePostException;
 import com.dope.breaking.exception.post.SoldExclusivePostException;
@@ -204,6 +205,53 @@ class PurchaseServiceTest {
         Assertions.assertEquals(999, buyer.getBalance());
         Assertions.assertEquals(0, seller.getBalance());
 
+
+    }
+
+    @DisplayName("이미 구매한 제보를 다시 구매할 경우, 예외가 발생한다.")
+    @Test
+    void purchaseAlreadyPurchasedPost() throws Exception {
+
+        //Given
+        User buyer = new User();
+        buyer.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "buyer", Role.USER);
+        buyer.updateBalance(2000);
+        userRepository.save(buyer);
+
+        User seller = new User();
+        seller.setRequestFields("URL", "anyURL", "nickname", "01012345678", "mwk300@nyu.edu", "Minwu Kim", "msg", "seller", Role.USER);
+        seller.updateBalance(0);
+        userRepository.save(seller);
+
+        List<MultipartFile> multipartFiles = new LinkedList<>();
+
+        String json = "{" +
+                "\"title\" : \"hello\"," +
+                "\"content\" : \"content\"," +
+                "\"price\" : 0," +
+                "\"isAnonymous\" : \"false\"," +
+                "\"postType\" : \"free\"," +
+                "\"eventDate\" : \"2020-01-01 14:01:01\"," +
+                "\"location\" : {" +
+                " \"address\" : \"address\"," +
+                "\"longitude\" : 12.1234," +
+                "\"latitude\" : 12.12345," +
+                "\"region_1depth_name\" : \"region_1depth_name\"," +
+                "\"region_2depth_name\" : \"region_2depth_name\" " +
+                "}," +
+                "\"hashtagList\" : [" +
+                "\"hello\", \"hello2\"]," +
+                "\"thumbnailIndex\" : 0" +
+                "}";
+
+        Long postId = postService.create("seller", json, multipartFiles);
+
+        //When
+        purchaseService.purchasePost("buyer", postId);
+
+        //Then
+        Assertions.assertThrows(AlreadyPurchasedPostException.class, ()
+                -> purchaseService.purchasePost("buyer", postId)); //When
 
     }
 

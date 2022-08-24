@@ -48,6 +48,7 @@ public enum ErrorCode {
 
     NO_SUCH_BREAKING_MISSION("BSE480", "존재하지 않는 브레이킹미션입니다."),
     MISSION_ONLY_FOR_PRESS("BSE481", "브레이킹 미션은 언론사만 게시 가능합니다."),
+    ALREADY_PURCHASED_POST("BSE483","이미 구매한 제보입니다."),
 
 
     INTERNAL_SERVER_ERROR("BSE500", "서버 요청 처리 실패."),

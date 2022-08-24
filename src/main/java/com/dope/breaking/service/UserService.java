@@ -378,7 +378,7 @@ public class UserService {
     }
 
     @Transactional
-    public void signOut(String username) {
+    public void withdraw(String username) {
 
         User user = userRepository.findByUsername(username).orElseThrow(InvalidAccessTokenException::new);
         followRepository.deleteAllByFollowing(user);

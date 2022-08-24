@@ -97,7 +97,7 @@ class UserAPITest {
 
         userRepository.save(user);
 
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/oauth2/sign-out"))
+        this.mockMvc.perform(MockMvcRequestBuilders.post("/oauth2/withdraw"))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
     }

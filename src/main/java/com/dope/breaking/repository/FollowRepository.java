@@ -19,5 +19,5 @@ public interface FollowRepository extends JpaRepository<Follow, Long>, FollowRep
 
     void deleteByFollowedAndFollowing(User followed, User following);
 
-    boolean existsFollowsByFollowedIdAndFollowingId(Long followed, Long following);
+    boolean existsFollowsByFollowingIdAndFollowedId(Long followed, Long following);
 }

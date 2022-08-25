@@ -124,7 +124,7 @@ public class SearchFeedService {
 
         if(me != null) {
             for (SearchUserResponseDto dto : result) {
-                if(followRepository.existsFollowsByFollowedIdAndFollowingId(me.getId(), dto.getUserId()))
+                if(followRepository.existsFollowsByFollowingIdAndFollowedId(me.getId(), dto.getUserId()))
                 dto.setIsFollowing(true);
             }
         }

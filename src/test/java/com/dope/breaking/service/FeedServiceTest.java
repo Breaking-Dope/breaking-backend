@@ -369,7 +369,7 @@ public class FeedServiceTest {
         User searchedUser = User.builder().username("searchedUserUserName").build();
 
         when(userRepository.findByUsername(me.getUsername())).thenReturn(Optional.of(me));
-        when(followRepository.existsFollowsByFollowedIdAndFollowingId(me.getId(), searchedUser.getId())).thenReturn(true);
+        when(followRepository.existsFollowsByFollowingIdAndFollowedId(me.getId(), searchedUser.getId())).thenReturn(true);
 
         List<SearchUserResponseDto> returnResult = new ArrayList<>();
         returnResult.add(SearchUserResponseDto.builder().build());

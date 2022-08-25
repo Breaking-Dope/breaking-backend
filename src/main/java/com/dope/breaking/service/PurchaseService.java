@@ -7,6 +7,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.user.ForListInfoResponseDto;
 import com.dope.breaking.exception.auth.InvalidAccessTokenException;
 import com.dope.breaking.exception.financial.NotEnoughBalanceException;
+import com.dope.breaking.exception.post.AlreadyPurchasedPostException;
 import com.dope.breaking.exception.post.NoSuchPostException;
 import com.dope.breaking.exception.post.NotPurchasablePostException;
 import com.dope.breaking.exception.post.SoldExclusivePostException;
@@ -42,6 +43,10 @@ public class PurchaseService {
 
         if (!post.getIsPurchasable()) {
             throw new NotPurchasablePostException();
+        }
+
+        if(purchaseRepository.existsByPostAndUser(post, buyer)){
+            throw new AlreadyPurchasedPostException();
         }
 
         if (post.getPostType() == PostType.FREE) {
@@ -168,7 +173,5 @@ public class PurchaseService {
         return purchaseRepository.purchaseList(user, post, cursorId, size);
 
     }
-
-
 
 }

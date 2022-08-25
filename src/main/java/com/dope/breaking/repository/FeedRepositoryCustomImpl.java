@@ -1,6 +1,8 @@
 package com.dope.breaking.repository;
 
+import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.*;
 import com.dope.breaking.service.SoldOption;
@@ -64,6 +66,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                 .from(post)
                 .where(
                         soldOption(searchFeedConditionDto.getSoldOption()),
+                        postTypeFilter(searchFeedConditionDto.getPostType()),
                         cursorPagination(cursorPost, searchFeedConditionDto.getSortStrategy()),
                         sameLevelCursorFilter(cursorPost, searchFeedConditionDto.getSortStrategy())
                 )
@@ -92,6 +95,17 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         userPageFeedOption(searchFeedConditionDto.getUserPageFeedOption(), owner, me)
                 )
                 .orderBy(boardSort(SortStrategy.CHRONOLOGICAL))
+                .fetch();
+    }
+
+    @Override
+    public List<FeedResultPostDto> searchFeedByMission(SearchFeedConditionDto searchFeedConditionDto, Mission mission, Post cursorPost, User me) {
+        return getBaseQuery(searchFeedConditionDto, cursorPost, me)
+                .where(
+                        post.mission.eq(mission),
+                        hiddenPostFilter(mission, me)
+                )
+                .orderBy(post.id.desc())
                 .fetch();
     }
 
@@ -136,6 +150,24 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
             return null;
         } else {
             return post.isHidden.eq(false);
+        }
+    }
+
+    private Predicate hiddenPostFilter(Mission mission, User me) {
+
+        if(mission.getUser() == me) {
+            return null;
+        } else {
+            return post.isHidden.eq(false);
+        }
+    }
+
+    private Predicate postTypeFilter(PostType postType) {
+
+        if(postType == null) {
+            return null;
+        } else {
+            return post.postType.eq(postType);
         }
     }
 

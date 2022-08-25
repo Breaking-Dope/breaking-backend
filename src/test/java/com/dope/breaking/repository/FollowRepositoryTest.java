@@ -361,4 +361,15 @@ class FollowRepositoryTest {
 
     }
 
+    @DisplayName("내가 팔로잉 하고 있는 유저라면, true가 반환된다.")
+    @Test
+    void existsFollowsByFollowingIdAndFollowedId() {
+        User user = new User();
+        userRepository.save(user);
+        User followed = new User();
+        userRepository.save(followed);
+        Follow follow = new Follow(user, followed);
+        followRepository.save(follow);
+        assertTrue(followRepository.existsFollowsByFollowingIdAndFollowedId(user.getId(), followed.getId()));
+    }
 }

@@ -45,8 +45,7 @@ dependencies {
 	runtimeOnly 'mysql:mysql-connector-java'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.11'
-	implementation group: 'org.jcodec', name: 'jcodec', version: '0.2.5'
-	implementation group: 'org.jcodec', name: 'jcodec-javase', version: '0.2.5'
+	implementation group: 'net.bramp.ffmpeg', name: 'ffmpeg', version: '0.7.0'
 	implementation 'com.github.maricn:logback-slack-appender:1.4.0'
 
 }

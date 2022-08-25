@@ -1,8 +1,8 @@
 package com.dope.breaking.api;
 
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
-import com.dope.breaking.dto.user.ProfileInformationResponseDto;
 import com.dope.breaking.dto.user.SearchUserResponseDto;
 import com.dope.breaking.service.SoldOption;
 import com.dope.breaking.service.SearchFeedService;
@@ -36,6 +36,7 @@ public class FeedAPI {
             @RequestParam(value="search", required = false) String searchKeyword,
             @RequestParam(value="hashtag", required = false) String hashtag,
             @RequestParam(value="sort", required = false) String sortStrategy,
+            @RequestParam(value="post-type", required = false) String postType,
             @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption,
             @RequestParam(value="date-from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
             @RequestParam(value="date-to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
@@ -48,6 +49,7 @@ public class FeedAPI {
                 .size(size)
                 .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
+                .postType(PostType.findMatchedEnum(postType))
                 .dateFrom(dateFrom)
                 .dateFrom(dateFrom)
                 .dateTo(dateTo)
@@ -60,7 +62,6 @@ public class FeedAPI {
         }
 
         return ResponseEntity.ok().body(searchFeedService.searchMainFeed(searchFeedConditionDto, username, cursorId));
-
     }
 
     @GetMapping("/feed/user/{ownerId}/{userFeedPostOption}")

@@ -3,8 +3,10 @@ package com.dope.breaking.repository;
 import com.dope.breaking.domain.comment.Comment;
 import com.dope.breaking.domain.hashtag.Hashtag;
 import com.dope.breaking.domain.hashtag.HashtagType;
+import com.dope.breaking.domain.post.Mission;
 import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostLike;
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.Bookmark;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.post.FeedResultPostDto;
@@ -34,6 +36,7 @@ public class FeedRepositoryTest {
     @Autowired BookmarkRepository bookmarkRepository;
     @Autowired HashtagRepository hashtagRepository;
     @Autowired CommentRepository commentRepository;
+    @Autowired MissionRepository missionRepository;
 
     @Autowired EntityManager em;
 
@@ -331,6 +334,93 @@ public class FeedRepositoryTest {
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
         assertEquals(1, result.size());
         assertEquals(postWithHashtag.getId(), result.get(0).getPostId());
+    }
+
+    @DisplayName("브레이킹 미션에 대한 포스트가 조회된다.")
+    @Test
+    void SearchPostByMission() {
+
+        User user = new User();
+        userRepository.save(user);
+        User otherUser = new User();
+        userRepository.save(otherUser);
+
+        Mission mission = Mission.builder()
+                .user(user)
+                .build();
+        missionRepository.save(mission);
+        Mission otherMission = Mission.builder()
+                .user(otherUser)
+                .build();
+        missionRepository.save(otherMission);
+
+        //create mission post
+        for(int i=0;i<15;i++) {
+            Post post = Post.builder()
+                    .isHidden(false)
+                    .postType(PostType.MISSION)
+                    .build();
+            post.setUser(user);
+            post.updateMission(mission);
+            postRepository.save(post);
+        }
+
+        //create other mission post
+        for(int i=0;i<5;i++) {
+            Post post = Post.builder()
+                    .isHidden(false)
+                    .postType(PostType.MISSION)
+                    .build();
+            post.setUser(user);
+            post.updateMission(otherMission);
+            postRepository.save(post);
+        }
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(100L)
+                .postType(PostType.MISSION)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedByMission(searchFeedConditionDto, mission, null, null);
+        assertEquals(15, result.size());
+    }
+
+    @DisplayName("유저가 숨긴 미션 게시글은, 미션을 게시한 사람에게 나타난다.")
+    @Test
+    void missionPostDisplayToMissionOwner() {
+
+        User missionOwner = new User();
+        userRepository.save(missionOwner);
+        User user = new User();
+        userRepository.save(user);
+
+        Mission mission = Mission.builder()
+                .user(missionOwner)
+                .build();
+        missionRepository.save(mission);
+
+        Post hiddenPost = Post.builder()
+                .isHidden(true)
+                .postType(PostType.MISSION)
+                .build();
+        hiddenPost.setUser(user);
+        hiddenPost.updateMission(mission);
+        postRepository.save(hiddenPost);
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(100L)
+                .postType(PostType.MISSION)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedByMission(searchFeedConditionDto, mission, null, missionOwner);
+
+        assertEquals(hiddenPost.getId(), result.get(0).getPostId());
     }
 
 }

@@ -339,6 +339,28 @@ class FollowRepositoryTest {
 
     }
 
+    @DisplayName("특정 유저의 팔로잉 및 팔로우 목록이 모두 삭제된다.")
+    @Test
+    void deleteAllFollowByUser(){
+
+        User user = new User();
+        userRepository.save(user);
+        User otherUser = new User();
+        userRepository.save(otherUser);
+
+        followRepository.save(new Follow(user, otherUser));
+        followRepository.save(new Follow(otherUser, user));
+
+        int preFollowCount = followRepository.countFollowsByFollowed(user) + followRepository.countFollowsByFollowing(user);
+
+        followRepository.deleteAllByFollowed(user);
+        followRepository.deleteAllByFollowing(user);
+
+        Assertions.assertEquals(2, preFollowCount);
+        Assertions.assertEquals(0, followRepository.countFollowsByFollowed(user) + followRepository.countFollowsByFollowing(user));
+
+    }
+
     @DisplayName("내가 팔로잉 하고 있는 유저라면, true가 반환된다.")
     @Test
     void existsFollowsByFollowingIdAndFollowedId() {

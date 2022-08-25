@@ -12,7 +12,9 @@ public enum UploadType {
 
     COMPRESSED_PROFILE_IMG("compressedProfileImgDirName", "/compressedProfileImg"),
     ORIGINAL_POST_MEDIA("originalPostMediaDirName","/originalPostMedia"),
-    THUMBNAIL_POST_MEDIA("thumbnailDirName" ,"/thumbnailPostMedia");
+    THUMBNAIL_POST_MEDIA("thumbnailDirName" ,"/thumbnailPostMedia"),
+
+    POST_MEDIA_DOWNLOAD("postMediaDownload", "/postMediaDownload");
 
     private final String uploadDivision;
     private final String DirName;

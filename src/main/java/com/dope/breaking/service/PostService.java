@@ -1,6 +1,7 @@
 package com.dope.breaking.service;
 
 import com.dope.breaking.domain.hashtag.HashtagType;
+import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Post;
@@ -101,11 +102,21 @@ public class PostService {
         }
 
         List<String> mediaURL = new LinkedList<>(); //순서를 지정하기 위함.
+        List<String> mediaWatermarkedURL = new LinkedList<>();
         if (files != null && files.size() != 0 &&files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
-            mediaURL = mediaService.uploadMedias(files, UploadType.ORIGINAL_POST_MEDIA);
-            mediaService.createMediaEntities(mediaURL, post); //저장.
-            String thumbImgURL = mediaService.makeThumbnail(mediaURL.get(postRequestDto.getThumbnailIndex()));
+            //1. 우선, 닉네임 워터마크를 생성
+            String watermarkImageURL = mediaService.makeWatermarkNickname(user.getNickname());
+            //2. 원본을 저장
+            mediaURL = mediaService.uploadMedias(files, UploadType.POST_MEDIA_DOWNLOAD);
+            mediaService.createMediaEntities(mediaURL, post); //저장
+            //3. 워터마크 적용된 원본을 저장
+            mediaWatermarkedURL = mediaService.makeWatermarkMedia(mediaURL, watermarkImageURL, UploadType.ORIGINAL_POST_MEDIA);
+            mediaService.createMediaEntities(mediaWatermarkedURL, post);
+            //4. 썸네일 생성
+            String thumbImgURL = mediaService.makeThumbnail(mediaURL.get(postRequestDto.getThumbnailIndex()), watermarkImageURL);
             post.setThumbnailImgURL(thumbImgURL);
+            //5. 다시 닉네임 워터마크 파일을 삭제
+            mediaService.deleteWatermarkNickname(watermarkImageURL);
             log.info(mediaRepository.findAllByPostId(postId).toString());
         } else {
             post.setThumbnailImgURL(null); //default는 null => 기본 썸네일 지정.
@@ -193,6 +204,17 @@ public class PostService {
                 .region_2depth_name(post.getLocation().getRegion_2depth_name())
                 .build();
 
+
+        List<String> mediaURLList= new LinkedList<>();
+        List<Media> MediaList = postRepository.findById(postId).get().getMediaList();
+        for(Media path : MediaList){
+            String[] pathArray = path.getMediaURL().split("/");
+            if(pathArray[pathArray.length -1].startsWith("w_")){
+                mediaURLList.add(path.getMediaURL());
+            }
+        }
+
+
         DetailPostResponseDto detailPostResponseDto = DetailPostResponseDto.builder()
                 .isLiked(isLiked)
                 .isBookmarked(isBookmarked)
@@ -200,7 +222,7 @@ public class PostService {
                 .user(writerDto)
                 .title(post.getTitle())
                 .content(post.getContent())
-                .mediaList(mediaRepository.findAllByPostId(postId).stream().map(media -> media.getMediaURL()).collect(Collectors.toList()))
+                .mediaList(mediaURLList)
                 .hashtagList(post.getHashtags().stream().map(postHashtag -> postHashtag.getContent()).collect(Collectors.toList()))
                 .location(locationDto)
                 .price(post.getPrice())

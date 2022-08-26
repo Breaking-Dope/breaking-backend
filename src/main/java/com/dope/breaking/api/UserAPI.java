@@ -69,7 +69,7 @@ public class UserAPI {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/oauth2/withdraw")
+    @DeleteMapping("/oauth2/withdraw")
     public ResponseEntity<FullUserInformationResponse> signOut(Principal principal) {
 
         userService.withdraw(principal.getName());

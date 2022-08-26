@@ -23,9 +23,23 @@ public class BreakingApplication implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-		registry.addResourceHandler("/static/**").addResourceLocations("/WEB-INF/static/")
+		registry.addResourceHandler("/static/compressedProfileImg/**").addResourceLocations("/WEB-INF/static/compressedProfileImg/")
+				.setCacheControl(CacheControl.maxAge(2, TimeUnit.HOURS).cachePublic());
+
+
+		registry.addResourceHandler("/static/originalPostMedia/**").addResourceLocations("/WEB-INF/static/originalPostMedia/")
+				.setCacheControl(CacheControl.maxAge(2, TimeUnit.HOURS).cachePublic());
+
+
+		registry.addResourceHandler("/static/originalProfileImg/**").addResourceLocations("/WEB-INF/static/originalProfileImg/")
+				.setCacheControl(CacheControl.maxAge(2, TimeUnit.HOURS).cachePublic());
+
+
+		registry.addResourceHandler("/static/thumbnailPostMedia/**").addResourceLocations("/WEB-INF/static/thumbnailPostMedia/")
 				.setCacheControl(CacheControl.maxAge(2, TimeUnit.HOURS).cachePublic());
 	}
+
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(BreakingApplication.class, args);

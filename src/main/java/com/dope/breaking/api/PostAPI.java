@@ -5,13 +5,18 @@ import com.dope.breaking.dto.post.DetailPostResponseDto;
 import com.dope.breaking.dto.post.PostRequestDto;
 import com.dope.breaking.service.*;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jdt.internal.compiler.batch.FileSystem;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.*;
 
@@ -21,6 +26,7 @@ import java.util.*;
 public class PostAPI {
 
     private final PostService postService;
+
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
@@ -83,5 +89,24 @@ public class PostAPI {
         postService.cancelHidePost(principal.getName(), postId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/post/{postId}/download/selected-media")
+    public ResponseEntity<FileSystemResource> downloadSelectedMedia(@PathVariable(value = "postId") Long postId,@RequestBody Map<String, String> mediaURL,  Principal principal) throws IOException {
+        String username = null;
+        if(principal != null) username = principal.getName();
+        return postService.downloadSelectedMedia(postId, mediaURL.get("mediaURL"), username);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/post/{postId}/download/all-media")
+    public void downdloadAllMedia(@PathVariable(value = "postId") long postId, Principal principal, HttpServletResponse httpServletResponse) throws IOException {
+        String username = null;
+        if(principal != null) username = principal.getName();
+        postService.downloadAllMedia(postId, username, httpServletResponse);
+
+    }
+
 
 }

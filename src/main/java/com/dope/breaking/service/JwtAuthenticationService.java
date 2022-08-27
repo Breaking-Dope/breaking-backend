@@ -34,17 +34,15 @@ public class JwtAuthenticationService {
 
     private final RedisService redisService;
 
-    public ResponseEntity<?> reissue(String accessToken, String refreshToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
+    public HttpHeaders reissue(String accessToken, String refreshToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
 
-        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow( () -> new NotFoundUserAgent());
+        String userAgent = Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElseThrow(NotFoundUserAgent::new);
 
         String userAgentType = distinguishUserAgent.extractUserAgent(userAgent);
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
         String getRefreshToken = userAgentType.equals("WEB") ? jwtTokenProvider.extractRefreshTokenFromCookie(httpServletRequest) : jwtTokenProvider.extractRefreshToken(refreshToken).orElse(null);
 
-        log.info(getRefreshToken);
-
-        if (refreshToken != null && jwtTokenProvider.validateToken(getRefreshToken) == false) {
+        if (refreshToken != null && !jwtTokenProvider.validateToken(getRefreshToken)) {
             try {
                 String username = jwtTokenProvider.getUsername(accessToken);
             } catch (ExpiredJwtException e) {
@@ -52,15 +50,14 @@ public class JwtAuthenticationService {
             } catch (SecurityException | IllegalArgumentException | JwtException e) {
                 throw new InvalidRefreshTokenException(); //유효하지 않은 예외.
             }
-        } else if (getAccessToken != null && jwtTokenProvider.validateToken(getRefreshToken) == true) {
+        } else if (getAccessToken != null && jwtTokenProvider.validateToken(getRefreshToken)) {
             String username = jwtTokenProvider.getUsername(getRefreshToken);
 
-            log.info(userAgentType);
             String redisRefreshToken = redisService.getData(userAgentType + "_" + username);
             if (!getRefreshToken.equals(redisRefreshToken)) { //Redis에 저장된 Refresh토큰이 존재하지 않을 때.
                 throw new InvalidRefreshTokenException();
             }
-            if (jwtTokenProvider.validateToken(getAccessToken) == true) { //만일 유효한 엑세스토큰이라면 블랙리스트로 지정.
+            if (jwtTokenProvider.validateToken(getAccessToken)) { //만일 유효한 엑세스토큰이라면 블랙리스트로 지정.
                 Long expiration = jwtTokenProvider.getExpireTime(getAccessToken);
                 redisService.setBlackListToken(getAccessToken, "BLACKLIST_ACCESSTOKEN_" + username, expiration); //엑세스 토큰 블랙리스트 저장
             }
@@ -80,13 +77,13 @@ public class JwtAuthenticationService {
             }
             redisService.setDataWithExpiration(userAgentType + "_" + username, newRefrsehToken, 2 * 604800L);
 
-            return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).build();
+            return httpHeaders;
         }
         throw new InvalidRefreshTokenException();
     }
 
 
-    public ResponseEntity<?> logout(String accessToken) throws IOException, ServletException {
+    public void logout(String accessToken) throws IOException {
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
 
         String username = jwtTokenProvider.getUsername(getAccessToken);
@@ -96,6 +93,5 @@ public class JwtAuthenticationService {
 
         Long expiration = jwtTokenProvider.getExpireTime(getAccessToken);
         redisService.setBlackListToken(getAccessToken, "BLACKLIST_ACCESSTOKEN_" + username, expiration); //엑세스 토큰 블랙리스트 저장
-        return ResponseEntity.ok().build();
     }
 }

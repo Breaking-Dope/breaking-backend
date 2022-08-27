@@ -19,14 +19,14 @@ public class PostLikeAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/like")
-    public ResponseEntity likePostById(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> likePostById(Principal principal, @PathVariable Long postId){
         postLikeService.likePostById(principal.getName(), postId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}/like")
-    public ResponseEntity unlikePostById(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> unlikePostById(Principal principal, @PathVariable Long postId){
         postLikeService.unlikePostById(principal.getName(),postId);
         return ResponseEntity.ok().build();
     }

@@ -21,7 +21,6 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(RequestRejectedException.class)
     protected ResponseEntity<ErrorResponseDto> handleRequestRejectedException(RequestRejectedException e) {
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDto(ErrorCode.BAD_REQUEST));
@@ -29,7 +28,6 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(CustomInternalErrorException.class)
     protected ResponseEntity<ErrorResponseDto> handleCustomInternalErrorException(CustomInternalErrorException e) {
-
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         String stacktraceAsString = sw.toString();
@@ -44,7 +42,6 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(BreakingException.class)
     protected ResponseEntity<ErrorResponseDto> handleBreakingCustomException(BreakingException e) {
-
         log.info(e.getMessage());
         return ResponseEntity
                 .status(e.getStatus())

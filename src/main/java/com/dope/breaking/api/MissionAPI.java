@@ -38,7 +38,7 @@ public class MissionAPI {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/breaking-mission/{missionId}", consumes = {"multipart/form-data"})
     public ResponseEntity<Map<String, Long>> submitPostForMission(Principal principal, @PathVariable Long missionId, @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(missionService.postSubmission(principal.getName(),contentData,files,missionId));
+        return ResponseEntity.ok().body(missionService.postSubmission(principal.getName(),contentData,files,missionId));
     }
 
     @GetMapping("/breaking-mission/feed")
@@ -46,12 +46,10 @@ public class MissionAPI {
             Principal principal,
             @RequestParam(value="cursor") Long cursorMissionId,
             @RequestParam(value="size") Long size) {
-
         String username = null;
         if(principal!=null) {
             username = principal.getName();
         }
-
         return ResponseEntity.ok().body(missionService.searchMissionFeed(username, cursorMissionId, size));
     }
 
@@ -71,18 +69,15 @@ public class MissionAPI {
             @RequestParam(value = "cursor") Long cursorId,
             @RequestParam(value = "size") Long size
             ) {
-
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .size(size)
                 .sortStrategy(SortStrategy.CHRONOLOGICAL)
                 .postType(PostType.MISSION)
                 .build();
-
         String username = null;
         if(principal!=null) {
             username = principal.getName();
         }
-
         return ResponseEntity.ok().body(searchFeedService.searchFeedForMission(searchFeedConditionDto, missionId, username, cursorId));
     }
 

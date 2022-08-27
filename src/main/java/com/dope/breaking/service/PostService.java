@@ -295,8 +295,8 @@ public class PostService {
 
 
     @Transactional
-    public ResponseEntity delete(long postId, String username) {
-        if (!postRepository.findById(postId).isPresent()) {
+    public void delete(long postId, String username) {
+        if (postRepository.findById(postId).isEmpty()) {
             throw new NoSuchPostException();
         }
 
@@ -304,18 +304,17 @@ public class PostService {
             throw new NoPermissionException();
         }
 
-
         Post post = postRepository.getById(postId);
         if (purchaseRepository.existsByPost(post)) {
             throw new PurchasedPostException();
         }
 
-        List<String> preMediaURLs = post.getMediaList().stream().map(postEntity -> postEntity.getMediaURL()).collect(Collectors.toList());
+        List<String> preMediaURLs = post.getMediaList().stream().map(Media::getMediaURL).collect(Collectors.toList());
         mediaService.deleteMedias(preMediaURLs);
         mediaService.deleteThumbnailImg(post.getThumbnailImgURL());
 
         postRepository.delete(post);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
     }
 
     @Transactional

@@ -27,7 +27,6 @@ public class PostAPI {
 
     private final PostService postService;
 
-
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
     public ResponseEntity<Map<String, Long>> postCreate(Principal principal,
@@ -35,7 +34,7 @@ public class PostAPI {
         Long postId = postService.create(principal.getName(), contentData, files);
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("postId", postId);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -44,7 +43,7 @@ public class PostAPI {
         postService.modify(postId , principal.getName(), postRequestDto);
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("postId", postId);
-        return ResponseEntity.status(HttpStatus.OK).body(result);
+        return ResponseEntity.ok().body(result);
     }
 
     @GetMapping(value = "/post/{postId}")
@@ -53,43 +52,43 @@ public class PostAPI {
         if(principal != null){
             crntUsername = principal.getName();
         }
-        return new ResponseEntity<DetailPostResponseDto>(postService.read(postId, crntUsername), HttpStatus.OK);
+        return ResponseEntity.ok().body(postService.read(postId, crntUsername));
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}")
-    public ResponseEntity postDelete(@PathVariable("postId") long postId, Principal principal){
-        return postService.delete(postId, principal.getName());
+    public ResponseEntity<Void> postDelete(@PathVariable("postId") long postId, Principal principal){
+        postService.delete(postId, principal.getName());
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/deactivate-purchase")
-    public ResponseEntity deactivatePurchase(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> deactivatePurchase(Principal principal, @PathVariable Long postId){
         postService.deactivatePurchase(principal.getName(),postId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/activate-purchase")
-    public ResponseEntity activatePurchase(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> activatePurchase(Principal principal, @PathVariable Long postId){
         postService.activatePurchase(principal.getName(),postId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/hide")
-    public ResponseEntity hidePost(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> hidePost(Principal principal, @PathVariable Long postId){
         postService.hidePost(principal.getName(),postId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}/hide")
-    public ResponseEntity cancelHidePost(Principal principal, @PathVariable Long postId) {
+    public ResponseEntity<Void> cancelHidePost(Principal principal, @PathVariable Long postId) {
         postService.cancelHidePost(principal.getName(), postId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{postId}/download/selected-media")
@@ -101,12 +100,11 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{postId}/download/all-media")
-    public void downdloadAllMedia(@PathVariable(value = "postId") long postId, Principal principal, HttpServletResponse httpServletResponse) throws IOException {
+    public void downloadAllMedia(@PathVariable(value = "postId") long postId, Principal principal, HttpServletResponse httpServletResponse) throws IOException {
         String username = null;
-        if(principal != null) username = principal.getName();
+        if(principal != null) {
+            username = principal.getName();
+        }
         postService.downloadAllMedia(postId, username, httpServletResponse);
-
     }
-
-
 }

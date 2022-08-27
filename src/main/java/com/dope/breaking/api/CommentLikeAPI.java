@@ -19,27 +19,21 @@ public class CommentLikeAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/comment/{commentId}/like")
-    public ResponseEntity likeComment(@PathVariable Long commentId, Principal principal){
-
+    public ResponseEntity<Void> likeComment(@PathVariable Long commentId, Principal principal){
         commentLikeService.likeComment(principal.getName(), commentId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/comment/{commentId}/like")
-    public ResponseEntity unlikeComment(@PathVariable Long commentId, Principal principal){
-
+    public ResponseEntity<Void> unlikeComment(@PathVariable Long commentId, Principal principal){
         commentLikeService.unlikeComment(principal.getName(), commentId);
         return ResponseEntity.ok().build();
-
     }
 
     @GetMapping("/post/comment/{commentId}/like-list")
     public ResponseEntity<List<ForListInfoResponseDto>> commentLikedUserList(Principal principal, @PathVariable Long commentId){
-
         return ResponseEntity.ok().body(commentLikeService.commentLikeList(principal,commentId));
-
     }
 
 }

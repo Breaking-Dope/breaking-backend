@@ -26,10 +26,8 @@ public class UserAPI {
 
     private final UserService userService;
 
-
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
     public ResponseEntity<Void> validatePhoneNumber(@PathVariable String phoneNumber, Principal principal) {
-
         String username = null;
         if (principal != null) {
             username = principal.getName();
@@ -40,7 +38,6 @@ public class UserAPI {
 
     @GetMapping("/oauth2/sign-up/validate-email/{email}")
     public ResponseEntity<Void> validateEmail(@PathVariable String email, Principal principal) {
-
         String username = null;
         if (principal != null) {
             username = principal.getName();
@@ -51,7 +48,6 @@ public class UserAPI {
 
     @GetMapping("/oauth2/sign-up/validate-nickname/{nickname}")
     public ResponseEntity<Void> validateNickname(@PathVariable String nickname, Principal principal) {
-
         String username = null;
         if (principal != null) {
             username = principal.getName();
@@ -71,7 +67,6 @@ public class UserAPI {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/oauth2/withdraw")
     public ResponseEntity<FullUserInformationResponse> signOut(Principal principal) {
-
         userService.withdraw(principal.getName());
         return ResponseEntity.ok().build();
     }

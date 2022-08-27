@@ -19,13 +19,6 @@ import java.io.StringWriter;
 @ControllerAdvice
 public class CustomExceptionHandler {
 
-    @ExceptionHandler(RequestRejectedException.class)
-    protected ResponseEntity<ErrorResponseDto> handleRequestRejectedException(RequestRejectedException e) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDto(ErrorCode.BAD_REQUEST));
-    }
-
     @ExceptionHandler(CustomInternalErrorException.class)
     protected ResponseEntity<ErrorResponseDto> handleCustomInternalErrorException(CustomInternalErrorException e) {
         StringWriter sw = new StringWriter();

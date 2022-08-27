@@ -80,7 +80,7 @@ class PostLikeAPITest {
 
         //When
         this.mockMvc.perform(post("/post/{postId}/like",post.getId()))
-                .andExpect(status().isCreated()); //Then
+                .andExpect(status().isOk()); //Then
 
         //Then
         Assertions.assertThat(postLikeRepository.existsPostLikesByUserAndPost(userRepository.findByUsername("12345g").get(),post)).isTrue();

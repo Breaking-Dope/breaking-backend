@@ -98,7 +98,7 @@ class CommentLikeAPITest {
 
         //When
         this.mockMvc.perform(post("/post/comment/{commentId}/like", commentId))
-                .andExpect(status().isCreated()); //Then
+                .andExpect(status().isOk()); //Then
 
         entityManager.flush();
         entityManager.clear();

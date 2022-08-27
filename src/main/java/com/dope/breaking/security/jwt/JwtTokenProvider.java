@@ -102,20 +102,17 @@ public class JwtTokenProvider {
 
 
     // 토큰에서 Username추출하는 과정.
-    public String getUsername(String token) { //Username을 얻자.
-        String username = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
-        return username;
+    public String getUsername(String token) {
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
     }
 
     //토큰에서 토큰 종류를 구별
     public String getTokenType(String token){
-        String tokenType = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getIssuer();
-        return tokenType;
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getIssuer();
     }
 
     public String getUserAgent(String token){
-        String userAgent = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getAudience();
-        return userAgent;
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getAudience();
     }
 
 

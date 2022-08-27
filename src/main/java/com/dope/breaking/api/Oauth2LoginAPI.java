@@ -27,7 +27,12 @@ public class Oauth2LoginAPI {
     private final Oauth2LoginService oauth2LoginService;
 
     @PostMapping("/kakao")
-    public ResponseEntity<?> kakaoOauthLogin(Principal principal, @RequestBody Map<String, String> accessToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
+    public ResponseEntity<?> kakaoOauthLogin(
+            Principal principal,
+            @RequestBody Map<String, String> accessToken,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+    ) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
         if(principal != null) throw new AlreadyLoginException();
         String token = accessToken.get("accessToken");
         ResponseEntity<String> kakaoUserinfo = oauth2LoginService.kakaoUserInfo(token);
@@ -35,11 +40,16 @@ public class Oauth2LoginAPI {
     }
 
     @PostMapping("/google")
-    public ResponseEntity<?> googleOauthLogin(Principal principal, @RequestBody Map<String, String> accessToken, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
+    public ResponseEntity<?> googleOauthLogin(
+            Principal principal,
+            @RequestBody Map<String, String> accessToken,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+    ) throws InvalidAccessTokenException, ParseException, ServletException, IOException {
         if(principal != null) throw new AlreadyLoginException();
         String token = accessToken.get("accessToken");
-        String idtoken = accessToken.get("idToken");
-        ResponseEntity<String> GoogleUserinfo = oauth2LoginService.googleUserInfo(token, idtoken);
+        String idToken = accessToken.get("idToken");
+        ResponseEntity<String> GoogleUserinfo = oauth2LoginService.googleUserInfo(token, idToken);
         return oauth2LoginService.googleLogin(GoogleUserinfo, httpServletRequest, httpServletResponse);
     }
 }

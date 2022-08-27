@@ -23,20 +23,16 @@ public class RelationshipAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/follow/{userId}")
-    public ResponseEntity followUser( Principal principal, @PathVariable Long userId) {
-
+    public ResponseEntity<Void> followUser(Principal principal, @PathVariable Long userId) {
        followService.follow(principal.getName(),userId);
-       return ResponseEntity.status(HttpStatus.CREATED).build();
-
+       return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/follow/{userId}")
-    public ResponseEntity unfollowUser(Principal principal, @PathVariable Long userId) {
-
+    public ResponseEntity<Void> unfollowUser(Principal principal, @PathVariable Long userId) {
        followService.unfollow(principal.getName(),userId);
        return ResponseEntity.ok().build();
-
     }
 
     @GetMapping("/follow/following/{userId}")
@@ -45,9 +41,7 @@ public class RelationshipAPI {
             @PathVariable Long userId,
             @RequestParam(value = "cursor") Long cursorId,
             @RequestParam(value = "size") int size) {
-
         return ResponseEntity.ok().body(followService.followUserList(principal, userId, cursorId, size, FollowTargetType.FOLLOWING));
-
     }
 
     @GetMapping("/follow/follower/{userId}")
@@ -56,9 +50,7 @@ public class RelationshipAPI {
             @PathVariable Long userId,
             @RequestParam(value = "cursor") Long cursorId,
             @RequestParam(value = "size") int size) {
-
         return ResponseEntity.ok().body(followService.followUserList(principal, userId, cursorId, size, FollowTargetType.FOLLOWED));
-
     }
 
 }

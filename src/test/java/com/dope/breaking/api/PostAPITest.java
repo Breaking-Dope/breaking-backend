@@ -143,7 +143,7 @@ class PostAPITest {
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .characterEncoding("UTF-8"))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk()).andReturn();
+                .andExpect(status().isCreated()).andReturn();
 
 
         MockHttpServletResponse response = resultActions.getResponse();
@@ -539,7 +539,7 @@ class PostAPITest {
         post.setUser(user);
         MvcResult resultActions = this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/" + postId))
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isNoContent()).andReturn();
+                .andExpect(status().isOk()).andReturn();
 
         MockHttpServletResponse response = resultActions.getResponse();
         String content = response.getContentAsString();

@@ -19,20 +19,25 @@ public class PostLikeAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/like")
-    public ResponseEntity likePostById(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> likePostById(Principal principal, @PathVariable Long postId){
         postLikeService.likePostById(principal.getName(), postId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}/like")
-    public ResponseEntity unlikePostById(Principal principal, @PathVariable Long postId){
+    public ResponseEntity<Void> unlikePostById(Principal principal, @PathVariable Long postId){
         postLikeService.unlikePostById(principal.getName(),postId);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("post/{postId}/like-list")
-    public ResponseEntity<List<ForListInfoResponseDto>> likedUserList (Principal principal, @PathVariable Long postId, @RequestParam(value = "cursor") Long cursorId, @RequestParam(value = "size") int size){
+    public ResponseEntity<List<ForListInfoResponseDto>> likedUserList (
+            Principal principal,
+            @PathVariable Long postId,
+            @RequestParam(value = "cursor") Long cursorId,
+            @RequestParam(value = "size") int size
+    ) {
         String username =  null;
         if(principal != null){ username = principal.getName(); }
         return ResponseEntity.ok().body(postLikeService.postLikeList(username,postId,cursorId,size));

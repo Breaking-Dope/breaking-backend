@@ -26,10 +26,8 @@ public class UserAPI {
 
     private final UserService userService;
 
-
     @GetMapping("/oauth2/sign-up/validate-phone-number/{phoneNumber}")
-    public ResponseEntity<Void> validatePhoneNumber(@PathVariable String phoneNumber, Principal principal) {
-
+    public ResponseEntity<Void> validatePhoneNumber(Principal principal, @PathVariable String phoneNumber) {
         String username = null;
         if (principal != null) {
             username = principal.getName();
@@ -39,8 +37,7 @@ public class UserAPI {
     }
 
     @GetMapping("/oauth2/sign-up/validate-email/{email}")
-    public ResponseEntity<Void> validateEmail(@PathVariable String email, Principal principal) {
-
+    public ResponseEntity<Void> validateEmail(Principal principal, @PathVariable String email) {
         String username = null;
         if (principal != null) {
             username = principal.getName();
@@ -50,8 +47,7 @@ public class UserAPI {
     }
 
     @GetMapping("/oauth2/sign-up/validate-nickname/{nickname}")
-    public ResponseEntity<Void> validateNickname(@PathVariable String nickname, Principal principal) {
-
+    public ResponseEntity<Void> validateNickname(Principal principal, @PathVariable String nickname) {
         String username = null;
         if (principal != null) {
             username = principal.getName();
@@ -61,9 +57,12 @@ public class UserAPI {
     }
 
     @PostMapping(value = "/oauth2/sign-up", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> signUp(Principal principal,
-                                    @RequestPart String signUpRequest,
-                                    @RequestPart(required = false) List<MultipartFile> profileImg, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+    public ResponseEntity<?> signUp(
+            Principal principal,
+            @RequestPart String signUpRequest,
+            @RequestPart(required = false) List<MultipartFile> profileImg,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse) throws ServletException, IOException {
         if (principal != null) throw new AlreadyLoginException();
         return userService.signUp(signUpRequest, profileImg, httpServletRequest, httpServletResponse);
     }
@@ -71,29 +70,27 @@ public class UserAPI {
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/oauth2/withdraw")
     public ResponseEntity<FullUserInformationResponse> signOut(Principal principal) {
-
         userService.withdraw(principal.getName());
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/profile", consumes = {MediaType.TEXT_PLAIN_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> profileUpdateConfirm(
+    public ResponseEntity<Void> profileUpdateConfirm(
             Principal principal,
             @RequestPart String updateRequest,
             @RequestPart(required = false) List<MultipartFile> profileImg) {
-
         userService.updateProfile(principal.getName(), updateRequest, profileImg);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/profile/{userId}")
     public ResponseEntity<ProfileInformationResponseDto> profileInformation(Principal principal, @PathVariable Long userId) {
-        String userName = null;
+        String username = null;
         if (principal != null) {
-            userName = principal.getName();
+            username = principal.getName();
         }
-        return ResponseEntity.ok().body(userService.profileInformation(userName, userId));
+        return ResponseEntity.ok().body(userService.profileInformation(username, userId));
     }
 
     @PreAuthorize("isAuthenticated()")

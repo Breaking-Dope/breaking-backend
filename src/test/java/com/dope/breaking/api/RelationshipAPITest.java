@@ -77,7 +77,7 @@ class RelationshipAPITest {
 
         //When
         this.mockMvc.perform(post("/follow/{userId}",followedUser.getId()))
-                .andExpect(status().isCreated()); //Then
+                .andExpect(status().isOk()); //Then
 
         //Then
         assertTrue(followRepository.existsFollowsByFollowedAndFollowing(followedUser,userRepository.findByUsername("12345g").get()));

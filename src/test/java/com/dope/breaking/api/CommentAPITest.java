@@ -219,7 +219,7 @@ class CommentAPITest {
         this.mockMvc.perform(put("/post/comment/{commentId}", commentId)
                         .content(requestJson)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated()); //Then
+                .andExpect(status().isOk()); //Then
 
         //Then
         Assertions.assertThat(commentRepository.getById(commentId).getContent()).isEqualTo("updated");

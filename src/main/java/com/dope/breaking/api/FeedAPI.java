@@ -40,8 +40,7 @@ public class FeedAPI {
             @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption,
             @RequestParam(value="date-from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
             @RequestParam(value="date-to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
-            @RequestParam(value="for-last-min", required = false) Integer forLastMin
-    ) {
+            @RequestParam(value="for-last-min", required = false) Integer forLastMin) {
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .searchKeyword(searchKeyword)
                 .searchHashtag(hashtag)
@@ -70,8 +69,7 @@ public class FeedAPI {
             @PathVariable("userFeedPostOption") String userFeedPostOption,
             @RequestParam(value="cursor") Long cursorId,
             @RequestParam(value="size") Long size,
-            @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption
-    ) {
+            @RequestParam(value="sold-option", required = false, defaultValue = "ALL") String soldOption) {
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .size(size)
                 .soldOption(SoldOption.findMatchedEnum(soldOption))
@@ -92,8 +90,7 @@ public class FeedAPI {
             Principal principal,
             @RequestParam(value = "search") String searchKeyword,
             @RequestParam(value = "cursor") Long cursorId,
-            @RequestParam(value = "size") Long size
-    ) {
+            @RequestParam(value = "size") Long size) {
         String username = null;
         if (principal != null) {
             username = principal.getName();

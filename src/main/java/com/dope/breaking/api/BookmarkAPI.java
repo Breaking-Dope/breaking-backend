@@ -27,7 +27,6 @@ public class BookmarkAPI {
         return bookmarkService.bookmarkPost(principal.getName(), postId);
     }
 
-
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}/bookmark")
     public ResponseEntity unbookmarkPost(Principal principal, @PathVariable long postId){

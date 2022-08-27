@@ -29,8 +29,11 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/post", consumes = {"multipart/form-data"})
-    public ResponseEntity<Map<String, Long>> postCreate(Principal principal,
-                                        @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
+    public ResponseEntity<Map<String, Long>> postCreate(
+            Principal principal,
+            @RequestPart(value = "mediaList", required = false) List<MultipartFile> files,
+            @RequestPart(value = "data") String contentData
+    ) throws Exception {
         Long postId = postService.create(principal.getName(), contentData, files);
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("postId", postId);
@@ -39,7 +42,11 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping(value = "/post/{postId}")
-    public ResponseEntity<Map<String, Long>> postModify(@PathVariable("postId") long postId, Principal principal, @RequestBody PostRequestDto postRequestDto) throws Exception {
+    public ResponseEntity<Map<String, Long>> postModify(
+            Principal principal,
+            @PathVariable("postId") long postId,
+            @RequestBody PostRequestDto postRequestDto
+    ) throws Exception {
         postService.modify(postId , principal.getName(), postRequestDto);
         Map<String, Long> result = new LinkedHashMap<>();
         result.put("postId", postId);
@@ -47,17 +54,17 @@ public class PostAPI {
     }
 
     @GetMapping(value = "/post/{postId}")
-    public ResponseEntity<DetailPostResponseDto> postRead(@PathVariable("postId") long postId, Principal principal){
-        String crntUsername = null;
+    public ResponseEntity<DetailPostResponseDto> postRead(Principal principal, @PathVariable("postId") long postId){
+        String username = null;
         if(principal != null){
-            crntUsername = principal.getName();
+            username = principal.getName();
         }
-        return ResponseEntity.ok().body(postService.read(postId, crntUsername));
+        return ResponseEntity.ok().body(postService.read(postId, username));
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/post/{postId}")
-    public ResponseEntity<Void> postDelete(@PathVariable("postId") long postId, Principal principal){
+    public ResponseEntity<Void> postDelete(Principal principal, @PathVariable("postId") long postId){
         postService.delete(postId, principal.getName());
         return ResponseEntity.ok().build();
     }
@@ -92,7 +99,10 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{postId}/download/selected-media")
-    public ResponseEntity<FileSystemResource> downloadSelectedMedia(@PathVariable(value = "postId") Long postId,@RequestBody Map<String, String> mediaURL,  Principal principal) throws IOException {
+    public ResponseEntity<FileSystemResource> downloadSelectedMedia(
+            Principal principal,
+            @PathVariable(value = "postId") Long postId,
+            @RequestBody Map<String, String> mediaURL) throws IOException {
         String username = null;
         if(principal != null) username = principal.getName();
         return postService.downloadSelectedMedia(postId, mediaURL.get("mediaURL"), username);
@@ -100,7 +110,10 @@ public class PostAPI {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/{postId}/download/all-media")
-    public void downloadAllMedia(@PathVariable(value = "postId") long postId, Principal principal, HttpServletResponse httpServletResponse) throws IOException {
+    public void downloadAllMedia(
+            Principal principal,
+            @PathVariable(value = "postId") long postId,
+            HttpServletResponse httpServletResponse) throws IOException {
         String username = null;
         if(principal != null) {
             username = principal.getName();

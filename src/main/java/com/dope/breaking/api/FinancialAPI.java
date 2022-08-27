@@ -27,7 +27,7 @@ public class FinancialAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/financial/deposit")
-    public ResponseEntity<Void> deposit(Principal principal,@RequestBody @Valid AmountRequestDto depositAmount) {
+    public ResponseEntity<Void> deposit(Principal principal, @RequestBody @Valid AmountRequestDto depositAmount) {
         statementService.depositOrWithdraw(principal.getName(), depositAmount.getAmount(), TransactionType.DEPOSIT);
         return ResponseEntity.ok().build();
     }
@@ -48,17 +48,24 @@ public class FinancialAPI {
 
     @PreAuthorize("isAuthenticated")
     @GetMapping("/post/{postId}/buy-list")
-    public ResponseEntity<List<ForListInfoResponseDto>> buyerList(Principal principal, @PathVariable Long postId, @RequestParam(value="cursor") Long cursorId, @RequestParam(value="size") int size){
-        return ResponseEntity.status(HttpStatus.OK).body(purchaseService.purchaseList(principal.getName(), postId, cursorId, size));
+    public ResponseEntity<List<ForListInfoResponseDto>> buyerList(
+            Principal principal,
+            @PathVariable Long postId,
+            @RequestParam(value="cursor") Long cursorId,
+            @RequestParam(value="size") int size) {
+        return ResponseEntity.ok().body(purchaseService.purchaseList(principal.getName(), postId, cursorId, size));
     }
 
     @PreAuthorize("isAuthenticated")
     @GetMapping("/profile/transaction")
-    public ResponseEntity<List<TransactionInfoResponseDto>> transactionList(Principal principal, @RequestParam(value="cursor") Long cursorId, @RequestParam(value="size") int size){
+    public ResponseEntity<List<TransactionInfoResponseDto>> transactionList(
+            Principal principal,
+            @RequestParam(value="cursor") Long cursorId,
+            @RequestParam(value="size") int size) {
         String username = null;
         if(principal!=null) {
             username = principal.getName();
         }
-        return ResponseEntity.status(HttpStatus.OK).body(transactionService.transactionInfoList(username, cursorId, size));
+        return ResponseEntity.ok().body(transactionService.transactionInfoList(username, cursorId, size));
     }
 }

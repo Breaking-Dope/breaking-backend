@@ -46,9 +46,10 @@ public class CommentAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/comment")
-    public ResponseEntity<Void> addComment(@PathVariable Long postId,
-                                     @RequestBody @Valid CommentRequestDto commentRequestDto,
-                                     Principal principal){
+    public ResponseEntity<Void> addComment(
+            Principal principal,
+            @PathVariable Long postId,
+            @RequestBody @Valid CommentRequestDto commentRequestDto) {
         commentService.addComment(postId, principal.getName(), commentRequestDto.getContent(), commentRequestDto.getHashtagList());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -58,8 +59,7 @@ public class CommentAPI {
             Principal principal,
             @PathVariable Long commentId,
             @RequestParam(value="cursor") Long cursorId,
-            @RequestParam(value="size") Long size
-    ) {
+            @RequestParam(value="size") Long size) {
         String username = null;
         if(principal != null)  {
             username = principal.getName();
@@ -78,25 +78,27 @@ public class CommentAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/comment/{commentId}/reply")
-    public ResponseEntity<Void> addReply(@PathVariable Long commentId,
-                                   @RequestBody @Valid CommentRequestDto commentRequestDto,
-                                   Principal principal){
+    public ResponseEntity<Void> addReply(
+            Principal principal,
+            @PathVariable Long commentId,
+            @RequestBody @Valid CommentRequestDto commentRequestDto) {
         commentService.addReply(commentId, principal.getName(), commentRequestDto.getContent(), commentRequestDto.getHashtagList());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @PutMapping ("/post/comment/{commentId}")
-    public ResponseEntity<Void> updateCommentAndReply(@PathVariable Long commentId,
-                                                @RequestBody @Valid CommentRequestDto commentRequestDto,
-                                                Principal principal){
+    public ResponseEntity<Void> updateCommentAndReply(
+            Principal principal,
+            @PathVariable Long commentId,
+            @RequestBody @Valid CommentRequestDto commentRequestDto) {
         commentService.updateCommentOrReply(principal.getName(), commentId, commentRequestDto.getContent(), commentRequestDto.getHashtagList());
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping ("/post/comment/{commentId}")
-    public ResponseEntity<Void> deleteCommentAndReply(@PathVariable Long commentId, Principal principal){
+    public ResponseEntity<Void> deleteCommentAndReply(Principal principal, @PathVariable Long commentId){
         commentService.deleteCommentOrReply(principal.getName(), commentId);
         return ResponseEntity.ok().build();
     }

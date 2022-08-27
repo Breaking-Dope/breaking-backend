@@ -43,9 +43,12 @@ public class JwtAuthenticationAPI {
     }
 
     @GetMapping("/reissue") //토큰 재발행 부분.
-    public ResponseEntity<Void> refreshTokenReissue(@RequestHeader(value = "authorization") String accessToken,
-                                                 @RequestHeader(value = "authorization-refresh", required = false) String refreshToken,
-                                                 HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
+    public ResponseEntity<Void> refreshTokenReissue(
+            @RequestHeader(value = "authorization") String accessToken,
+            @RequestHeader(value = "authorization-refresh", required = false) String refreshToken,
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse
+    ) throws IOException, ServletException {
         return ResponseEntity.ok()
                 .headers(jwtAuthenticationService.reissue(accessToken, refreshToken, httpServletRequest, httpServletResponse))
                 .build();
@@ -53,7 +56,7 @@ public class JwtAuthenticationAPI {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/oauth2/sign-out")
-    public ResponseEntity<Void> logout(@RequestHeader(value = "authorization") String accessToken) throws IOException, ServletException {
+    public ResponseEntity<Void> logout(@RequestHeader(value = "authorization") String accessToken) throws IOException {
         jwtAuthenticationService.logout(accessToken);
         return ResponseEntity.ok().build();
     }

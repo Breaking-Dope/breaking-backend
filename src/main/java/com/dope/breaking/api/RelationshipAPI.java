@@ -23,7 +23,7 @@ public class RelationshipAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/follow/{userId}")
-    public ResponseEntity<Void> followUser( Principal principal, @PathVariable Long userId) {
+    public ResponseEntity<Void> followUser(Principal principal, @PathVariable Long userId) {
        followService.follow(principal.getName(),userId);
        return ResponseEntity.ok().build();
     }

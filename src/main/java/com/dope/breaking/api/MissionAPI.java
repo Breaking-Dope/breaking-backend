@@ -30,14 +30,19 @@ public class MissionAPI {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/breaking-mission")
-    public ResponseEntity createMission(Principal principal, @RequestBody @Valid MissionRequestDto missionRequestDto){
+    public ResponseEntity<Void> createMission(Principal principal, @RequestBody @Valid MissionRequestDto missionRequestDto){
         missionService.createMission(missionRequestDto, principal.getName());
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/breaking-mission/{missionId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<Map<String, Long>> submitPostForMission(Principal principal, @PathVariable Long missionId, @RequestPart(value = "mediaList", required = false) List<MultipartFile> files, @RequestPart(value = "data") String contentData) throws Exception {
+    public ResponseEntity<Map<String, Long>> submitPostForMission(
+            Principal principal,
+            @PathVariable Long missionId,
+            @RequestPart(value = "mediaList", required = false) List<MultipartFile> files,
+            @RequestPart(value = "data") String contentData
+    ) throws Exception {
         return ResponseEntity.ok().body(missionService.postSubmission(principal.getName(),contentData,files,missionId));
     }
 
@@ -54,12 +59,12 @@ public class MissionAPI {
     }
 
     @GetMapping("/breaking-mission/{missionId}")
-    public ResponseEntity<MissionResponseDto> readMission(@PathVariable("missionId") long missionId, Principal principal){
-        String crntUsername = null;
+    public ResponseEntity<MissionResponseDto> readMission(Principal principal, @PathVariable("missionId") long missionId){
+        String username = null;
         if(principal != null){
-            crntUsername = principal.getName();
+            username = principal.getName();
         }
-        return missionService.readMission(missionId, crntUsername);
+        return missionService.readMission(missionId, username);
     }
 
     @GetMapping("/breaking-mission/{missionId}/feed")
@@ -67,8 +72,7 @@ public class MissionAPI {
             Principal principal,
             @PathVariable Long missionId,
             @RequestParam(value = "cursor") Long cursorId,
-            @RequestParam(value = "size") Long size
-            ) {
+            @RequestParam(value = "size") Long size) {
         SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto.builder()
                 .size(size)
                 .sortStrategy(SortStrategy.CHRONOLOGICAL)

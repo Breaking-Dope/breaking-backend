@@ -264,7 +264,7 @@ public class MediaService {
                     int originalWidth = oImage.getWidth();
                     Thumbnails.of(oImage)
                             .size(originalWidth, originalHeight)
-                            .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 0.5f)
+                            .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 1.0f)
                             .outputQuality(1.0f)
                             .toFile(thumbDestination);
 
@@ -323,8 +323,6 @@ public class MediaService {
 
         BufferedImage nicknameTextImage = ImageIO.read(new File(watermarkImageURL));
 
-        final int tWidth = 400;
-        final int tHeight = 300;
 
         try {
             if (mediaType.equals(MediaType.PHOTO)) {
@@ -333,14 +331,10 @@ public class MediaService {
                 String thumbDestinationPath = SUB_DIR_NAME + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator + generateThumbFileName;
                 File thumbDestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
                 BufferedImage oImage = ImageIO.read(originalMediaPath);
-                BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR);
-                Graphics2D graphic = tImage.createGraphics();
-                Image image = oImage.getScaledInstance(tWidth, tHeight, Image.SCALE_SMOOTH);
-                graphic.drawImage(image, 0, 0, tWidth, tHeight, null);
-                graphic.dispose();
-                Thumbnails.of(tImage)
+
+                Thumbnails.of(oImage)
                         .size(400, 300)
-                        .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 0.5f)
+                        .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 1.0f)
                         .outputQuality(1.0f)
                         .toFile(thumbDestination);
 
@@ -370,14 +364,11 @@ public class MediaService {
                 executor.createJob(fFmpegBuilder).run();
 
                 File thumbDestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
-                BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR); // 썸네일이미지
-                Graphics2D graphic = tImage.createGraphics();
-                BufferedImage oImage = ImageIO.read(thumbDestination);
-                Image image = oImage.getScaledInstance(tWidth, tHeight, Image.SCALE_SMOOTH);
-                graphic.drawImage(image, 0, 0, tWidth, tHeight, null);
-                graphic.dispose();
 
-                Thumbnails.of(tImage)
+
+                BufferedImage oImage = ImageIO.read(thumbDestination);
+
+                Thumbnails.of(oImage)
                         .size(400, 300)
                         .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 1.0f)
                         .outputQuality(1.0f)

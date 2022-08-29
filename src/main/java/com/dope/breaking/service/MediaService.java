@@ -4,10 +4,8 @@ import com.dope.breaking.domain.media.Media;
 import com.dope.breaking.domain.media.MediaType;
 import com.dope.breaking.domain.media.UploadType;
 import com.dope.breaking.domain.post.Post;
-import com.dope.breaking.exception.BreakingException;
 import com.dope.breaking.exception.CustomInternalErrorException;
 import com.dope.breaking.repository.MediaRepository;
-import io.jsonwebtoken.Header;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,14 +15,12 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
-import org.apache.coyote.Response;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MimeType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,7 +33,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -362,10 +357,10 @@ public class MediaService {
 
                 String videofile = originalMediaPath.getPath();
                 generateThumbFileName = "s_" + UUID.randomUUID().toString() + ".png";
-                String thumbDestinationPath = MAIN_DIR_NAME + SUB_DIR_NAME + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator + generateThumbFileName;
+                String thumbDestinationPath = SUB_DIR_NAME + UploadType.THUMBNAIL_POST_MEDIA.getDirName() + File.separator + generateThumbFileName;
                 FFmpegBuilder fFmpegBuilder = new FFmpegBuilder()
                         .setInput(videofile)
-                        .addOutput(thumbDestinationPath)
+                        .addOutput(MAIN_DIR_NAME + thumbDestinationPath)
                         .addExtraArgs("-ss", "00:00:01")
                         .addExtraArgs("-preset", "ultrafast")
                         .setFrames(1)
@@ -374,7 +369,7 @@ public class MediaService {
                 FFmpegExecutor executor = new FFmpegExecutor(fFmpeg, fFprobe);
                 executor.createJob(fFmpegBuilder).run();
 
-                File thumbDestination = new File(thumbDestinationPath);
+                File thumbDestination = new File(MAIN_DIR_NAME + thumbDestinationPath);
                 BufferedImage tImage = new BufferedImage(tWidth, tHeight, BufferedImage.TYPE_3BYTE_BGR); // 썸네일이미지
                 Graphics2D graphic = tImage.createGraphics();
                 BufferedImage oImage = ImageIO.read(thumbDestination);

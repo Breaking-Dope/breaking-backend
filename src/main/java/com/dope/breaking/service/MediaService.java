@@ -398,10 +398,12 @@ public class MediaService {
         try {
             //워터마크 이미지 생성
             String nicknameText = nickname != null ? "@" + nickname : "@Breaking";
+            String eucKrEncoding = new String(nicknameText.getBytes("euc-kr"), "euc-kr");
+
             File nicknameTextImagePath = new File(MAIN_DIR_NAME + SUB_DIR_NAME + File.separator + UUID.randomUUID() + ".png");
-            Font font = new Font(null, Font.PLAIN, 50);
+            Font font = new Font(null, Font.PLAIN, 20);
             FontRenderContext frc = new FontRenderContext(null, true, true);
-            Rectangle2D bounds = font.getStringBounds(nicknameText, frc);
+            Rectangle2D bounds = font.getStringBounds(eucKrEncoding, frc);
             int backgroundWidth = (int) bounds.getWidth();
             int backgroundHeight = (int) bounds.getHeight();
             BufferedImage nicknameTextImage = new BufferedImage(backgroundWidth, backgroundHeight, BufferedImage.TYPE_INT_ARGB);
@@ -416,7 +418,7 @@ public class MediaService {
             g2D.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
             g2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
-            g2D.drawString(nicknameText, (float) bounds.getX(), (float) -bounds.getY());
+            g2D.drawString(eucKrEncoding, (float) bounds.getX(), (float) -bounds.getY());
             g2D.dispose();
 
             ImageIO.write(nicknameTextImage, "PNG", nicknameTextImagePath);

@@ -264,7 +264,7 @@ public class MediaService {
                     int originalWidth = oImage.getWidth();
                     Thumbnails.of(oImage)
                             .size(originalWidth, originalHeight)
-                            .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 1f)
+                            .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 1.0f)
                             .outputQuality(1.0f)
                             .toFile(thumbDestination);
 
@@ -334,7 +334,7 @@ public class MediaService {
 
                 Thumbnails.of(oImage)
                         .size(400, 300)
-                        .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 0.5f)
+                        .watermark(Positions.BOTTOM_RIGHT, nicknameTextImage, 1.0f)
                         .outputQuality(1.0f)
                         .toFile(thumbDestination);
 

@@ -46,7 +46,7 @@ public class FeedRepositoryCustomImpl implements FeedRepositoryCustom {
                         ),
                         post.thumbnailImgURL,
                         post.postLikeList.size(),
-                        Expressions.asNumber(0),
+                        post.commentList.size(),
                         post.postType,
                         post.viewCount,
                         Projections.constructor(WriterDto.class,

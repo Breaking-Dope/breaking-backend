@@ -174,6 +174,35 @@ public class FeedRepositoryTest {
         assertTrue(result.get(0).getIsMyPost());
     }
 
+    @DisplayName("피드 조회에서, 해당 게시글의 댓글 개수를 반환한다.")
+    @Test
+    void commentCountInFeed() {
+
+        User user = new User();
+        userRepository.save(user);
+        Post post = Post.builder()
+                .isAnonymous(true)
+                .build();
+        post.setUser(user);
+        postRepository.save(post);
+
+        commentRepository.save(new Comment(user, post, "comments"));
+        commentRepository.save(new Comment(user, post, "comments"));
+
+        em.flush();
+
+        SearchFeedConditionDto searchFeedConditionDto = SearchFeedConditionDto
+                .builder()
+                .size(1L)
+                .soldOption(SoldOption.ALL)
+                .build();
+
+        List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, null, user);
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).getCommentCount());
+    }
+
     @DisplayName("문자열이 포함된 제목이나 본문을 가진 게시글을 검색한다")
     @Test
     void searchPostByString() {

@@ -12,9 +12,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) { //CORS 정책 추가.
         registry.addMapping("/**")
                 .allowedOrigins("http://localhost:8080", "http://localhost:3000", "http://team-dope.link:3000")
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .exposedHeaders("*")
+                .allowedMethods("POST", "GET", "PUT", "DELETE")
+                .allowedHeaders("authorization", "authorization-refresh", "User-Agent")
+                .exposedHeaders("authorization", "authorization-refresh", "User-Agent")
                 .allowCredentials(true);
     }
 }

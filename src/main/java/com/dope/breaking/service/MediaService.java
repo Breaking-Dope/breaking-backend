@@ -15,6 +15,7 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,9 +49,14 @@ public class MediaService {
 
     private final MediaRepository mediaRepository;
 
+    @Value("${imageModule.ffmpeg.path}")
+    private String ffmpegPath;
+
+    @Value("${imageModule.ffprobe.path}")
+    private String ffprobePath;
+
     private final String MAIN_DIR_NAME = System.getProperty("user.dir") + "/src/main/webapp/WEB-INF";
     private final String SUB_DIR_NAME = "/static";
-
 
     private final String basicProfileDir = "profile.png";
 
@@ -271,14 +277,8 @@ public class MediaService {
 
                     watermarkMedia.add(watermarkDestinationPath);
                 } else {
-                    //MacOS
-                    FFmpeg fFmpeg = new FFmpeg("/usr/local/bin/ffmpeg");
-                    FFprobe fFprobe = new FFprobe("/usr/local/bin/ffprobe");
-
-                    //UbuntuOS
-//                FFmpeg fFmpeg = new FFmpeg("/usr/bin/ffmpeg");
-//                FFprobe fFprobe = new FFprobe("/usr/bin/ffprobe");
-
+                    FFmpeg fFmpeg = new FFmpeg(ffmpegPath);
+                    FFprobe fFprobe = new FFprobe(ffprobePath);
 
                     String videofile = originalMediaPath.getPath();
                     String generateWatermarkName = "w_" + pathArray[pathArray.length - 1];
@@ -297,7 +297,6 @@ public class MediaService {
                     watermarkMedia.add(watermarkDestinationPath);
                 }
             } catch (IllegalArgumentException e) {
-                e.getMessage();
                 log.info("미디어 포맷을 읽을 수 없습니다.");
                 return null;
             }
@@ -340,14 +339,8 @@ public class MediaService {
 
                 return thumbDestinationPath;
             } else {
-                //MacOS
-                FFmpeg fFmpeg = new FFmpeg("/usr/local/bin/ffmpeg");
-                FFprobe fFprobe = new FFprobe("/usr/local/bin/ffprobe");
-
-                //UbuntuOS
-//                FFmpeg fFmpeg = new FFmpeg("/usr/bin/ffmpeg");
-//                FFprobe fFprobe = new FFprobe("/usr/bin/ffprobe");
-
+                FFmpeg fFmpeg = new FFmpeg(ffmpegPath);
+                FFprobe fFprobe = new FFprobe(ffprobePath);
 
                 String videofile = originalMediaPath.getPath();
                 generateThumbFileName = "s_" + UUID.randomUUID().toString() + ".png";
@@ -378,7 +371,6 @@ public class MediaService {
                 return thumbDestinationPath;
             }
         } catch (IllegalArgumentException e) {
-            e.getMessage();
             log.info("미디어 포맷을 읽을 수 없습니다.");
             return null;
         }

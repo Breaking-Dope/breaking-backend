@@ -56,8 +56,8 @@ public class JwtAuthenticationAPI {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/oauth2/sign-out")
-    public ResponseEntity<Void> logout(@RequestHeader(value = "authorization") String accessToken) throws IOException {
-        jwtAuthenticationService.logout(accessToken);
+    public ResponseEntity<Void> logout(@RequestHeader(value = "authorization") String accessToken, HttpServletResponse httpServletResponse) throws IOException {
+        jwtAuthenticationService.logout(accessToken, httpServletResponse);
         return ResponseEntity.ok().build();
     }
 }

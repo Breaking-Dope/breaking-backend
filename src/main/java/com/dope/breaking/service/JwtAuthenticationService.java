@@ -83,12 +83,22 @@ public class JwtAuthenticationService {
     }
 
 
-    public void logout(String accessToken) throws IOException {
+    public void logout(String accessToken, HttpServletResponse httpServletResponse) throws IOException {
+
         String getAccessToken = jwtTokenProvider.extractAccessToken(accessToken).orElse(null);
 
         String username = jwtTokenProvider.getUsername(getAccessToken);
         String userAgentType = jwtTokenProvider.getUserAgent(getAccessToken);
-        log.info(userAgentType);
+
+        if(userAgentType.equals("WEB")){
+            Cookie cookie= new Cookie("authorization-refresh", null);
+            cookie.setMaxAge(0);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            httpServletResponse.addCookie(cookie);
+        }
+
+
         redisService.deleteValues(userAgentType + "_" + username); //레디스에 저장된 refreshToken 삭제
 
         Long expiration = jwtTokenProvider.getExpireTime(getAccessToken);

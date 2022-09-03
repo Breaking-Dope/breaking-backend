@@ -44,25 +44,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.httpBasic().disable() //rest api만 고려하면 해제해도 되는듯하다.
-                .csrf().disable() //csrf() 설정은 로컬환경이므로 필요가 없다.
-                .cors().configurationSource(corsConfigurationSource()).and()
-                .headers()
-                .addHeaderWriter(new XFrameOptionsHeaderWriter( //h2 콘솔을사용하기 위해
-                        XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
-                .and()
+        http
+            .httpBasic().disable() //rest api만 고려하면 해제해도 되는듯하다.
+            .csrf().disable()
+            .cors()
+            .configurationSource(corsConfigurationSource())
+            .and()
+                .headers().frameOptions().disable()
+            .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) //토큰 기반 인증이라 세션은 사용하지 않음
-                .and()
+            .and()
                 .formLogin().disable() // Restapi이므로 form 로그인은 필요가 없다.
+                .httpBasic().disable()
                 .authorizeRequests() //요청에 대한 권한 체크
                 .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight Request 허용해주기 ->CORS 정책
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers("/press/**").hasRole("PRESS") //PRESS를 가진 권한만이 접근이 허용됨
                 .antMatchers("/user/**").hasRole("USER") //USER를 가진 권한만이 접근이 허용됨
                 .antMatchers("/**").permitAll() //그외 접근은 모두 허용됨.
-                .and()
+            .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint()); //에러코드 반환할 ExceptionPoint
-
 
         http.addFilterBefore(jwtAuthenticationFilter(),
                 UsernamePasswordAuthenticationFilter.class); //JwtAuthenticationFilter를 JsonUsernamePasswordAuthenticationFilter 전에 넣음
@@ -87,17 +88,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:3000", "http://team-dope.link:3000" ));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://team-dope.link:3000", "https://team-dope.link"));
+
+        configuration.addAllowedMethod("*");
+
         configuration.addAllowedHeader("authorization");
         configuration.addAllowedHeader("authorization-refresh");
         configuration.addAllowedHeader("User-Agent");
-        configuration.addAllowedMethod("POST");
-        configuration.addAllowedMethod("PUT");
-        configuration.addAllowedMethod("GET");
-        configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedHeader("Content-Type");
+
         configuration.addExposedHeader("authorization");
         configuration.addExposedHeader("authorization-refresh");
         configuration.addExposedHeader("User-Agent");
+        configuration.addExposedHeader("Content-Type");
 
         configuration.setAllowCredentials(true);
 

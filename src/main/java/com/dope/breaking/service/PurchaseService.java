@@ -77,6 +77,7 @@ public class PurchaseService {
             }
 
             transactionService.purchasePostTransaction(buyer, seller, purchase);
+            post.updateIsPurchasable(false);
 
         }
 

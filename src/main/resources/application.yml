@@ -39,3 +39,17 @@ server:
   compression:
     enabled: true
     mime-types: text/html,text/plain,text/css,application/javascript,application/json, application/zip, application/octet-stream
+
+# Linux
+imageModule:
+  ffmpeg:
+    path: "/usr/bin/ffmpeg"
+  ffprobe:
+    path: "/usr/bin/ffprobe"
+
+# MacOS
+#imageModule:
+#  ffmpeg:
+#    path: "/usr/local/bin/ffmpeg"
+#  ffprobe:
+#    path: "/usr/local/bin/ffprobe"

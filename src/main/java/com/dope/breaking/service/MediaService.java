@@ -432,7 +432,6 @@ public class MediaService {
 
         httpServletResponse.setContentType("application/zip");
         httpServletResponse.setHeader("Content-Disposition", "attachment; filename=download.zip");
-        log.info(Integer.toString(mediaURL.size()));
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(httpServletResponse.getOutputStream())) {
 

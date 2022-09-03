@@ -286,8 +286,10 @@ public class PostService {
         for (Media mediaURL : mediaList) {
             String[] pathArray = mediaURL.getMediaURL().split("/");
             String watermarkedMediaFileName = pathArray[pathArray.length - 1];
-            String originalMediaFileName = watermarkedMediaFileName.replace("w_", "");
-            mediaURLList.add(originalMediaFileName);
+            if(watermarkedMediaFileName.startsWith("w_")){
+                String originalMediaFileName = watermarkedMediaFileName.replace("w_", "");
+                mediaURLList.add(originalMediaFileName);
+            }
         }
 
         mediaService.responseAllMediaFile(mediaURLList, httpServletResponse);

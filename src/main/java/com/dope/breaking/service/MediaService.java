@@ -433,20 +433,23 @@ public class MediaService {
         httpServletResponse.setContentType("application/zip");
         httpServletResponse.setHeader("Content-Disposition", "attachment; filename=download.zip");
 
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(httpServletResponse.getOutputStream())) {
 
-        for (String fileName : mediaURL) {
-            ZipOutputStream zipOutputStream = new ZipOutputStream(httpServletResponse.getOutputStream());
-            FileSystemResource fileSystemResource = new FileSystemResource(MAIN_DIR_NAME + SUB_DIR_NAME + UploadType.POST_MEDIA_DOWNLOAD.getDirName() + File.separator + fileName);
-            ZipEntry zipEntry = new ZipEntry(fileSystemResource.getFilename());
-            zipEntry.setSize(fileSystemResource.contentLength());
-            zipEntry.setTime(System.currentTimeMillis());
+            for (String filename : mediaURL) {
+                FileSystemResource fileSystemResource = new FileSystemResource(MAIN_DIR_NAME + SUB_DIR_NAME + UploadType.POST_MEDIA_DOWNLOAD.getDirName() + File.separator + filename);
+                ZipEntry zipEntry = new ZipEntry(fileSystemResource.getFilename());
+                zipEntry.setSize(fileSystemResource.contentLength());
+                zipEntry.setTime(System.currentTimeMillis());
 
-            zipOutputStream.putNextEntry(zipEntry);
+                zipOutputStream.putNextEntry(zipEntry);
 
-            StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-            zipOutputStream.closeEntry();
+                StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+                zipOutputStream.closeEntry();
+            }
             zipOutputStream.finish();
-
+        } catch (IOException e) {
+            log.info(e.getMessage());
+            throw new CustomInternalErrorException("파일을 다운로드 할 수 없습니다.");
         }
     }
 

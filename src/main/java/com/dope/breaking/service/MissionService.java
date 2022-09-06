@@ -94,44 +94,39 @@ public class MissionService {
 
     }
 
-    public ResponseEntity<MissionResponseDto> readMission(long missionId, String crntUsername){
+    public MissionResponseDto readMission(long missionId, String username){
 
-        //예외처리 수정 필요
-        Mission mission = missionRepository.findById(missionId).orElseThrow(() -> new NoSuchBreakingMissionException());
-
+        Mission mission = missionRepository.findById(missionId).orElseThrow(NoSuchBreakingMissionException::new);
+        mission.increaseViewCount();
 
         boolean isMyMission = false;
-        if(crntUsername != null){
-            User user = userRepository.findByUsername(crntUsername).get();
-            isMyMission = user == mission.getUser(); //JPA의 동일성 보장
+        if(username != null){
+            User user = userRepository.findByUsername(username).get();
+            isMyMission = user == mission.getUser();
         }
 
-        LocationDto locationDto = LocationDto.builder()
-                .address(mission.getLocation().getAddress())
-                .latitude(mission.getLocation().getLatitude())
-                .longitude(mission.getLocation().getLongitude())
-                .region_1depth_name(mission.getLocation().getRegion_1depth_name())
-                .region_2depth_name(mission.getLocation().getRegion_2depth_name()).build();
-
-
-        User missionWriter = mission.getUser();
-        WriterDto writerDto = WriterDto.builder()
-                .userId(missionWriter.getId())
-                .profileImgURL(missionWriter.getOriginalProfileImgURL())
-                .nickname(missionWriter.getNickname()).build();
-
-
-        MissionResponseDto missionResponseDto = MissionResponseDto.builder()
+        return MissionResponseDto.builder()
                 .isMyMission(isMyMission)
                 .title(mission.getTitle())
+                .viewCount(mission.getViewCount())
                 .content(mission.getContent())
                 .startTime(mission.getStartTime())
                 .endTime(mission.getEndTime())
-                .locationDto(locationDto)
-                .writerDto(writerDto)
+                .locationDto(
+                        LocationDto.builder()
+                                .address(mission.getLocation().getAddress())
+                                .latitude(mission.getLocation().getLatitude())
+                                .longitude(mission.getLocation().getLongitude())
+                                .region_1depth_name(mission.getLocation().getRegion_1depth_name())
+                                .region_2depth_name(mission.getLocation().getRegion_2depth_name()).build()
+                )
+                .writerDto(
+                        WriterDto.builder()
+                                .userId(mission.getUser().getId())
+                                .profileImgURL(mission.getUser().getOriginalProfileImgURL())
+                                .nickname(mission.getUser().getNickname()).build()
+                )
                 .build();
-
-        return new ResponseEntity<MissionResponseDto>(missionResponseDto, HttpStatus.OK);
 
     }
     

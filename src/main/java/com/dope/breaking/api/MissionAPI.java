@@ -64,7 +64,7 @@ public class MissionAPI {
         if(principal != null){
             username = principal.getName();
         }
-        return missionService.readMission(missionId, username);
+        return ResponseEntity.ok().body(missionService.readMission(missionId, username));
     }
 
     @GetMapping("/breaking-mission/{missionId}/feed")

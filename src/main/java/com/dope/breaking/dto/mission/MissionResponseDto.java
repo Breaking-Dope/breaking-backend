@@ -23,20 +23,22 @@ public class MissionResponseDto {
 
     String content;
 
+    Long viewCount;
+
     LocalDateTime startTime;
 
     LocalDateTime endTime;
-
 
     LocationDto location;
 
     WriterDto user;
 
     @Builder
-    public MissionResponseDto(String title, String content, LocalDateTime startTime, LocalDateTime endTime, Boolean isMyMission, LocationDto locationDto, WriterDto writerDto){
+    public MissionResponseDto(String title, String content, Long viewCount, LocalDateTime startTime, LocalDateTime endTime, Boolean isMyMission, LocationDto locationDto, WriterDto writerDto){
         this.isMyMission = isMyMission;
         this.title = title;
         this.content = content;
+        this.viewCount = viewCount;
         this.startTime = startTime;
         this.endTime = endTime;
         this.location = locationDto;

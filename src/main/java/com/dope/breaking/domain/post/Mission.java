@@ -26,6 +26,8 @@ public class Mission {
 
     private String content;
 
+    private Long viewCount;
+
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;
@@ -41,6 +43,10 @@ public class Mission {
         this.startTime = startTime;
         this.endTime = endTime;
         this.location = location;
+    }
+
+    public void increaseViewCount() {
+        viewCount++;
     }
 
 }

@@ -2,8 +2,11 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
+import com.dope.breaking.dto.post.FeedResultPostDto;
+import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -108,6 +111,47 @@ class MissionRepositoryTest {
         assertEquals(1, result.size());
         assertTrue(result.get(0).getIsMyMission());
 
+    }
+
+
+    @DisplayName("유저가 조회한 게시글은 조회수가 증가한다.")
+    @Test
+    void missionViewCountIncrement() {
+
+        User missionOwner = new User();
+        userRepository.save(missionOwner);
+
+        Mission mission = Mission.builder()
+                .user(missionOwner)
+                .build();
+        missionRepository.save(mission);
+
+        mission.increaseViewCount();
+        mission.increaseViewCount();
+        mission.increaseViewCount();
+
+        assertEquals(3, mission.getViewCount());
+    }
+
+    @DisplayName("유저가 조회한 미션은 미션 피드에서 조회수가 증가한다.")
+    @Test
+    void missionViewCountIncrementOnFeed() {
+
+        User missionOwner = new User();
+        userRepository.save(missionOwner);
+
+        Mission mission = Mission.builder()
+                .user(missionOwner)
+                .build();
+        missionRepository.save(mission);
+
+        mission.increaseViewCount();
+        mission.increaseViewCount();
+        mission.increaseViewCount();
+
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
+
+        assertEquals(3, result.get(0).getViewCount());
     }
 
 }

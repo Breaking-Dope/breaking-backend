@@ -26,7 +26,7 @@ public class Mission {
 
     private String content;
 
-    private Long viewCount;
+    private Long viewCount = 0L;
 
     private LocalDateTime startTime;
 

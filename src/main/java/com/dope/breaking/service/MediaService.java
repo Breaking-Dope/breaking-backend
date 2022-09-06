@@ -384,7 +384,7 @@ public class MediaService {
             String eucKrEncoding = new String(nicknameText.getBytes("euc-kr"), "euc-kr");
 
             File nicknameTextImagePath = new File(MAIN_DIR_NAME + SUB_DIR_NAME + File.separator + UUID.randomUUID() + ".png");
-            Font font = new Font(null, Font.PLAIN, 20);
+            Font font = new Font("나눔고딕", Font.BOLD, 20);
             FontRenderContext frc = new FontRenderContext(null, true, true);
             Rectangle2D bounds = font.getStringBounds(eucKrEncoding, frc);
             int backgroundWidth = (int) bounds.getWidth();

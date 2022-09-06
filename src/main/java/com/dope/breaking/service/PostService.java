@@ -75,8 +75,8 @@ public class PostService {
         validatePostRequest(postRequestDto);
 
         PostType postType = confirmPostType(postRequestDto.getPostType());
-        Post post = new Post();
-        Long postId = null;
+        Post post;
+        Long postId;
 
         try {
             post = Post.builder()
@@ -109,7 +109,12 @@ public class PostService {
         List<String> mediaWatermarkedURL = new LinkedList<>();
         if (files != null && files.size() != 0 && files.get(0).getSize() != 0) {//사용자가 파일을 보내지 않아도 기본적으로 갯수는 1로 반영되며, byte는 0으로 반환된다. 따라서 파일이 확실히 존재할때만 DB에 반영되도록 함.
             //1. 우선, 닉네임 워터마크를 생성
-            String watermarkImageURL = mediaService.makeWatermarkNickname(user.getNickname());
+            String watermarkImageURL;
+            if(post.isAnonymous()) {
+                watermarkImageURL = mediaService.makeWatermarkNickname(null);
+            } else {
+                watermarkImageURL = mediaService.makeWatermarkNickname(user.getNickname());
+            }
             //2. 원본을 저장
             mediaURL = mediaService.uploadMedias(files, UploadType.POST_MEDIA_DOWNLOAD);
             mediaService.createMediaEntities(mediaURL, post); //저장

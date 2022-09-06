@@ -31,6 +31,7 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
                 .select(new QMissionFeedResponseDto(
                         mission.id,
                         mission.title,
+                        mission.viewCount,
                         mission.startTime,
                         mission.endTime,
                         new QLocationDto(

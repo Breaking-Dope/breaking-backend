@@ -19,6 +19,8 @@ public class MissionFeedResponseDto {
 
     private String title;
 
+    private Long viewCount;
+
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;
@@ -30,9 +32,10 @@ public class MissionFeedResponseDto {
     private Boolean isMyMission;
 
     @QueryProjection
-    public MissionFeedResponseDto(Long missionId, String title, LocalDateTime startTime, LocalDateTime endTime, LocationDto location, WriterDto user, Boolean isMyMission) {
+    public MissionFeedResponseDto(Long missionId, String title, Long viewCount, LocalDateTime startTime, LocalDateTime endTime, LocationDto location, WriterDto user, Boolean isMyMission) {
         this.missionId = missionId;
         this.title = title;
+        this.viewCount = viewCount;
         this.startTime = startTime;
         this.endTime = endTime;
         this.location = location;

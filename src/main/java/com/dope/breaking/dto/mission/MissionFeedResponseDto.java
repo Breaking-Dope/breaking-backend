@@ -31,8 +31,10 @@ public class MissionFeedResponseDto {
 
     private Boolean isMyMission;
 
+    private int postCount;
+
     @QueryProjection
-    public MissionFeedResponseDto(Long missionId, String title, Long viewCount, LocalDateTime startTime, LocalDateTime endTime, LocationDto location, WriterDto user, Boolean isMyMission) {
+    public MissionFeedResponseDto(Long missionId, String title, Long viewCount, LocalDateTime startTime, LocalDateTime endTime, LocationDto location, WriterDto user, Boolean isMyMission, int postCount) {
         this.missionId = missionId;
         this.title = title;
         this.viewCount = viewCount;
@@ -41,5 +43,6 @@ public class MissionFeedResponseDto {
         this.location = location;
         this.user = user;
         this.isMyMission = isMyMission;
+        this.postCount = postCount;
     }
 }

@@ -46,7 +46,8 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
                             mission.user.compressedProfileImgURL,
                             mission.user.nickname
                         ),
-                        me == null ? Expressions.asBoolean(false) : mission.user.eq(me)
+                        me == null ? Expressions.asBoolean(false) : mission.user.eq(me),
+                        mission.postList.size()
                 ))
                 .from(mission)
                 .leftJoin(mission.user,user)

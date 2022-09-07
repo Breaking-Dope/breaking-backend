@@ -649,7 +649,7 @@ class PostAPITest {
         Long postId = postRepository.save(post).getId();
 
         //When
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/deactivate-purchase",postId))
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/{postId}/activate-purchase",postId))
                 .andExpect(status().isOk()); //Then
 
         //Then
@@ -677,7 +677,7 @@ class PostAPITest {
         Long postId = postRepository.save(post).getId();
 
         //When
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/post/{postId}/deactivate-purchase",postId))
+        this.mockMvc.perform(MockMvcRequestBuilders.delete("/post/{postId}/activate-purchase",postId))
                 .andExpect(status().isBadRequest()); //Then
 
     }

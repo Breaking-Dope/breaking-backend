@@ -34,6 +34,7 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
                         mission.viewCount,
                         mission.startTime,
                         mission.endTime,
+                        mission.createdDate,
                         new QLocationDto(
                                 mission.location.address,
                                 mission.location.longitude,

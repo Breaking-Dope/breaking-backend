@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +36,9 @@ public class Mission {
 
     @Embedded
     private Location location;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Post> postList = new ArrayList<>();
 
     @Builder
     public Mission(User user, String title, String content, LocalDateTime startTime, LocalDateTime endTime, Location location){

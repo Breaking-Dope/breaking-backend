@@ -2,6 +2,7 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
+import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
@@ -27,6 +28,8 @@ class MissionRepositoryTest {
     MissionRepository missionRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    PostRepository postRepository;
 
     @DisplayName("브레이킹 미션을 생성할 시, 미션이 정상적으로 저장된다.")
     @Test
@@ -152,6 +155,31 @@ class MissionRepositoryTest {
         List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
 
         assertEquals(3, result.get(0).getViewCount());
+    }
+
+    @DisplayName("해당 미션과 관련된 포스트의 개수가 나타난다.")
+    @Test
+    void missionRelatedPostCount() {
+
+        User missionOwner = new User();
+        userRepository.save(missionOwner);
+
+        Mission mission = Mission.builder()
+                .user(missionOwner)
+                .build();
+        missionRepository.save(mission);
+
+        for(int i=0;i<10;i++) {
+            Post post = new Post();
+            post.setUser(missionOwner);
+            post.updateMission(mission);
+            postRepository.save(post);
+        }
+
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
+
+        assertEquals(1, result.size());
+        assertEquals(10, result.get(0).getPostCount());
     }
 
 }

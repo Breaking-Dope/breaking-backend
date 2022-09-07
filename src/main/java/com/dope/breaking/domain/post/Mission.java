@@ -37,7 +37,7 @@ public class Mission {
     @Embedded
     private Location location;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Post> postList = new ArrayList<>();
 
     @Builder

@@ -70,7 +70,7 @@ public class PostAPI {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/post/{postId}/deactivate-purchase")
+    @DeleteMapping("/post/{postId}/activate-purchase")
     public ResponseEntity<Void> deactivatePurchase(Principal principal, @PathVariable Long postId){
         postService.deactivatePurchase(principal.getName(),postId);
         return ResponseEntity.ok().build();

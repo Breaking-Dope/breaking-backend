@@ -1,5 +1,6 @@
 package com.dope.breaking.domain.post;
 
+import com.dope.breaking.domain.baseTimeEntity.BaseTimeEntity;
 import com.dope.breaking.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,11 +8,13 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
-public class Mission {
+public class Mission extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +37,9 @@ public class Mission {
 
     @Embedded
     private Location location;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Post> postList = new ArrayList<>();
 
     @Builder
     public Mission(User user, String title, String content, LocalDateTime startTime, LocalDateTime endTime, Location location){

@@ -21,9 +21,11 @@ public class MissionFeedResponseDto {
 
     private Long viewCount;
 
-    private LocalDateTime startTime;
+    private LocalDateTime startDate;
 
-    private LocalDateTime endTime;
+    private LocalDateTime endDate;
+
+    private LocalDateTime createdDate;
 
     private LocationDto location;
 
@@ -31,15 +33,20 @@ public class MissionFeedResponseDto {
 
     private Boolean isMyMission;
 
+    private int postCount;
+
     @QueryProjection
-    public MissionFeedResponseDto(Long missionId, String title, Long viewCount, LocalDateTime startTime, LocalDateTime endTime, LocationDto location, WriterDto user, Boolean isMyMission) {
+
+    public MissionFeedResponseDto(Long missionId, String title, Long viewCount, LocalDateTime startDate, LocalDateTime endDate, LocalDateTime createdDate, LocationDto location, WriterDto user, Boolean isMyMission, int postCount) {
         this.missionId = missionId;
         this.title = title;
         this.viewCount = viewCount;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.createdDate = createdDate;
         this.location = location;
         this.user = user;
         this.isMyMission = isMyMission;
+        this.postCount = postCount;
     }
 }

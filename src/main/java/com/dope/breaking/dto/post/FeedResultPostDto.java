@@ -27,13 +27,14 @@ public class FeedResultPostDto {
     private Boolean isPurchasable;
     private Boolean isSold;
     private Boolean isAnonymous;
+    private Boolean isHidden;
     private Boolean isMyPost;
     private Boolean isLiked;
     private Boolean isBookmarked;
 
     @QueryProjection
     @Builder
-    public FeedResultPostDto(Long postId, String title, LocationDto location, String thumbnailImgURL, int likeCount, int commentCount, PostType postType, int viewCount, WriterDto user, int price, LocalDateTime createdDate, Boolean isPurchasable, Boolean isSold, Boolean isAnonymous, Boolean isMyPost, Boolean isLiked, Boolean isBookmarked) {
+    public FeedResultPostDto(Long postId, String title, LocationDto location, String thumbnailImgURL, int likeCount, int commentCount, PostType postType, int viewCount, WriterDto user, int price, LocalDateTime createdDate, Boolean isPurchasable, Boolean isSold, Boolean isAnonymous, Boolean isHidden, Boolean isMyPost, Boolean isLiked, Boolean isBookmarked) {
         this.postId = postId;
         this.title = title;
         this.location = location;
@@ -48,6 +49,7 @@ public class FeedResultPostDto {
         this.isPurchasable = isPurchasable;
         this.isSold = isSold;
         this.isAnonymous = isAnonymous;
+        this.isHidden = isHidden;
         this.isMyPost = isMyPost;
         this.isLiked = isLiked;
         this.isBookmarked = isBookmarked;

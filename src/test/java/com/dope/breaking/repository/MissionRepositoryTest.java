@@ -2,11 +2,9 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
-import com.dope.breaking.domain.post.PostType;
+import com.dope.breaking.domain.post.Post;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
-import com.dope.breaking.dto.post.FeedResultPostDto;
-import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.service.SearchMissionConditionDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import java.time.LocalDateTime;
@@ -29,6 +28,10 @@ class MissionRepositoryTest {
     MissionRepository missionRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    PostRepository postRepository;
+    @Autowired
+    EntityManager em;
 
     @DisplayName("브레이킹 미션을 생성할 시, 미션이 정상적으로 저장된다.")
     @Test
@@ -179,11 +182,47 @@ class MissionRepositoryTest {
             post.updateMission(mission);
             postRepository.save(post);
         }
+        em.clear();
+        em.flush();
 
-        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L, searchMissionConditionDto);
 
         assertEquals(1, result.size());
+        assertEquals(mission.getId(), result.get(0).getMissionId());
         assertEquals(10, result.get(0).getPostCount());
+    }
+
+    @DisplayName("현재 진행중인 미션만 보여준다.")
+    @Test
+    void displayOngoingMissions() {
+
+        User missionOwner = new User();
+        userRepository.save(missionOwner);
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        Mission mission = Mission.builder()
+                .user(missionOwner)
+                .startTime(currentTime.minusHours(1))
+                .endTime(currentTime.plusHours(1))
+                .build();
+        missionRepository.save(mission);
+
+        Mission overMission = Mission.builder()
+                .user(missionOwner)
+                .startTime(currentTime.minusHours(2))
+                .endTime(currentTime.minusHours(1))
+                .build();
+        missionRepository.save(overMission);
+
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder()
+                .isMissionOnGoing(true)
+                .build();
+
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L, searchMissionConditionDto);
+
+        assertEquals(1, result.size());
+        assertEquals(mission.getId(), result.get(0).getMissionId());
     }
 
 }

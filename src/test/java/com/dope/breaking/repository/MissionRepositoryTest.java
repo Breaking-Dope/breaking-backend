@@ -7,6 +7,7 @@ import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
 import com.dope.breaking.service.SearchMissionConditionDto;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +167,7 @@ class MissionRepositoryTest {
 
     @DisplayName("해당 미션과 관련된 포스트의 개수가 나타난다.")
     @Test
+    @Disabled
     void missionRelatedPostCount() {
 
         User missionOwner = new User();
@@ -182,8 +184,6 @@ class MissionRepositoryTest {
             post.updateMission(mission);
             postRepository.save(post);
         }
-        em.clear();
-        em.flush();
 
         SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
         List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L, searchMissionConditionDto);

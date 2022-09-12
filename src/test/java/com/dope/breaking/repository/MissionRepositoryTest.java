@@ -2,9 +2,12 @@ package com.dope.breaking.repository;
 
 import com.dope.breaking.domain.post.Location;
 import com.dope.breaking.domain.post.Mission;
-import com.dope.breaking.domain.post.Post;
+import com.dope.breaking.domain.post.PostType;
 import com.dope.breaking.domain.user.User;
 import com.dope.breaking.dto.mission.MissionFeedResponseDto;
+import com.dope.breaking.dto.post.FeedResultPostDto;
+import com.dope.breaking.dto.post.SearchFeedConditionDto;
+import com.dope.breaking.service.SearchMissionConditionDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.transaction.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,8 +29,6 @@ class MissionRepositoryTest {
     MissionRepository missionRepository;
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    PostRepository postRepository;
 
     @DisplayName("브레이킹 미션을 생성할 시, 미션이 정상적으로 저장된다.")
     @Test
@@ -88,8 +90,9 @@ class MissionRepositoryTest {
             Mission mission = new Mission(user, "title", "content", null, null, location);
             missionRepository.save(mission);
         }
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
 
-        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L, searchMissionConditionDto);
 
         assertEquals(10, result.size());
 
@@ -106,7 +109,9 @@ class MissionRepositoryTest {
         Mission mission = new Mission(me, "title", "content", null, null, location);
         missionRepository.save(mission);
 
-        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(me, null, 20L);
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
+
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(me, null, 20L, searchMissionConditionDto);
 
         assertEquals(1, result.size());
         assertTrue(result.get(0).getIsMyMission());
@@ -149,7 +154,9 @@ class MissionRepositoryTest {
         mission.increaseViewCount();
         mission.increaseViewCount();
 
-        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L);
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
+
+        List<MissionFeedResponseDto> result = missionRepository.searchMissionFeed(null, null, 20L, searchMissionConditionDto);
 
         assertEquals(3, result.get(0).getViewCount());
     }

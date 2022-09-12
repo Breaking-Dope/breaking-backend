@@ -62,7 +62,7 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
                         onGoingFilter(searchMissionConditionDto.getIsMissionOnGoing()),
                         cursorPagination(cursorMission)
                 )
-                .orderBy(mission.id.desc())
+                .orderBy(boardSort(searchMissionConditionDto.getSortStrategy()), mission.id.desc())
                 .limit(size)
                 .fetch();
     }
@@ -83,6 +83,21 @@ public class MissionRepositoryCustomImpl implements MissionRepositoryCustom{
             return null;
         } else {
             return mission.id.gt(cursorMission.getId());
+        }
+    }
+
+    private OrderSpecifier<?> boardSort(SortStrategy sortStrategy) {
+
+        if(sortStrategy == null){
+            return new OrderSpecifier<>(Order.DESC, mission.id);
+        }
+
+        switch (sortStrategy){
+            case VIEW:
+                return new OrderSpecifier<>(Order.DESC, mission.viewCount);
+            case CHRONOLOGICAL:
+            default:
+                return new OrderSpecifier<>(Order.DESC, mission.id);
         }
     }
 }

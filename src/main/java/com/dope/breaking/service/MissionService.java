@@ -130,7 +130,7 @@ public class MissionService {
 
     }
     
-    public List<MissionFeedResponseDto> searchMissionFeed(String username, Long cursorMissionId, Long size) {
+    public List<MissionFeedResponseDto> searchMissionFeed(String username, Long cursorMissionId, Long size, SearchMissionConditionDto searchMissionConditionDto) {
 
         User me = null;
         if(username != null) {
@@ -142,7 +142,7 @@ public class MissionService {
             cursorMission = missionRepository.findById(cursorMissionId).orElseThrow(InvalidCursorException::new);
         }
 
-        return missionRepository.searchMissionFeed(me, cursorMission, size);
+        return missionRepository.searchMissionFeed(me, cursorMission, size, searchMissionConditionDto);
     }
 
 }

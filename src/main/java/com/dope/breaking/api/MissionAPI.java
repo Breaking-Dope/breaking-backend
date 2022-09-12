@@ -8,9 +8,9 @@ import com.dope.breaking.dto.post.FeedResultPostDto;
 import com.dope.breaking.dto.post.SearchFeedConditionDto;
 import com.dope.breaking.service.MissionService;
 import com.dope.breaking.service.SearchFeedService;
+import com.dope.breaking.service.SearchMissionConditionDto;
 import com.dope.breaking.service.SortStrategy;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -50,12 +50,21 @@ public class MissionAPI {
     public ResponseEntity<List<MissionFeedResponseDto>> getMissionFeed(
             Principal principal,
             @RequestParam(value="cursor") Long cursorMissionId,
-            @RequestParam(value="size") Long size) {
+            @RequestParam(value="size") Long size,
+            @RequestParam(value = "sort", required = false) String sortStrategy,
+            @RequestParam(value = "isMissionOnGoing", required = false, defaultValue = "false") Boolean isMissionOnGoing
+            ) {
+
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder()
+                .sortStrategy(SortStrategy.findMatchedEnum(sortStrategy))
+                .isMissionOnGoing(isMissionOnGoing)
+                .build();
+
         String username = null;
         if(principal!=null) {
             username = principal.getName();
         }
-        return ResponseEntity.ok().body(missionService.searchMissionFeed(username, cursorMissionId, size));
+        return ResponseEntity.ok().body(missionService.searchMissionFeed(username, cursorMissionId, size, searchMissionConditionDto));
     }
 
     @GetMapping("/breaking-mission/{missionId}")

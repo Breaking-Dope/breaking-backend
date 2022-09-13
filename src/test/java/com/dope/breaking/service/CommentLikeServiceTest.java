@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class CommentLikeServiceTest {
 
     @Autowired

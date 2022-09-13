@@ -162,10 +162,11 @@ class MissionServiceTest {
         dummy.add(new MissionFeedResponseDto());
         dummy.add(new MissionFeedResponseDto());
         dummy.add(new MissionFeedResponseDto());
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
 
-        when(missionRepository.searchMissionFeed(null, null, 10L)).thenReturn(dummy);
+        when(missionRepository.searchMissionFeed(null, null, 10L, searchMissionConditionDto)).thenReturn(dummy);
 
-        List<MissionFeedResponseDto> result = missionService.searchMissionFeed(null, null, 10L);
+        List<MissionFeedResponseDto> result = missionService.searchMissionFeed(null, null, 10L, searchMissionConditionDto);
         assertEquals(3, result.size());
     }
 
@@ -173,10 +174,12 @@ class MissionServiceTest {
     @Test
     void searchMissionFeedInvalidCursor() {
 
+        SearchMissionConditionDto searchMissionConditionDto = SearchMissionConditionDto.builder().build();
+
         when(missionRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(InvalidCursorException.class,
-                () -> missionService.searchMissionFeed(null, 999L, 10L));
+                () -> missionService.searchMissionFeed(null, 999L, 10L, searchMissionConditionDto));
     }
 
 }

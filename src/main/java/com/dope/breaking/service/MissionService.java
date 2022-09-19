@@ -112,7 +112,8 @@ public class MissionService {
                 .content(mission.getContent())
                 .startTime(mission.getStartTime())
                 .endTime(mission.getEndTime())
-                .locationDto(
+                .createdDate(mission.getCreatedDate())
+                .location(
                         LocationDto.builder()
                                 .address(mission.getLocation().getAddress())
                                 .latitude(mission.getLocation().getLatitude())
@@ -120,7 +121,7 @@ public class MissionService {
                                 .region_1depth_name(mission.getLocation().getRegion_1depth_name())
                                 .region_2depth_name(mission.getLocation().getRegion_2depth_name()).build()
                 )
-                .writerDto(
+                .user(
                         WriterDto.builder()
                                 .userId(mission.getUser().getId())
                                 .profileImgURL(mission.getUser().getOriginalProfileImgURL())

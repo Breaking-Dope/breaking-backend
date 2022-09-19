@@ -55,11 +55,12 @@ public class SearchFeedService {
 
         List<FeedResultPostDto> result = feedRepository.searchFeedBy(searchFeedConditionDto, cursorPost, me);
 
-        if(me != null) {
-            for (FeedResultPostDto dto : result) {
-                if (dto.getIsAnonymous()) {
-                    dto.setUser(null);
-                }
+
+        for (FeedResultPostDto dto : result) {
+            if (dto.getIsAnonymous()) {
+                dto.setUser(null);
+            }
+            if(me != null) {
                 dto.setIsBookmarked(bookmarkRepository.existsByUserAndPostId(me, dto.getPostId()));
                 dto.setIsLiked(postLikeRepository.existsByUserAndPostId(me, dto.getPostId()));
             }
